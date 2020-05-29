@@ -24,7 +24,7 @@ class Thread(models.Model):
 # Primary keys are thread_name and comment_id where comment_id starts at 1 for every new thread
 class Comment(models.Model):
     comment_id = models.AutoField(primary_key=True)
-    thread_id = models.ForeignKey(Thread, to_field="thread_id")
+    thread_id = models.ForeignKey(Thread, to_field="thread_id", on_delete=models.CASCADE)
     text = models.CharField(max_length=250, default="none")
 
     pub_date = models.DateTimeField('date published')
