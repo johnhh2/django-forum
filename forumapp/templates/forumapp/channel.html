@@ -3,7 +3,7 @@
 {% if channel_list %}
     <ul>
     {% for channel in channel_list %}
-        <li><a href="{% url 'forumapp:channel' %}">{{ channel.channel_name }}</a></li>
+        <li><a href="{% url 'forumapp:thread' channel_name=channel.channel_name %}">{{ channel.channel_name }}</a></li>
     {% endfor %}
     </ul>
 {% else %}

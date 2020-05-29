@@ -1,0 +1,12 @@
+{% extends 'forumapp/base.html' %}
+{% block content %}
+{% if thread_list %}
+    <ul>
+    {% for thread in thread_list %}
+        <li><a href="{% url 'forumapp:comment' %}">{{ thread.thread_name }}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No threads are available.</p>
+{% endif %}
+{% endblock %}

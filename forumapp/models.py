@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 
 class Channel(models.Model):
-    channel_name = models.CharField(max_length=30, primary_key=True)
+    channel_name = models.SlugField(max_length=30, primary_key=True)
 
     owner = models.ForeignKey(User, to_field="username", on_delete=models.CASCADE)
     pub_date = models.DateTimeField('date published')
