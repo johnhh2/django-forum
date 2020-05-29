@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 class Channel(models.Model):
     channel_name = models.CharField(max_length=30, primary_key=True)
 
-    owner = models.ForeignKey(User, to_field="username")
+    owner = models.ForeignKey(User, to_field="username", on_delete=models.CASCADE)
     pub_date = models.DateTimeField('date published')
 
     def __str__(self):
@@ -13,7 +13,7 @@ class Channel(models.Model):
 # Store thread_id as primary key
 class Thread(models.Model):
     thread_id = models.AutoField(primary_key=True)
-    channel_name = models.ForeignKey(Channel, to_field="channel_name")
+    channel_name = models.ForeignKey(Channel, to_field="channel_name", on_delete=models.CASCADE)
 
     thread_name = models.CharField(max_length=90)
     pub_date = models.DateTimeField('date published')
