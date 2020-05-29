@@ -25,7 +25,7 @@ class Thread(models.Model):
 class Comment(models.Model):
     comment_id = models.AutoField(primary_key=True)
     thread_id = models.ForeignKey(Thread, to_field="thread_id")
-    text = models.CharField(max_length=250)
+    text = models.CharField(max_length=250, default="none")
 
     pub_date = models.DateTimeField('date published')
 
