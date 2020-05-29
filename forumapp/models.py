@@ -12,7 +12,7 @@ class Channel(models.Model):
 
 # Store thread_id as primary key
 class Thread(models.Model):
-    thread_id = models.IntegerField(primary_key=True)
+    thread_id = models.AutoField(primary_key=True)
     channel_name = models.ForeignKey(Channel, to_field="channel_name")
 
     thread_name = models.CharField(max_length=90)
@@ -23,8 +23,9 @@ class Thread(models.Model):
 
 # Primary keys are thread_name and comment_id where comment_id starts at 1 for every new thread
 class Comment(models.Model):
-    comment_id = models.IntegerField(primary_key=True)
+    comment_id = models.AutoField(primary_key=True)
     thread_id = models.ForeignKey(Thread, to_field="thread_id")
+    text = models.CharField(max_length=250)
 
     pub_date = models.DateTimeField('date published')
 
