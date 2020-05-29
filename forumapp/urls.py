@@ -14,7 +14,9 @@ Including another URLconf
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
 from django.conf.urls import url, include
+from . import views
 
+app_name = 'forumapp'
 urlpatterns = [
-    url(r'^foundation/', include('foundation.urls')),
+    url(r'^channel', views.ChannelView.as_view(), name='channel')
 ]

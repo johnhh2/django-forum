@@ -1,21 +1,22 @@
 from django.shortcuts import render
 from django.views import generic
-from . import models
+from .models import Channel, Thread, Comment
+
 # Create your views here.
 class ChannelView(generic.ListView):
-    model = models.Channel
+    model = Channel
     template_name = 'forumapp/channel.html'
     queryset = Channel.objects.all()
     context_object_name = 'channel_list'
 
-class ThreadView(generic.DetailView, channel_id):
-    model = models.Thread
+class ThreadView(generic.DetailView):
+    model = Thread
     template_name = 'forumapp/thread.html'
-    queryset = Thread.objects.filter(channel_id=channel_id)
+    queryset = Thread.objects.all()
     context_object_name = 'thread_list'
 
-class CommentView(generic.DetailView, thread_id):
-    model = models.Comment
+class CommentView(generic.DetailView):
+    model = Comment
     template_name = 'forumapp/comment.html'
-    queryset = Comment.objects.filter(thread_id=thread_id)
+    queryset = Comment.objects.all()
     context_object_name = 'comment_list'
