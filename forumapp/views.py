@@ -5,20 +5,17 @@ from . import models
 class ChannelView(generic.ListView):
     model = models.Channel
     template_name = 'forumapp/channel.html'
-
-    def get_queryset(request):
-        return Channel.objects.all()
+    queryset = Channel.objects.all()
+    context_object_name = 'channel_list'
 
 class ThreadView(generic.DetailView, channel_id):
     model = models.Thread
     template_name = 'forumapp/thread.html'
-
-    def get_queryset(request):
-        return Thread.objects.filter(channel_id__eq=channel_id)
+    queryset = Thread.objects.filter(channel_id=channel_id)
+    context_object_name = 'thread_list'
 
 class CommentView(generic.DetailView, thread_id):
     model = models.Comment
     template_name = 'forumapp/comment.html'
-
-    def get_queryset(request):
-        return Comment.objects.filter(thread_id__eq=thread_id)
+    queryset = Comment.objects.filter(thread_id=thread_id)
+    context_object_name = 'comment_list'
