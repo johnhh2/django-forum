@@ -7,10 +7,16 @@ from .models import Channel, Thread, Comment
 
 
 ## Helper functions
-
 def create_channel(name, owner, days):
     time = timezone.now() + datetime.timedelta(days=days)
-    return Channel.objects.create(channel_name=name, owner=owner, pub_date=time)
+    try:
+        return Channel.objects.get(channel_name=name, owner=owner, pub_date=time)
+    except:
+        return Channel.objects.create(channel_name=name, owner=owner, pub_date=time)
+
+def create_thread(channel, owner, name, days):
+    time = timezone.now() + datetime.timedelta(days=days)
+    return Thread(channel_name=channel, owner=owner, thread_name=name, pub_date=time)
 
 def create_comment(thread, text, owner, days):
     time = timezone.now() + datetime.timedelta(days=days)
@@ -19,6 +25,8 @@ def create_comment(thread, text, owner, days):
 ## Channel tests
 class ChannelModelTests(TestCase):
     name = "Test channel 123456789"
+    channel_name = "Test channel 123456789"
+    owner_name = 'owner'
 
     def testNoChannel(self):
         response = self.client.get(reverse('forumapp:channel'))
@@ -27,9 +35,12 @@ class ChannelModelTests(TestCase):
         self.assertQuerysetEqual(response.context['channel_list'], [])
 
     def testChannelCreateDelete(self):
-        owner = User.objects.create(self.name)
+        owner = User.objects.create(username=self.owner_name)
 
-        c = create_channel(self.name, owner, -1)
+        c = create_channel(self.channel_name, owner, -1)
+
+        self.assertIn(c.channel_name, self.channel_name)
+        self.assertEqual(len(c.channel_name), len(self.channel_name))
 
         response = self.client.get(reverse('forumapp:channel'))
 
@@ -41,7 +52,7 @@ class ChannelModelTests(TestCase):
         self.testNoChannel()
 
     def testChannelsAreDisplayed(self):
-        owner = User.objects.create(self.name)
+        owner = User.objects.create(username=self.owner_name)
 
         name2 = "testchannel2"
         c = create_channel(self.name, owner, -1)
@@ -53,6 +64,31 @@ class ChannelModelTests(TestCase):
         self.assertContains(response, self.name)
         self.assertContains(response, name2)
 
+## Thread tests
+class ThreadModelTests(TestCase):
+    channel_name = "channelforthreadtest"
+    owner_name = 'owner'
+    thread_name = "threadtest"
+
+    def testNoThread(self):
+        owner = User.objects.create(username=self.owner_name)
+        c = create_channel(self.channel_name, owner, -1)
+        response = self.client.get(reverse('forumapp:thread', kwargs={'channel_name': self.channel_name}))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "No threads are available.")
+        self.assertQuerysetEqual(response.context['thread_list'], [])
+
+    def testThreadCreateDelete(self):
+        owner = User.objects.create(username=self.owner_name)
+        c = create_channel(self.channel_name, owner, -1)
+        t = create_thread(c, owner, self.thread_name, 0)
+
+        self.assertIn(t.thread_name, self.thread_name)
+        self.assertEqual(len(t.thread_name), len(self.thread_name))
+
+        c.delete()
+
+        self.testNoThread()
 
 ## Comment tests
 class CommentModelTests(TestCase):
@@ -62,7 +98,7 @@ class CommentModelTests(TestCase):
     thread_name = "stupid topic"
 
     def testNoComment(self):
-        owner = User.objects.create(self.self.owner_name)
+        owner = User.objects.create(self.owner_name)
         channel = create_channel(self.channel_name, owner, -2)
         owner2 = User.objects.create(self.owner_name2)
         thread = create_thread(channel, self.thread_name, owner2, -1)
@@ -109,4 +145,5 @@ class CommentModelTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, text)
         self.assertContains(response, text[::-1])
+
 
