@@ -1,3 +1,5 @@
+import datetime
+from django.utils import timezone
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
@@ -78,3 +80,10 @@ class Comment(models.Model):
 
         super(Comment, self).save(*args, **kwargs)
 
+    def is_recent(self):
+        now = timezone.now()
+        return timezone.now() - datetime.timedelta(days=1) <= self.pub_date <= now
+
+    is_recent.admin_order_field = 'pub_date'
+    is_recent.boolean = True
+    is_recent.short_description = 'Published recently?'

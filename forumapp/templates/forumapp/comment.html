@@ -1,9 +1,16 @@
 {% extends 'forumapp/base.html' %}
+{% load commenthelpers %}
 {% block content %}
 {% if comment_list %}
     <ul>
-    {% for comment in comment_list %}
-        <li>{{ comment.text }}</li>
+    {% for comment in comment_list|dictsortreversed:'pub_date' %}
+        <li>
+            {{ comment.text }} by {{comment.owner}}
+            at {{comment.pub_date|date:"g:i"}}
+            {% if not comment|isrecent  %}
+                  on {{comment.pub_date|date:"D, d M, Y"}}
+            {% endif %}
+        </li>
     {% endfor %}
     </ul>
 {% else %}
