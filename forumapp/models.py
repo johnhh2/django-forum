@@ -14,10 +14,10 @@ class Channel(models.Model):
 class Thread(models.Model):
     thread_id = models.AutoField(primary_key=True)
     channel_name = models.ForeignKey(Channel, to_field="channel_name", on_delete=models.CASCADE)
-    owner = models.ForeignKey(User, to_field="username", on_delete=models.CASCADE, null=True)
+    owner = models.ForeignKey(User, to_field="username", on_delete=models.CASCADE)
     thread_name = models.CharField(max_length=90)
     pub_date = models.DateTimeField('date published')
-    description = models.CharField(max_length=150, default="None")
+    description = models.CharField(max_length=150)
 
     def __str__(self):
         return self.thread_name
@@ -27,6 +27,7 @@ class Comment(models.Model):
     comment_id = models.AutoField(primary_key=True)
     thread_id = models.ForeignKey(Thread, to_field="thread_id", on_delete=models.CASCADE)
     text = models.CharField(max_length=250, default="none")
+    owner = models.ForeignKey(User, to_field="username", on_delete=models.CASCADE)
 
     pub_date = models.DateTimeField('date published')
 

@@ -95,6 +95,7 @@ class ThreadModelTests(TestCase):
 class CommentModelTests(TestCase):
     owner_name = "testuser3"
     owner_name2 = "testuser4"
+    owner_name3 = "testuser5"
     channel_name = "aaatestchannel"
     thread_name = "stupid topic"
     thread_desc = "stupid description"
