@@ -25,20 +25,20 @@ class ChannelAdmin(admin.ModelAdmin):
 
 class ThreadAdmin(admin.ModelAdmin):
     fieldsets = [
-        (None,              {'fields': ['channel_name', 'thread_name', 'description']}),
+        (None,              {'fields': ['channel', 'thread_name', 'description']}),
         ('Date Information',{'fields': ['pub_date']}),
         ('Owner',           {'fields': ['owner']}),
     ]
 
     inlines = [CommentInline]
 
-    list_display = ('channel_name', 'thread_name', 'description', 'owner', 'pub_date')
+    list_display = ('thread_name', 'channel', 'description', 'owner', 'pub_date')
     list_filter = ['pub_date']
     search_fields = ['thread_name']
 
 class CommentAdmin(admin.ModelAdmin):
     fieldsets = [
-        (None,               {'fields': ['thread_id', 'text']}),
+        (None,               {'fields': ['thread', 'text']}),
         ('Date Information', {'fields': ['pub_date']}),
         ('Owner'           , {'fields': ['owner']}),
     ]
