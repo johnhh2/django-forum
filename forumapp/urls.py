@@ -18,7 +18,7 @@ from . import views
 
 app_name = 'forumapp'
 urlpatterns = [
-    url(r'^channel/(?P<channel_name>[-\w]+)', views.ThreadView.as_view(), name='thread'),
-    url(r'^channel', views.ChannelView.as_view(), name='channel'),
-    url(r'^comment', views.CommentView.as_view(), name='comment'),
+        url(r'^channel/(?P<channel_name>[-\w]+)/(?P<thread_id>[0-9]+)/$', views.CommentView.as_view(), name='comment'),
+    url(r'^channel/(?P<channel_name>[-\w]+)/', views.ThreadView.as_view(), name='thread'),
+    url(r'^', views.ChannelView.as_view(), name='channel'),
 ]

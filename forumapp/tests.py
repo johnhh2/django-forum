@@ -24,8 +24,7 @@ def create_comment(thread, text, owner, days):
 
 ## Channel tests
 class ChannelModelTests(TestCase):
-    name = "Test channel 123456789"
-    channel_name = "Test channel 123456789"
+    channel_name = "Test-channel-123456789"
     owner_name = 'owner'
 
     def testNoChannel(self):
@@ -45,7 +44,7 @@ class ChannelModelTests(TestCase):
         response = self.client.get(reverse('forumapp:channel'))
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, self.name)
+        self.assertContains(response, self.channel_name)
 
         c.delete()
 
@@ -54,15 +53,15 @@ class ChannelModelTests(TestCase):
     def testChannelsAreDisplayed(self):
         owner = User.objects.create(username=self.owner_name)
 
-        name2 = "testchannel2"
-        c = create_channel(self.name, owner, -1)
-        c = create_channel(name2, owner, -1)
+        channel_name_2 = "testchannel2"
+        c = create_channel(self.channel_name, owner, -1)
+        c = create_channel(channel_name_2, owner, -1)
 
         response = self.client.get(reverse('forumapp:channel'))
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, self.name)
-        self.assertContains(response, name2)
+        self.assertContains(response, self.channel_name)
+        self.assertContains(response, channel_name_2)
 
 ## Thread tests
 class ThreadModelTests(TestCase):
@@ -95,6 +94,7 @@ class ThreadModelTests(TestCase):
 class CommentModelTests(TestCase):
     owner_name = "testuser3"
     owner_name2 = "testuser4"
+    owner_name3 = "testuser5"
     channel_name = "aaatestchannel"
     thread_name = "stupid topic"
     thread_desc = "stupid description"

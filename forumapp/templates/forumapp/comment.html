@@ -1,0 +1,12 @@
+{% extends 'forumapp/base.html' %}
+{% block content %}
+{% if comment_list %}
+    <ul>
+    {% for comment in comment_list %}
+        <li>{{ comment.text }}</li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No threads are available.</p>
+{% endif %}
+{% endblock %}

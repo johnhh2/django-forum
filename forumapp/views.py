@@ -28,3 +28,5 @@ class CommentView(generic.DetailView):
     slug_url_kwords = 'comment_name'
     queryset = Comment.objects.all()
     context_object_name = 'comment_list'
+    def get_object(self):
+        return Comment.objects.filter(channel_name=self.kwargs.get('channel_name'), thread_id=self.kwargs.get('thread_id'))
