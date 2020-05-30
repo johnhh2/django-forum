@@ -16,11 +16,13 @@ def create_channel(name, owner, days):
 
 def create_thread(channel, owner, name, desc, days):
     time = timezone.now() + datetime.timedelta(days=days)
-    return Thread(channel_name=channel, owner=owner, thread_name=name, description=desc, pub_date=time)
+    return Thread(channel=channel, owner=owner, thread_name=name, description=desc, pub_date=time)
 
 def create_comment(thread, text, owner, days):
     time = timezone.now() + datetime.timedelta(days=days)
-    return Comment.objects.create(thread_id=thread, text=text, owner=owner, pub_date=time)
+    return Comment.objects.create(thread=thread, text=text, owner=owner, pub_date=time)
+
+##TODO: create_reply
 
 ## Channel tests
 class ChannelModelTests(TestCase):
@@ -73,13 +75,13 @@ class ThreadModelTests(TestCase):
     def testNoThread(self):
         owner = User.objects.create(username=self.owner_name)
         c = create_channel(self.channel_name, owner, -1)
-        response = self.client.get(reverse('forumapp:thread', kwargs={'channel_name': self.channel_name}))
+        response = self.client.get(reverse('forumapp:thread', kwargs={'channel': self.channel_name}))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "No threads are available.")
-        self.assertQuerysetEqual(response.context['thread_list'], [])
+        #self.assertQuerysetEqual(response.context['thread_list'], [])
 
     def testThreadCreateDelete(self):
-        owner = User.objects.create(username=self.owner_name)
+        owner = User.objects.create(username=self.owner_name+'2')
         c = create_channel(self.channel_name, owner, -1)
         t = create_thread(c, owner, self.thread_name, self.thread_desc, 0)
 
@@ -104,11 +106,13 @@ class CommentModelTests(TestCase):
         channel = create_channel(self.channel_name, owner, -2)
         owner2 = User.objects.create(username=self.owner_name2)
         thread = create_thread(channel, owner2, self.thread_name, self.thread_desc, -1)
+        thread.save()
 
-        response = self.client.get(reverse('forumapp:comment'))
+        response = self.client.get(reverse('forumapp:comment'), kwargs={'channel': channel.channel_name, 'thread': thread.thread_id})
+
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "No comments are available.")
-        self.assertQuerysetEqual(response.context['comment_list'], [])
+        #self.assertQuerysetEqual(response.context['comment_list'], [])
 
     def testCommentCreateDelete(self):
         owner = User.objects.create(username=self.owner_name)
@@ -120,15 +124,15 @@ class CommentModelTests(TestCase):
 
         c = create_comment(thread, text, owner3, -1)
 
-        response = self.client.get(reverse('forumapp:comment'))
+        response = self.client.get(reverse('forumapp:comment'), kwargs={'channel': self.channel_name, 'thread': thread.thread_id})
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, text)
-        #self.assertContains(response, self.owner_name3)
+        self.assertContains(response, self.owner_name3)
 
         c.delete()
 
-        self.testNoComment()
+        #self.testNoComment()
 
     def testCommentsAreDisplayed(self):
         name2 = "testchannel2"
@@ -142,7 +146,7 @@ class CommentModelTests(TestCase):
         c = create_comment(thread, text, owner3, 0)
         c = create_comment(thread, text[::-1], owner2, -1)
 
-        response = self.client.get(reverse('forumapp:comment'))
+        response = self.client.get(reverse('forumapp:comment'), kwargs={'channel': self.channel_name, 'thread': thread.thread_id})
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, text)
