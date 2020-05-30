@@ -43,7 +43,7 @@ class CommentAdmin(admin.ModelAdmin):
         ('Owner'           , {'fields': ['owner']}),
     ]
 
-    list_display = ('text', 'owner', 'pub_date')
+    list_display = ('text', 'owner', 'pub_date', 'is_recent')
     list_filter = ['pub_date']
     search_fields = ['text']
 
