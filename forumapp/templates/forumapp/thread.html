@@ -3,7 +3,7 @@
 {% if thread_list %}
     <ul>
     {% for thread in thread_list %}
-        <li><a href="{% url 'forumapp:comment' %}">{{ thread.thread_name }}</a></li>
+        <li><a href="{% url 'forumapp:comment' channel_name=thread.channel_name thread_id=thread.thread_id %}">{{ thread.thread_name }}</a></li>
     {% endfor %}
     </ul>
 {% else %}
