@@ -1,3 +1,5 @@
+import datetime
+from django.utils import timezone
 from django.db import models
 from django.contrib.auth.models import User
 
@@ -27,8 +29,16 @@ class Comment(models.Model):
     comment_id = models.AutoField(primary_key=True)
     thread_id = models.ForeignKey(Thread, to_field="thread_id")
     pub_date = models.DateTimeField('date published')
-    text = models.CharField(max_length=250, default="none")
+    text = models.CharField(max_length=250)
     owner = models.ForeignKey(User, to_field="username", null=False)
+    ordering = [pub_date]
 
     def __str__(self):
         return self.text
+
+    def is_recent(self):
+        now = timezone.now()
+        return timezone.now() - datetime.timedelta(days=1) <= self.pub_date <= now
+    is_recent.admin_order_field = 'pub_date'
+    is_recent.boolean = True
+    is_recent.short_description = 'Published recently?'
