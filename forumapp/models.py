@@ -32,7 +32,7 @@ class Thread(models.Model):
 
     def validate_unique(self, exclude=None):
         threads = Thread.objects.filter(channel__channel_name=self.channel.channel_name)
-        if threads.filter(thread_id=self.thread_id).exists():
+        if self._state.adding and threads.filter(thread_id=self.thread_id).exists():
             raise ValidationError('Name must be unique per site')
 
     def save(self, *args, **kwargs):

@@ -32,7 +32,7 @@ class ThreadAdmin(admin.ModelAdmin):
 
     inlines = [CommentInline]
 
-    list_display = ('thread_name', 'channel', 'description', 'owner', 'pub_date')
+    list_display = ('thread_name', 'thread_id', 'channel', 'description', 'owner', 'pub_date')
     list_filter = ['pub_date']
     search_fields = ['thread_name']
 
@@ -43,7 +43,7 @@ class CommentAdmin(admin.ModelAdmin):
         ('Owner'           , {'fields': ['owner']}),
     ]
 
-    list_display = ('text', 'owner', 'pub_date', 'is_recent')
+    list_display = ('text','comment_id', 'thread', 'owner', 'pub_date', 'is_recent')
     list_filter = ['pub_date']
     search_fields = ['text']
 
