@@ -14,9 +14,9 @@ def create_channel(name, owner, days):
     except:
         return Channel.objects.create(channel_name=name, owner=owner, pub_date=time)
 
-def create_thread(channel, owner, name, days):
+def create_thread(channel, owner, name, desc, days):
     time = timezone.now() + datetime.timedelta(days=days)
-    return Thread(channel_name=channel, owner=owner, thread_name=name, pub_date=time)
+    return Thread(channel_name=channel, owner=owner, thread_name=name, description=desc, pub_date=time)
 
 def create_comment(thread, text, owner, days):
     time = timezone.now() + datetime.timedelta(days=days)
@@ -46,7 +46,7 @@ class ChannelModelTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, self.name)
-        
+
         c.delete()
 
         self.testNoChannel()
@@ -69,6 +69,7 @@ class ThreadModelTests(TestCase):
     channel_name = "channelforthreadtest"
     owner_name = 'owner'
     thread_name = "threadtest"
+    thread_desc = "descriptionforthreadtest"
 
     def testNoThread(self):
         owner = User.objects.create(username=self.owner_name)
@@ -81,7 +82,7 @@ class ThreadModelTests(TestCase):
     def testThreadCreateDelete(self):
         owner = User.objects.create(username=self.owner_name)
         c = create_channel(self.channel_name, owner, -1)
-        t = create_thread(c, owner, self.thread_name, 0)
+        t = create_thread(c, owner, self.thread_name, self.thread_desc, 0)
 
         self.assertIn(t.thread_name, self.thread_name)
         self.assertEqual(len(t.thread_name), len(self.thread_name))
@@ -96,12 +97,13 @@ class CommentModelTests(TestCase):
     owner_name2 = "testuser4"
     channel_name = "aaatestchannel"
     thread_name = "stupid topic"
+    thread_desc = "stupid description"
 
     def testNoComment(self):
-        owner = User.objects.create(self.owner_name)
+        owner = User.objects.create(username=self.owner_name)
         channel = create_channel(self.channel_name, owner, -2)
-        owner2 = User.objects.create(self.owner_name2)
-        thread = create_thread(channel, self.thread_name, owner2, -1)
+        owner2 = User.objects.create(username=self.owner_name2)
+        thread = create_thread(channel, owner2, self.thread_name, self.thread_desc, -1)
 
         response = self.client.get(reverse('forumapp:comment'))
         self.assertEqual(response.status_code, 200)
@@ -109,12 +111,12 @@ class CommentModelTests(TestCase):
         self.assertQuerysetEqual(response.context['comment_list'], [])
 
     def testCommentCreateDelete(self):
-        owner = User.objects.create(self.owner_name)
+        owner = User.objects.create(username=self.owner_name)
         channel = create_channel(self.channel_name, owner, -2)
-        owner2 = User.objects.create(self.owner_name2)
-        thread = create_thread(channel, self.thread_name, owner2, -1)
+        owner2 = User.objects.create(username=self.owner_name2)
+        thread = create_thread(channel, owner2, self.thread_name, self.thread_desc, -1)
         text = "test text :)"
-        owner3 = User.objects.create(self.owner_name3)
+        owner3 = User.objects.create(username=self.owner_name3)
 
         c = create_comment(thread, text, owner3, -1)
 
@@ -123,19 +125,19 @@ class CommentModelTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, text)
         #self.assertContains(response, self.owner_name3)
-        
+
         c.delete()
 
         self.testNoComment()
 
     def testCommentsAreDisplayed(self):
         name2 = "testchannel2"
-        owner = User.objects.create(self.owner_name)
+        owner = User.objects.create(username=self.owner_name)
         channel = create_channel(self.channel_name, owner, -2)
-        owner2 = User.objects.create(self.owner_name2)
-        thread = create_thread(channel, self.thread_name, owner2, -1)
+        owner2 = User.objects.create(username=self.owner_name2)
+        thread = create_thread(channel, owner2, self.thread_name, self.thread_desc, -1)
         text = "test text :)"
-        owner3 = User.objects.create(self.owner_name3)
+        owner3 = User.objects.create(username=self.owner_name3)
 
         c = create_comment(thread, text, owner3, 0)
         c = create_comment(thread, text[::-1], owner2, -1)
@@ -145,5 +147,3 @@ class CommentModelTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, text)
         self.assertContains(response, text[::-1])
-
-
