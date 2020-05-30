@@ -10,6 +10,7 @@ class ChannelAdmin(admin.ModelAdmin):
     fieldsets = [
         (None,               {'fields': ['channel_name']}),
         ('Date Information', {'fields': ['pub_date']}),
+        ('Owner'           , {'fields': ['owner']}),
     ]
     inlines = [ThreadInline]
 
