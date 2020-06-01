@@ -78,7 +78,7 @@ class ThreadModelTests(TestCase):
         response = self.client.get(reverse('forumapp:thread', kwargs={'channel': self.channel_name}))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "No threads are available.")
-        #self.assertQuerysetEqual(response.context['thread_list'], [])
+        self.assertQuerysetEqual(response.context['thread_list'], [])
 
     def testThreadCreateDelete(self):
         owner = User.objects.create(username=self.owner_name+'2')
@@ -126,7 +126,7 @@ class CommentModelTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "No comments are available.")
-        #self.assertQuerysetEqual(response.context['comment_list'], [])
+        self.assertQuerysetEqual(response.context['comment_list'], [])
 
     def testCommentCreateDelete(self):
         owner = User.objects.create(username=self.owner_name)
