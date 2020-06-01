@@ -5,6 +5,7 @@ from django.utils import timezone
 from django.urls import reverse
 from .models import Channel, Thread, Comment
 from .forms import ChannelForm, ThreadForm, CommentForm
+
 # Create your views here.
 class ChannelView(generic.ListView):
     model = Channel

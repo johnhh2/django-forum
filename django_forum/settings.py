@@ -12,6 +12,9 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 
 import os
 
+# Added
+LOGIN_REDIRECT_URL = '/forum'
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -33,6 +36,7 @@ ALLOWED_HOSTS = ['testserver', '127.0.0.1', 'localhost']
 INSTALLED_APPS = [
     'foundation',
     'forumapp.apps.ForumappConfig',
+    'registration.apps.RegistrationConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -56,7 +60,7 @@ ROOT_URLCONF = 'django_forum.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [ os.path.join(BASE_DIR, '/templates/') ],
+        'DIRS': [ BASE_DIR + '/templates/', os.path.join(BASE_DIR, '/templates/') ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
