@@ -1,6 +1,7 @@
 {% extends 'forumapp/base.html' %}
 {% load commenthelpers %}
 {% block content %}
+<p><button type="button" class="button float-right" data-open="newComment">Create a new comment</button></p>
 {% if comment_list %}
     <ul>
     {% for comment in comment_list|dictsortreversed:'pub_date' %}
@@ -16,4 +17,15 @@
 {% else %}
     <p>No comments are available.</p>
 {% endif %}
+<div class="reveal" id="newComment" data-reveal>
+	<h3>Create a new thread:</h3>
+	<form action="?" method="post">
+		{% csrf_token %}
+	  	{{ form }}
+		<input type="submit" class="success button float-right" value="Create Comment">
+	</form>
+	<button type="button" class="close-button" data-close aria-label="Close modal">
+		<span aria-hidden="true">&times;</span>
+	</button>
+</div>
 {% endblock %}

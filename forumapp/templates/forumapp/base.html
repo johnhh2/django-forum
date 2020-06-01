@@ -1,16 +1,27 @@
 {% load static %}
+<!DOCTYPE html>
 <html>
-<link rel="stylesheet" type="text/css" href="{% static 'foundation/css/foundation.css' %}">
-<head></head>
+<head runat="server">
+	<link rel="stylesheet" type="text/css" href="{% static 'foundation/css/foundation.css' %}">
+</head>
 <body>
   <div class='content container'>
     <div class='row'>
       <div class='col-md-8'>
   {% block content %}
-
   {% endblock %}
       </div>
     </div>
   </div>
+
+  <script src="{% static 'foundation/js/vendor/jquery.js' %}"></script>
+
+  <!-- <script src="{% static 'foundation/js/vendor/what-input.min.js' %}"></script> --!>
+  <script src="{% static 'foundation/js/foundation.min.js' %}"></script>
+
+  <script>
+	$(document).foundation();
+  <script>
 </body>
 </html>
+
