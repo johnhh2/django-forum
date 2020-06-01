@@ -4,6 +4,7 @@
 
 venv/
 */migrations/
+poetry.lock
 
 ### Django ###
 *.log
