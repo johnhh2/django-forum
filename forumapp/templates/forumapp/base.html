@@ -1,8 +1,48 @@
 {% load static %}
 <html>
 <link rel="stylesheet" type="text/css" href="{% static 'foundation/css/foundation.css' %}">
-<head></head>
+<head>
+  <title>Forum</title>
+</head>
 <body>
+  <!--
+  <div class="top-bar">
+    <div class="top-bar-left">
+      <ul class="dropdown menu" data-dropdown-menu>
+        <li class="menu-text"><a href="/forum/">Forum</a></li>
+        <li>
+          <a href="#">One</a>
+          <ul class="menu vertical">
+            <li><a href="/forum/test/">One</a></li>
+            <li><a href="/forum/testing">Two</a></li>
+            <li><a href="#">Three</a></li>
+          </ul>
+        </li>
+        <li><a href="#">Two</a></li>
+        <li><a href="#">Three</a></li>
+      </ul>
+    </div>
+  -->
+
+<!--
+  <div class="top-bar">
+    <div class="top-bar-left">
+      <ul class="dropdown menu" data-dropdown-menu>
+        <li class="menu-text"><h3><a href="/forum/">Forum</a></h3></li>
+        <li>
+          <a href="/forum/">Channels</a>
+          <ul class="menu-vertical">
+            <li><a href="/forum/test/">Test</a></li>
+            <li><a href="/forum/testing/">Testing</a></li>
+          </ul>
+        </li>
+        <li><a href="/forum/test/0/">Thread from Test</a></li>
+        <li><a href="/forum/testing/0/">Thread from Testing</a></li>
+      </ul>
+    </div>
+  </div>
+-->
+
   <div class='content container'>
     <div class='row'>
       <div class='col-md-8'>
@@ -14,3 +54,8 @@
   </div>
 </body>
 </html>
+<script src="{% static 'foundation/js/vendor/jquery.js' %}"></script>
+<script src="{% static 'foundation/js/foundation/foundation.js' %}"></script>
+<script>
+  $(document).foundation();
+</script>
