@@ -92,6 +92,19 @@ class ThreadModelTests(TestCase):
 
         self.testNoThread()
 
+    def testThreadsAreDisplayed(self):
+        owner = User.objects.create(username=self.owner_name+'2')
+        c = create_channel(self.channel_name, owner, -1)
+        t = create_thread(c, owner, self.thread_name, self.thread_desc, 0)
+        t2 = create_thread(c, owner, self.thread_name[::-1], self.thread_desc, 0)
+        t.save()
+        t2.save()
+        response = self.client.get(reverse('forumapp:thread', kwargs={'channel': self.channel_name}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, self.thread_name)
+        self.assertContains(response, self.thread_name[::-1])
+
 ## Comment tests
 class CommentModelTests(TestCase):
     owner_name = "testuser3"
@@ -106,9 +119,10 @@ class CommentModelTests(TestCase):
         channel = create_channel(self.channel_name, owner, -2)
         owner2 = User.objects.create(username=self.owner_name2)
         thread = create_thread(channel, owner2, self.thread_name, self.thread_desc, -1)
+        
         thread.save()
 
-        response = self.client.get(reverse('forumapp:comment'), kwargs={'channel': channel.channel_name, 'thread': thread.thread_id})
+        response = self.client.get(reverse('forumapp:comment', kwargs={'channel': channel.channel_name, 'thread': thread.thread_id}))
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "No comments are available.")
@@ -122,9 +136,11 @@ class CommentModelTests(TestCase):
         text = "test text :)"
         owner3 = User.objects.create(username=self.owner_name3)
 
+        thread.save()
+
         c = create_comment(thread, text, owner3, -1)
 
-        response = self.client.get(reverse('forumapp:comment'), kwargs={'channel': self.channel_name, 'thread': thread.thread_id})
+        response = self.client.get(reverse('forumapp:comment', kwargs={'channel': self.channel_name, 'thread': thread.thread_id}))
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, text)
@@ -143,10 +159,12 @@ class CommentModelTests(TestCase):
         text = "test text :)"
         owner3 = User.objects.create(username=self.owner_name3)
 
+        thread.save()
+
         c = create_comment(thread, text, owner3, 0)
         c = create_comment(thread, text[::-1], owner2, -1)
 
-        response = self.client.get(reverse('forumapp:comment'), kwargs={'channel': self.channel_name, 'thread': thread.thread_id})
+        response = self.client.get(reverse('forumapp:comment', kwargs={'channel': self.channel_name, 'thread': thread.thread_id}))
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, text)

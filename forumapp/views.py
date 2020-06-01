@@ -17,9 +17,12 @@ class ChannelView(generic.ListView):
     queryset = Channel.objects.all()
     context_object_name = 'channel_list'
 
+    def get_object(self):
+        return Channel.objects.all()
+
     def get(self, request, *args, **kwargs):
         form = self.form_class(initial=self.initial)
-        return render(request, self.template_name, {'form': form, self.context_object_name: self.queryset})
+        return render(request, self.template_name, {'form': form, self.context_object_name: self.get_object()})
    
     def post(self, request, *args, **kwargs):
         form = self.form_class(request.POST)
