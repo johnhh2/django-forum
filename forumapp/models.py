@@ -33,7 +33,7 @@ class Thread(models.Model):
     def validate_unique(self, exclude=None):
         threads = Thread.objects.filter(channel__channel_name=self.channel.channel_name)
         if self._state.adding and threads.filter(thread_id=self.thread_id).exists():
-            raise ValidationError('Name must be unique per site')
+            raise ValidationError('thread_id and channel_name must be unique')
 
     def save(self, *args, **kwargs):
 
@@ -42,7 +42,6 @@ class Thread(models.Model):
 
             if last_id is not None:
                 self.thread_id = last_id + 1
-
 
         super(Thread, self).save(*args, **kwargs)
 
@@ -63,20 +62,21 @@ class Comment(models.Model):
         return self.text
 
     def validate_unique(self, exclude=None):
-        channel_comments = Comment.objects.filter(thread__channel__channel_name=self.thread.channel.channel_name)
-        comments = channel_comments.filter(thread__thread_id=self.thread_id)
-        if comments.filter(comment_id=self.comment_id).exists():
-            raise ValidationError('Name must be unique per site')
+        not_unique = Comment.objects.filter(thread__channel__channel_name=self.thread.channel.channel_name, thread__thread_id=self.thread.thread_id, comment_id=self.comment_id).exists()
+        if self._state.adding and not_unique:
+            raise ValidationError('comment_id, thread_id, and channel_name must be unique')
 
     def save(self, *args, **kwargs):
 
         if self._state.adding:
-            comments = Comment.objects.filter(thread__channel__channel_name=kwargs.get('channel'), thread__thread_id=kwargs.get('thread'))
+            comments = Comment.objects.filter(thread__channel__channel_name=self.thread.channel.channel_name, thread__thread_id=self.thread.thread_id)
 
             last_id = comments.aggregate(largest=models.Max('comment_id'))['largest']
 
             if last_id is not None:
                 self.comment_id = last_id + 1
+
+        #self.validate_unique()
 
         super(Comment, self).save(*args, **kwargs)
 
