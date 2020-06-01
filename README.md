@@ -2,7 +2,7 @@
 Basic forum web application made with Django during FarmAField training
 
 ## foundation/
-Files for Foundation 6 front-end framework
+Files for Foundation 6 front-end framework  
 Example site can be seen at foundation/
 
 ## forumapp/
