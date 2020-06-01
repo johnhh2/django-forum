@@ -3,7 +3,8 @@
 # Edit at https://www.gitignore.io/?templates=django
 
 venv/
-forumapp/migrations/
+migrations/
+!migrations/__init__.py
 poetry.lock
 
 ### Django ###

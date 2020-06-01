@@ -24,7 +24,7 @@ class ChannelView(generic.ListView):
     def post(self, request, *args, **kwargs):
         form = self.form_class(request.POST)
         if form.is_valid():
-            channel_name = form.cleaned_data['channel_name']
+            channel_name = form.cleaned_data.get('channel_name')
             owner = request.user
             pub_date = timezone.now()
 
@@ -32,8 +32,6 @@ class ChannelView(generic.ListView):
             channel.save()
 
             return HttpResponseRedirect(reverse('forumapp:thread', kwargs={'channel': channel_name}))
-        else:
-            return Http404("Invalid form submission")
 
 class ThreadView(generic.DetailView):
     model = Thread
@@ -53,14 +51,14 @@ class ThreadView(generic.DetailView):
 
     def get(self, request, *args, **kwargs):
         form = self.form_class(initial=self.initial)
-        return render(request, self.template_name, {'form': form, self.context_object_name: self.queryset})
+        return render(request, self.template_name, {'form': form, self.context_object_name: self.get_object()})
    
     def post(self, request, *args, **kwargs):
         form = self.form_class(request.POST)
         if form.is_valid():
-            channel = Channel.objects.get(channel_name=kwargs.get('channel'))
-            thread_name = form.cleaned_data['thread_name']
-            description = form.cleaned_data['description']
+            channel = Channel.objects.get(channel_name=self.kwargs.get('channel'))
+            thread_name = form.cleaned_data.get('thread_name')
+            description = form.cleaned_data.get('description')
             owner = request.user
             pub_date = timezone.now()
 
@@ -68,8 +66,6 @@ class ThreadView(generic.DetailView):
             thread.save()
 
             return HttpResponseRedirect(reverse('forumapp:comment', kwargs={'channel': thread.channel.channel_name, 'thread': thread.thread_id}))
-        else:
-            return Http404("Invalid form submission")
 
 class CommentView(generic.DetailView):
     model = Comment
@@ -96,7 +92,7 @@ class CommentView(generic.DetailView):
         form = self.form_class(request.POST)
         if form.is_valid():
             thread = Thread.objects.get(channel__channel_name=kwargs.get('channel'), thread_id=kwargs.get('thread'))
-            text = form.cleaned_data['text']
+            text = form.cleaned_data.get('text')
             owner = request.user
             pub_date = timezone.now()
 
