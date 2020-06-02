@@ -6,8 +6,9 @@ from django.core.exceptions import ValidationError
 
 class Channel(models.Model):
     channel_name = models.SlugField(max_length=30, primary_key=True)
+    moderators = models.CharField(max_length=250, default='[]')
 
-    owner = models.ForeignKey(User, to_field="username", null=False)
+    owner = models.ForeignKey(User, to_field="username", null=True)
     pub_date = models.DateTimeField('date published')
 
     def __str__(self):
@@ -21,7 +22,7 @@ class Channel(models.Model):
     is_recent.boolean = True
     is_recent.short_description = 'Published recently?'
 
-# Store thread_id as primary key
+# Store channel and thread_id as primary keys
 class Thread(models.Model):
     thread_id = models.IntegerField(default=0)
     channel = models.ForeignKey(Channel)
@@ -29,7 +30,7 @@ class Thread(models.Model):
     thread_name = models.CharField(max_length=90)
     description = models.CharField(max_length=150)
 
-    owner = models.ForeignKey(User, to_field="username", null=False)
+    owner = models.ForeignKey(User, to_field="username", null=True)
     pub_date = models.DateTimeField('date published')
 
     class Meta:
@@ -39,14 +40,16 @@ class Thread(models.Model):
         return self.thread_name
 
     def validate_unique(self, exclude=None):
-        threads = Thread.objects.filter(channel__channel_name=self.channel.channel_name)
+        threads = Thread.objects.filter(channel=self.channel)
         if self._state.adding and threads.filter(thread_id=self.thread_id).exists():
-            raise ValidationError('thread_id and channel_name must be unique')
-
+            raise ValidationError({field:'' for field in self._meta.unique_together[0]})
+            
     def save(self, *args, **kwargs):
 
         if self._state.adding:
-            last_id = Thread.objects.filter(channel__channel_name=self.channel.channel_name).aggregate(largest=models.Max('thread_id'))['largest']
+            threads = Thread.objects.filter(channel=self.channel)
+            
+            last_id = threads.aggregate(largest=models.Max('thread_id'))['largest']
 
             if last_id is not None:
                 self.thread_id = last_id + 1
@@ -61,7 +64,7 @@ class Thread(models.Model):
     is_recent.boolean = True
     is_recent.short_description = 'Published recently?'
 
-# Primary keys are thread_name and comment_id where comment_id starts at 1 for every new thread
+# Primary keys are thread and comment_id
 class Comment(models.Model):
     comment_id = models.IntegerField(default=0)
     thread = models.ForeignKey(Thread)
@@ -69,7 +72,7 @@ class Comment(models.Model):
     text = models.CharField(max_length=250)
 
     pub_date = models.DateTimeField('date published')
-    owner = models.ForeignKey(User, to_field="username", null=False)
+    owner = models.ForeignKey(User, to_field="username", null=True)
 
     class Meta:
         unique_together = (('thread', 'comment_id'))
@@ -78,14 +81,14 @@ class Comment(models.Model):
         return self.text
 
     def validate_unique(self, exclude=None):
-        not_unique = Comment.objects.filter(thread__channel__channel_name=self.thread.channel.channel_name, thread__thread_id=self.thread.thread_id, comment_id=self.comment_id).exists()
+        not_unique = Comment.objects.filter(thread=self.thread, comment_id=self.comment_id).exists()
         if self._state.adding and not_unique:
-            raise ValidationError('comment_id, thread_id, and channel_name must be unique')
+            raise ValidationError({field:'' for field in self._meta.unique_together[0]})
 
     def save(self, *args, **kwargs):
 
         if self._state.adding:
-            comments = Comment.objects.filter(thread__channel__channel_name=self.thread.channel.channel_name, thread__thread_id=self.thread.thread_id)
+            comments = Comment.objects.filter(thread=self.thread)
 
             last_id = comments.aggregate(largest=models.Max('comment_id'))['largest']
 
