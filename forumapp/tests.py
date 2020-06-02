@@ -325,4 +325,5 @@ class UniqueValidationTests(ValidationErrorTestMixin, TestCase):
         def testLogin(self):
             response = self.client.post('/login/', self.credentials, follow=True)
 
+            self.assertEqual(response.status_code, 200)
             self.assertTrue(response.context['user'].is_active)
