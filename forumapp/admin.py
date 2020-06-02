@@ -12,14 +12,15 @@ class CommentInline(admin.TabularInline):
 
 class ChannelAdmin(admin.ModelAdmin):
     fieldsets = [
-        (None,               {'fields': ['channel_name']}),
+        (None,               {'fields': ['channel_name', 'description']}),
         ('Date Information', {'fields': ['pub_date']}),
-        ('Owner'           , {'fields': ['owner']}),
+        ('Owner',            {'fields': ['owner']}),
+        ('Moderators',       {'fields': ['moderators']}),
     ]
 
     inlines = [ThreadInline]
 
-    list_display = ('channel_name', 'owner', 'pub_date', 'is_recent')
+    list_display = ('channel_name', 'description', 'owner', 'moderators', 'pub_date', 'is_recent')
     list_filter = ['pub_date']
     search_fields = ['channel_name']
 

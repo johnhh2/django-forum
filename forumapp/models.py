@@ -7,7 +7,7 @@ from django.core.exceptions import ValidationError
 class Channel(models.Model):
     channel_name = models.SlugField(max_length=30, primary_key=True)
     moderators = models.CharField(max_length=250, default='[]')
-
+    description = models.CharField(max_length=250, default='')
     owner = models.ForeignKey(User, to_field="username", null=True)
     pub_date = models.DateTimeField('date published')
 
@@ -43,12 +43,12 @@ class Thread(models.Model):
         threads = Thread.objects.filter(channel=self.channel)
         if self._state.adding and threads.filter(thread_id=self.thread_id).exists():
             raise ValidationError({field:'' for field in self._meta.unique_together[0]})
-            
+
     def save(self, *args, **kwargs):
 
         if self._state.adding:
             threads = Thread.objects.filter(channel=self.channel)
-            
+
             last_id = threads.aggregate(largest=models.Max('thread_id'))['largest']
 
             if last_id is not None:

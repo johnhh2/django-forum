@@ -2,11 +2,9 @@
 {% block content %}
 <p><button type="button" class="button float-right" data-open="newChannel">Create a new channel</button></p>
 {% if channel_list %}
-    <ul>
     {% for channel in channel_list %}
-        <li><a href="{% url 'forumapp:thread' channel=channel.channel_name %}">{{ channel.channel_name }}</a></li>
+      {% include "forumapp/channel_listing.html" %}
     {% endfor %}
-    </ul>
 {% else %}
     <p>No channels are available.</p>
 {% endif %}

@@ -1,26 +1,4 @@
-{% extends 'base.html' %}
-{% block content %}
-<p><button type="button" class="button float-right" data-open="newChannel">Create a new channel</button></p>
-{% if channel_list %}
-    <ul>
-    {% for channel in channel_list %}
-        <li><a href="{% url 'forumapp:thread' channel=channel.channel_name %}">{{ channel.channel_name }}</a></li>
-    {% endfor %}
-    </ul>
-{% else %}
-    <p>No channels are available.</p>
-{% endif %}
-
-
-<div class="reveal" id="newChannel" data-reveal>
-	<h3>Create a new channel:</h3>
-	<form action="?" method="post">
-		{% csrf_token %}
-	  	{{ form }}
-		<input type="submit" class="success button float-right" value="Create Channel">
-	</form>
-	<button type="button" class="close-button" data-close aria-label="Close modal">
-		<span aria-hidden="true">&times;</span>
-	</button>
-</div>
-{% endblock %}
+<h4><a href="{% url 'forumapp:thread' channel=channel.channel_name %}">{{ channel.channel_name }}</a></h4>
+<!-- TODO: link owner name to owner account page -->
+<p style="text-align:right">owned by: {{channel.owner}}</p>
+<p style="text-align:left">{{channel.description}}</p>

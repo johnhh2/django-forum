@@ -2,6 +2,7 @@ from django import forms
 
 class ChannelForm(forms.Form):
     channel_name = forms.SlugField(label='Channel name', max_length=30)
+    description = forms.CharField(label='Channel description', max_length=250)
 
 class ThreadForm(forms.Form):
     thread_name = forms.CharField(label='Thread name', max_length=90)
