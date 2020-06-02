@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect
+from django.contrib import messages
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 
@@ -19,6 +20,17 @@ def SignUpView(request):
 
                 login(request, user)
                 return redirect('forumapp:channel')
+            else: # passwords dont match
+                messages.error(request, 'Passwords do not match')
+
+        else: # tell user why form isnt valid
+            password1 = form.cleaned_data.get('password1')
+            password2 = form.cleaned_data.get('password2')
+
+            if form.fields['password1'] != form.fields['password2']:
+                messages.error(request, 'Passwords do not match')
+            else:
+                messages.error(request, 'Invalid username or password')
 
     form = UserCreationForm()
     return render(request, 'registration/signup.html', {'form': form})
@@ -38,6 +50,9 @@ def LogInView(request):
                 login(request, user)
 
                 return redirect('forumapp:channel')
+        else:
+            messages.error(request, 'Invalid username or password')
+
 
     form = AuthenticationForm()
     return render(request, 'registration/login.html', {'form': form})
