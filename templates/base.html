@@ -53,12 +53,18 @@
     </div>
   </div>
 
-  <script src="{% static 'foundation/js/vendor/jquery.js' %}"></script>
+  {% block foundation_jquery %}
+    <script src="{% static "foundation/js/vendor/jquery.js" %}"></script>
+  {% endblock foundation_jquery %}
 
-  <script src="{% static 'foundation/js/foundation.min.js' %}"></script>
+  {% block foundation_js %}
+    <script src="{% static "foundation/js/foundation.min.js" %}"></script>
+  {% endblock foundation_js %}
 
-  <script>
-	$(document).foundation();
-  </script>
+  {% block foundation_js_init %}
+    <script>
+        $(document).foundation();
+    </script>
+  {% endblock foundation_js_init %}
 </body>
 </html>

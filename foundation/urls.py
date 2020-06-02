@@ -6,6 +6,10 @@ urlpatterns = [
     url(regex=r'^$',
         view=TemplateView.as_view(template_name="foundation/index.html"),
         name="foundation_index"),
+        
+    url(regex=r'^original/$',
+        view=TemplateView.as_view(template_name="foundation/original_index.html"),
+        name="original_foundation_index"),
 
     url(regex=r'^scss/$',
         view=TemplateView.as_view(template_name="foundation/scss/index.html"),

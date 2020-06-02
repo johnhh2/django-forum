@@ -39,6 +39,4 @@ def LogInView(request):
                 return redirect('forumapp:channel')
 
     form = AuthenticationForm()
-    return render(request, 'registration/signup.html', {'form': form})
-
-
+    return render(request, 'registration/login.html', {'form': form})

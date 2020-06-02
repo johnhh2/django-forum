@@ -13,6 +13,14 @@ class Channel(models.Model):
     def __str__(self):
         return self.channel_name
 
+    def is_recent(self):
+        now = timezone.now()
+        return timezone.now() - datetime.timedelta(days=1) <= self.pub_date <= now
+
+    is_recent.admin_order_field = 'pub_date'
+    is_recent.boolean = True
+    is_recent.short_description = 'Published recently?'
+
 # Store thread_id as primary key
 class Thread(models.Model):
     thread_id = models.IntegerField(default=0)
@@ -44,6 +52,14 @@ class Thread(models.Model):
                 self.thread_id = last_id + 1
 
         super(Thread, self).save(*args, **kwargs)
+
+    def is_recent(self):
+        now = timezone.now()
+        return timezone.now() - datetime.timedelta(days=1) <= self.pub_date <= now
+
+    is_recent.admin_order_field = 'pub_date'
+    is_recent.boolean = True
+    is_recent.short_description = 'Published recently?'
 
 # Primary keys are thread_name and comment_id where comment_id starts at 1 for every new thread
 class Comment(models.Model):

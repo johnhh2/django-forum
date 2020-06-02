@@ -19,7 +19,7 @@ class ChannelAdmin(admin.ModelAdmin):
 
     inlines = [ThreadInline]
 
-    list_display = ('channel_name', 'owner', 'pub_date')
+    list_display = ('channel_name', 'owner', 'pub_date', 'is_recent')
     list_filter = ['pub_date']
     search_fields = ['channel_name']
 
@@ -32,7 +32,7 @@ class ThreadAdmin(admin.ModelAdmin):
 
     inlines = [CommentInline]
 
-    list_display = ('thread_name', 'thread_id', 'channel', 'description', 'owner', 'pub_date')
+    list_display = ('thread_name', 'thread_id', 'channel', 'description', 'owner', 'pub_date', 'is_recent')
     list_filter = ['pub_date']
     search_fields = ['thread_name']
 
