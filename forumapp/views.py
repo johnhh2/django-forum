@@ -23,15 +23,16 @@ class ChannelView(generic.ListView):
     def get(self, request, *args, **kwargs):
         form = self.form_class(initial=self.initial)
         return render(request, self.template_name, {'form': form, self.context_object_name: self.get_object()})
-   
+
     def post(self, request, *args, **kwargs):
         form = self.form_class(request.POST)
         if form.is_valid():
             channel_name = form.cleaned_data.get('channel_name')
+            description = form.cleaned_data.get('description')
             owner = request.user
             pub_date = timezone.now()
 
-            channel = Channel(channel_name=channel_name, owner=owner, pub_date=pub_date)
+            channel = Channel(channel_name=channel_name, description=description, owner=owner, pub_date=pub_date)
             channel.save()
 
             return HttpResponseRedirect(reverse('forumapp:thread', kwargs={'channel': channel_name}))
@@ -49,13 +50,13 @@ class ThreadView(generic.DetailView):
     # Return querylist of threads in the given channel
     def get_object(self):
         c_name = self.kwargs.get('channel')
-        
+
         return Thread.objects.filter(channel__channel_name=c_name)
 
     def get(self, request, *args, **kwargs):
         form = self.form_class(initial=self.initial)
         return render(request, self.template_name, {'form': form, self.context_object_name: self.get_object()})
-   
+
     def post(self, request, *args, **kwargs):
         form = self.form_class(request.POST)
         if form.is_valid():
@@ -90,7 +91,7 @@ class CommentView(generic.DetailView):
     def get(self, request, *args, **kwargs):
         form = self.form_class(initial=self.initial)
         return render(request, self.template_name, {'form': form, self.context_object_name: self.get_object()})
-   
+
     def post(self, request, *args, **kwargs):
         form = self.form_class(request.POST)
         if form.is_valid():

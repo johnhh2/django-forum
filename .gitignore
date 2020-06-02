@@ -6,6 +6,7 @@ venv/
 migrations/
 !migrations/__init__.py
 poetry.lock
+node_modules/
 
 ### Django ###
 *.log

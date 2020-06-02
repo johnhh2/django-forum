@@ -1,4 +1,18 @@
+<!--
 <h4><a href="{% url 'forumapp:thread' channel=channel.channel_name %}">{{ channel.channel_name }}</a></h4>
-<!-- TODO: link owner name to owner account page -->
+<!- TODO: link owner name to owner account page ->
 <p style="text-align:right">owned by: {{channel.owner}}</p>
-<p style="text-align:left">{{channel.description}}</p>
+<p>{{channel.description}}</p>
+-->
+
+<div class="row">
+  <div class="large-9 columns">
+    <div class="callout panel">
+      <h3><a href="{% url 'forumapp:thread' channel=channel.channel_name %}">{{channel.channel_name}}</a></h3>
+      <div class="callout float-right" !important >
+        <h3>Owned by: {{channel.owner}}</h3>
+      </div>
+      {{channel.description}}
+    </div>
+  </div>
+</div>

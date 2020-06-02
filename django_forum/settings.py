@@ -34,7 +34,7 @@ ALLOWED_HOSTS = ['testserver', '127.0.0.1', 'localhost']
 # Application definition
 
 INSTALLED_APPS = [
-    'foundation',
+    #'foundation',
     'forumapp.apps.ForumappConfig',
     'registration.apps.RegistrationConfig',
     'django.contrib.admin',

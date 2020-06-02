@@ -23,6 +23,6 @@ urlpatterns = [
     url(r'logout/', auth_views.logout, name='logout'),
     url(r'signup/', SignUpView, name='signup'),
     url(r'^admin/', admin.site.urls),
-    url(r'^foundation/', include('foundation.urls')),
+    #url(r'^foundation/', include('foundation.urls')),
     url(r'^forum/', include('forumapp.urls')),
 ]
