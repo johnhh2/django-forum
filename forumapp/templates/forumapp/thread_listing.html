@@ -1,18 +1,8 @@
 <div class="row">
-  <div class="large-9 columns">
-    <div class="callout panel">
+  <div class="large-6 columns">
+    <div class="callout panel radius">
       <h3><a href="{% url 'forumapp:comment' channel=thread.channel.channel_name thread=thread.thread_id %}">{{thread.thread_name}}</a></h3>
-    </div>
-  </div>
-  <div class="large-3 columns">
-    <div class="callout panel">
-      <h3>Owned by: {{thread.owner}}</h3>
-    </div>
-  </div>
-</div>
-<div class="row">
-  <div class="large-12 columns">
-    <div class="callout panel">
+      <p class="text-right">Owned by: {{thread.owner}}</p>
       {{thread.description}}
     </div>
   </div>

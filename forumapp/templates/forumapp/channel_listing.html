@@ -6,8 +6,8 @@
 -->
 
 <div class="row">
-  <div class="large-9 columns">
-    <div class="panel">
+  <div class="large-6 columns">
+    <div class="panel radius">
       <h3><a href="{% url 'forumapp:thread' channel=channel.channel_name %}">{{channel.channel_name}}</a></h3>
       <p class="text-right">Owned by: {{channel.owner}}</p>
       {{channel.description}}

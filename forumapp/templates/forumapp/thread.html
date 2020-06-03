@@ -1,12 +1,12 @@
 {% extends 'base.html' %}
 {% block content %}
 <div class="row">
-  <p><button type="button" class="button float-left" data-open="newThread">Create a new channel</button></p>
+  <p><button type="button" class="button float-left radius" data-open="newThread">Create a new thread</button></p>
   <!-- TODO: fix this so that we can check the owner even if thread_list is empty -->
-  {% if thread_list.0.channel.owner.username == user.get_username %}
+  {% if thread_list.0.channel.owner.username == user.get_username or perms.forumapp.delete_channel %}
     <form action="?" method="post">
       {% csrf_token %}
-      <p><input type="submit" class="alert button float-right" value="Delete this channel" name="delete"></p>
+      <p><input type="submit" class="alert button float-right radius" value="Delete this channel" name="delete"></p>
     </form>
   {% endif %}
 
@@ -24,9 +24,9 @@
 	<form action="?" method="post">
 		{% csrf_token %}
 	  	{{ form }}
-		<input type="submit" class="success button float-right" value="Create Thread" name="create">
+		<input type="submit" class="success button float-right radius" value="Create Thread" name="create">
 	</form>
-	<button type="button" class="close-button" data-close aria-label="Close modal">
+	<button type="button" class="close-button radius" data-close aria-label="Close modal">
 		<span aria-hidden="true">&times;</span>
 	</button>
 </div>

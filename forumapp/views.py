@@ -102,16 +102,20 @@ class CommentView(generic.DetailView):
         return render(request, self.template_name, {'form': form, self.context_object_name: self.get_object()})
 
     def post(self, request, *args, **kwargs):
-        form = self.form_class(request.POST)
-        if form.is_valid():
-            thread = Thread.objects.get(channel__channel_name=kwargs.get('channel'), thread_id=kwargs.get('thread'))
-            text = form.cleaned_data.get('text')
-            owner = request.user
-            pub_date = timezone.now()
+        if 'create' in request.POST:
+            form = self.form_class(request.POST)
+            if form.is_valid():
+                thread = Thread.objects.get(channel__channel_name=kwargs.get('channel'), thread_id=kwargs.get('thread'))
+                text = form.cleaned_data.get('text')
+                owner = request.user
+                pub_date = timezone.now()
 
-            comment = Comment(thread=thread, text=text, owner=owner, pub_date=pub_date)
-            comment.save()
+                comment = Comment(thread=thread, text=text, owner=owner, pub_date=pub_date)
+                comment.save()
 
-            return HttpResponseRedirect(reverse('forumapp:comment', kwargs={'channel': thread.channel.channel_name, 'thread': thread.thread_id}))
-        else:
-            return CommentView.get(self, request, *args, **kwargs)
+                return HttpResponseRedirect(reverse('forumapp:comment', kwargs={'channel': thread.channel.channel_name, 'thread': thread.thread_id}))
+            else:
+                return CommentView.get(self, request, *args, **kwargs)
+        elif 'delete' in request.POST:
+            Thread.objects.get(thread_name=self.kwargs.get('thread')).delete()
+            return HttpResponseRedirect(reverse('forumapp:thread'), kwargs={'channel': thread.channel.channel_name})

@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% block content %}
-<p><button type="button" class="button float-right" data-open="newChannel">Create a new channel</button></p>
+<p><button type="button" class="button float-right radius" data-open="newChannel">Create a new channel</button></p>
 
 {% if channel_list %}
     {% for channel in channel_list %}
@@ -15,10 +15,10 @@
 	<form action="?" method="post">
 		{% csrf_token %}
 	  	{{ form }}
-		<input type="submit" class="success button float-right" value="Create Channel">
+		<input type="submit" class="success button float-right radius" value="Create Channel">
 	</form>
   {% include "forumapp/messages.html" %}
-	<button type="button" class="close-button" data-close aria-label="Close modal">
+	<button type="button" class="close-button radius" data-close aria-label="Close modal">
 		<span aria-hidden="true">&times;</span>
 	</button>
 </div>
