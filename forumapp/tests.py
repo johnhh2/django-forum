@@ -21,15 +21,15 @@ class ValidationErrorTestMixin(object):
             self.assertEqual(set(fields), set(e.message_dict.keys()))
 
 ## Helper functions
-def create_channel(name, owner, days):
+def create_channel(name, owner, days=0):
     time = timezone.now() + datetime.timedelta(days=days)
     return Channel.objects.create(channel_name=name, owner=owner, pub_date=time)
 
-def create_thread(channel, owner, name, desc, days):
+def create_thread(channel, owner, name="name", desc="desc", days=0):
     time = timezone.now() + datetime.timedelta(days=days)
     return Thread.objects.create(channel=channel, owner=owner, thread_name=name, description=desc, pub_date=time)
 
-def create_comment(thread, owner, text, days):
+def create_comment(thread, owner, text="text", days=0):
     time = timezone.now() + datetime.timedelta(days=days)
     return Comment.objects.create(thread=thread, text=text, owner=owner, pub_date=time)
 
@@ -50,7 +50,7 @@ class ChannelModelTests(TestCase):
     def testChannelCreateDelete(self):
         owner = User.objects.create(username=self.owner_name)
 
-        c = create_channel(self.channel_name, owner, -1)
+        c = create_channel(self.channel_name, owner)
 
         self.assertIn(c.channel_name, self.channel_name)
         self.assertEqual(len(c.channel_name), len(self.channel_name))
@@ -68,8 +68,8 @@ class ChannelModelTests(TestCase):
         owner = User.objects.create(username=self.owner_name)
 
         channel_name_2 = "testchannel2"
-        c = create_channel(self.channel_name, owner, -1)
-        c = create_channel(channel_name_2, owner, -1)
+        c = create_channel(self.channel_name, owner)
+        c = create_channel(channel_name_2, owner)
 
         response = self.client.get(reverse('forumapp:channel'))
 
@@ -86,7 +86,7 @@ class ThreadModelTests(TestCase):
 
     def testNoThread(self):
         owner = User.objects.create(username=self.owner_name)
-        c = create_channel(self.channel_name, owner, -1)
+        c = create_channel(self.channel_name, owner)
 
         response = self.client.get(reverse('forumapp:thread', kwargs={'channel': self.channel_name}))
 
@@ -96,8 +96,8 @@ class ThreadModelTests(TestCase):
 
     def testThreadCreateDelete(self):
         owner = User.objects.create(username=self.owner_name)
-        c = create_channel(self.channel_name, owner, -1)
-        t = create_thread(c, owner, self.thread_name, self.thread_desc, 0)
+        c = create_channel(self.channel_name, owner)
+        t = create_thread(c, owner, self.thread_name, self.thread_desc)
 
         self.assertIn(t.thread_name, self.thread_name)
         self.assertEqual(len(t.thread_name), len(self.thread_name))
@@ -118,8 +118,12 @@ class ThreadModelTests(TestCase):
     def testThreadsAreDisplayed(self):
         owner = User.objects.create(username=self.owner_name+'2')
         c = create_channel(self.channel_name, owner, -1)
-        t = create_thread(c, owner, self.thread_name, self.thread_desc, 0)
-        t2 = create_thread(c, owner, self.thread_name[::-1], self.thread_desc, 0)
+        t1 = create_thread(c, owner, self.thread_name, self.thread_desc)
+        t2 = create_thread(c, owner, self.thread_name[::-1], self.thread_desc)
+
+        self.assertEquals(0, t1.thread_id)
+        self.assertEquals(1, t2.thread_id)
+
         response = self.client.get(reverse('forumapp:thread', kwargs={'channel': self.channel_name}))
 
         self.assertEqual(response.status_code, 200)
@@ -132,16 +136,14 @@ class CommentModelTests(TestCase):
     owner_name2 = "testuser4"
     owner_name3 = "testuser5"
     channel_name = "aaatestchannel"
-    thread_name = "stupid topic"
-    thread_desc = "stupid description"
     text = "test text :)"
 
     def testNoComment(self):
         owner = User.objects.create(username=self.owner_name)
 
-        channel = create_channel(self.channel_name, owner, -2)
+        channel = create_channel(self.channel_name, owner)
         owner2 = User.objects.create(username=self.owner_name2)
-        thread = create_thread(channel, owner2, self.thread_name, self.thread_desc, -1)
+        thread = create_thread(channel, owner2)
 
         response = self.client.get(reverse('forumapp:comment', kwargs={'channel': channel.channel_name, 'thread': thread.thread_id}))
 
@@ -152,12 +154,12 @@ class CommentModelTests(TestCase):
     def testCommentCreateDelete(self):
         owner = User.objects.create(username=self.owner_name)
 
-        channel = create_channel(self.channel_name, owner, -2)
+        channel = create_channel(self.channel_name, owner)
         owner2 = User.objects.create(username=self.owner_name2)
-        thread = create_thread(channel, owner2, self.thread_name, self.thread_desc, -1)
+        thread = create_thread(channel, owner2)
         owner3 = User.objects.create(username=self.owner_name3)
 
-        c = create_comment(thread, owner3, self.text, -1)
+        c = create_comment(thread, owner3, self.text)
 
         response = self.client.get(reverse('forumapp:comment', kwargs={'channel': self.channel_name, 'thread': thread.thread_id}))
 
@@ -175,20 +177,27 @@ class CommentModelTests(TestCase):
 
     def testCommentsAreDisplayed(self):
         owner = User.objects.create(username=self.owner_name)
-        channel = create_channel(self.channel_name, owner, -2)
+        channel = create_channel(self.channel_name, owner)
         owner2 = User.objects.create(username=self.owner_name2)
-        thread = create_thread(channel, owner2, self.thread_name, self.thread_desc, -1)
+        thread = create_thread(channel, owner2)
         owner3 = User.objects.create(username=self.owner_name3)
 
 
-        c = create_comment(thread, owner3, self.text, 0)
-        c = create_comment(thread, owner2, self.text[::-1], -1)
+        c1 = create_comment(thread, owner3, self.text)
+        c2 = create_comment(thread, owner2, self.text[::-1])
+
+        self.assertEquals(0, c1.comment_id)
+        self.assertEquals(1, c2.comment_id)
 
         response = self.client.get(reverse('forumapp:comment', kwargs={'channel': self.channel_name, 'thread': thread.thread_id}))
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, self.text)
         self.assertContains(response, self.text[::-1])
+
+    # TODO: add test for is_recent
+    def testCommentIsRecent(self):
+        pass
 
 ## Preserve data when a User is deleted
 ## Cascade-delete when channels/threads are removed (preserving users)
@@ -200,29 +209,29 @@ class CascadeDeleteTests(TestCase):
     thread_name = "aaa"
     thread_name2 = "bbb"
     thread_name3 = "ccc"
-    text = "textt"
     def testUserCascadeDelete(self):
         owner = User.objects.create(username=self.username)
         otheruser = User.objects.create(username=self.username[::-1])
         
         # Create a channel
-        channel = create_channel(self.channel_name, owner, -2)
-        subthread = create_thread(channel, owner, self.thread_name, self.text, -1)
+        channel = create_channel(self.channel_name, owner)
+        subthread = create_thread(channel, owner, self.thread_name)
         thread_id1 = subthread.thread_id
 
-        subcomment = create_comment(subthread, owner, self.text, 0)
+        subcomment = create_comment(subthread, owner)
         comment_id1 = subcomment.comment_id
+
         # Create a thread under another users channel
-        otherchannel = create_channel(self.channel_name2, otheruser, -2)
-        thread = create_thread(otherchannel, owner, self.thread_name2, self.text, -1)
+        otherchannel = create_channel(self.channel_name2, otheruser)
+        thread = create_thread(otherchannel, owner, self.thread_name2)
 
 
         # Create a comment under another users channel and thread
-        otherthread = create_thread(otherchannel, otheruser, self.thread_name3, self.text, -1)
+        otherthread = create_thread(otherchannel, otheruser, self.thread_name3)
         thread_id2 = otherthread.thread_id
 
         otherthread_id = otherthread.thread_id
-        comment = create_comment(otherthread, owner, self.text, 0)
+        comment = create_comment(otherthread, owner)
         comment_id2 = comment.comment_id
 
         owner.delete()
@@ -244,8 +253,8 @@ class CascadeDeleteTests(TestCase):
         owner = User.objects.create(username=self.username)
         otheruser = User.objects.create(username=self.username[::-1])
 
-        channel = create_channel(self.channel_name, owner, -2)
-        subthread = create_thread(channel, owner, self.thread_name, self.text, -1)
+        channel = create_channel(self.channel_name, owner)
+        subthread = create_thread(channel, owner, self.thread_name)
 
         # set moderator
         channel.moderators = json.dumps([otheruser.username])
@@ -260,7 +269,7 @@ class CascadeDeleteTests(TestCase):
 #Confirm primary keys work as expected (esp. since comment has 3 primary keys and thread has 2)
 class UniqueValidationTests(ValidationErrorTestMixin, TestCase):
     username1 = "asdjghuetjw"
-    username2 = username1[:7]
+    username2 = username1[:8]
     channel_name1 = "channel1981719"
     channel_name2 = channel_name1[:10]
     def testUniqueUser(self):
@@ -274,8 +283,8 @@ class UniqueValidationTests(ValidationErrorTestMixin, TestCase):
     def testUniqueChannel(self):
         user1 = User.objects.create(username=self.username1)
         user2 = User.objects.create(username=self.username2)
-        c1 = create_channel(self.channel_name1, user1, 0)
-        c2 = create_channel(self.channel_name2, user2, 0)
+        c1 = create_channel(self.channel_name1, user1)
+        c2 = create_channel(self.channel_name2, user2)
         c3 = Channel(channel_name=self.channel_name1, owner=user1, pub_date=timezone.now())
         c4 = Channel(channel_name=self.channel_name2, owner=user1, pub_date=timezone.now())
 
@@ -288,12 +297,12 @@ class UniqueValidationTests(ValidationErrorTestMixin, TestCase):
     def testUniqueThread(self):
         user1 = User.objects.create(username=self.username1)
         user2 = User.objects.create(username=self.username2)
-        c1 = create_channel(self.channel_name1, user1, 0)
-        c2 = create_channel(self.channel_name2, user2, 0)
-        t1 = create_thread(c1, user1, "a", "b", 0)
-        t2 = create_thread(c1, user1, "a", "b", 0)
-        t3 = create_thread(c2, user2, "c", "d", 0)
-        t4 = create_thread(c2, user1, "c", "d", 0)
+        c1 = create_channel(self.channel_name1, user1)
+        c2 = create_channel(self.channel_name2, user2)
+        t1 = create_thread(c1, user1)
+        t2 = create_thread(c1, user1)
+        t3 = create_thread(c2, user2)
+        t4 = create_thread(c2, user1)
 
         self.assertEquals(t1.thread_id, t3.thread_id)
         self.assertEquals(t2.thread_id, t4.thread_id)
@@ -306,21 +315,21 @@ class UniqueValidationTests(ValidationErrorTestMixin, TestCase):
     def testUniqueComment(self):
         user1 = User.objects.create(username=self.username1)
         user2 = User.objects.create(username=self.username2)
-        c1 = create_channel(self.channel_name1, user1, 0)
-        c2 = create_channel(self.channel_name2, user2, 0)
-        t1 = create_thread(c1, user1, "a", "b", 0)
-        t2 = create_thread(c2, user2, "c", "d", 0)
-        co1 = create_comment(t1, user1, "hi", 0)
-        co3 = create_comment(t2, user2, "no", 0)
-        co2 = create_comment(t1, user2, "pls", 0)
-        co4 = create_comment(t2, user2, "help", 0)
+        c1 = create_channel(self.channel_name1, user1)
+        c2 = create_channel(self.channel_name2, user2)
+        t1 = create_thread(c1, user1)
+        t2 = create_thread(c2, user2)
+        co1 = create_comment(t1, user1)
+        co2 = create_comment(t1, user2)
+        co3 = create_comment(t2, user2)
+        co4 = create_comment(t2, user2)
 
-        self.assertEquals(co1.thread_id, co3.thread_id)
-        self.assertEquals(co2.thread_id, co4.thread_id)
+        self.assertEquals(co1.comment_id, co3.comment_id)
+        self.assertEquals(co2.comment_id, co4.comment_id)
 
         co5 = Comment(comment_id=0, thread=t1, owner=user2, text="", pub_date=timezone.now())
         co6 = Comment(comment_id=1, thread=t1, owner=user2, text="", pub_date=timezone.now())
-        co7 = Comment(comment_id=1,thread=t2, owner=user1, text="", pub_date=timezone.now())
+        co7 = Comment(comment_id=1, thread=t2, owner=user1, text="", pub_date=timezone.now())
         
         with self.assertValidationErrors(['thread', 'comment_id']):
             co5.validate_unique()
@@ -330,3 +339,4 @@ class UniqueValidationTests(ValidationErrorTestMixin, TestCase):
 
         with self.assertValidationErrors(['thread', 'comment_id']):
             co7.validate_unique()
+

@@ -45,11 +45,13 @@ class Thread(models.Model):
     def __str__(self):
         return self.thread_name
 
+    # validate uniqueness on channel and thread_id
     def validate_unique(self, exclude=None):
         threads = Thread.objects.filter(channel=self.channel)
         if self._state.adding and threads.filter(thread_id=self.thread_id).exists():
             raise ValidationError({field:'' for field in self._meta.unique_together[0]})
 
+    # override to auto set thread_id
     def save(self, *args, **kwargs):
 
         if self._state.adding:
@@ -87,18 +89,20 @@ class Comment(models.Model):
     def __str__(self):
         return self.text
 
+    # validate uniqueness on thread and comment_id
     def validate_unique(self, exclude=None):
         not_unique = Comment.objects.filter(thread=self.thread, comment_id=self.comment_id).exists()
         if self._state.adding and not_unique:
             raise ValidationError({field:'' for field in self._meta.unique_together[0]})
 
+    # override to auto set comment_id
     def save(self, *args, **kwargs):
 
         if self._state.adding:
             comments = Comment.objects.filter(thread=self.thread)
 
             last_id = comments.aggregate(largest=models.Max('comment_id'))['largest']
-
+            
             if last_id is not None:
                 self.comment_id = last_id + 1
 
@@ -106,6 +110,7 @@ class Comment(models.Model):
 
         super(Comment, self).save(*args, **kwargs)
 
+    # see if a comment was posted in the last day
     def is_recent(self):
         now = timezone.now()
         return timezone.now() - datetime.timedelta(days=1) <= self.pub_date <= now
