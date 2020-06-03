@@ -6,14 +6,14 @@
 	<link rel="stylesheet" type="text/css" href="{% static 'foundation/css/foundation.css' %}">
 </head>
 <body>
-  <!--
+<!--
   <div class="top-bar">
     <div class="top-bar-left">
       <ul class="dropdown menu" data-dropdown-menu>
         <li class="menu-text"><a href="/forum/">Forum</a></li>
         <li>
           <a href="#">One</a>
-          <ul class="menu vertical">
+          <ul class="menu horizontal">
             <li><a href="/forum/test/">One</a></li>
             <li><a href="/forum/testing">Two</a></li>
             <li><a href="#">Three</a></li>
@@ -23,7 +23,7 @@
         <li><a href="#">Three</a></li>
       </ul>
     </div>
-  -->
+-->
 
   <div class="top-bar">
     <div class="top-bar-left">
@@ -36,7 +36,7 @@
             <li><a href="/forum/test/">Test</a></li>
             <li><a href="/forum/testing/">Testing</a></li>
           </ul>
-        -->
+          -->
         </li>
         <li><a href="#">Threads</a></li>
         <li><a href="#">Comments</a></li>
@@ -52,7 +52,7 @@
       </div>
     </div>
   </div>
-
+<!--
   {% block foundation_jquery %}
     <script src="{% static "foundation/js/vendor/jquery.js" %}"></script>
   {% endblock foundation_jquery %}
@@ -66,5 +66,7 @@
         $(document).foundation();
     </script>
   {% endblock foundation_js_init %}
+
+-->
 </body>
 </html>
