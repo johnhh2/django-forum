@@ -36,7 +36,7 @@ def create_comment(thread, owner, text="text", days=0):
 ##TODO: create_reply
 
 ## Channel tests
-class ChannelModelTests(TestCase):
+class ChannelTests(TestCase):
     channel_name = "Test-channel-123456789"
     owner_name = 'owner'
 
@@ -78,7 +78,7 @@ class ChannelModelTests(TestCase):
         self.assertContains(response, channel_name_2)
 
 ## Thread tests
-class ThreadModelTests(TestCase):
+class ThreadTests(TestCase):
     channel_name = "channelforthreadtest"
     owner_name = 'owner'
     thread_name = "threadtest"
@@ -131,7 +131,7 @@ class ThreadModelTests(TestCase):
         self.assertContains(response, self.thread_name[::-1])
 
 ## Comment tests
-class CommentModelTests(TestCase):
+class CommentTests(TestCase):
     owner_name = "testuser3"
     owner_name2 = "testuser4"
     owner_name3 = "testuser5"
@@ -209,7 +209,7 @@ class CascadeDeleteTests(TestCase):
     thread_name = "aaa"
     thread_name2 = "bbb"
     thread_name3 = "ccc"
-    def testUserCascadeDelete(self):
+    def testUserDelete(self):
         owner = User.objects.create(username=self.username)
         otheruser = User.objects.create(username=self.username[::-1])
         
@@ -266,12 +266,54 @@ class CascadeDeleteTests(TestCase):
         self.assertEqual(True, Channel.objects.filter(channel_name=self.channel_name).exists())
         self.assertEqual(self.username[::-1], Channel.objects.get(channel_name=self.channel_name).owner.username)
 
+    ## Test whether deleting a thread preserves its channel and deletes its comments
+    def testThreadDelete(self):
+        owner = User.objects.create(username=self.username)
+        
+        # Create a channel
+        channel = create_channel(self.channel_name, owner)
+        thread = create_thread(channel, owner, self.thread_name)
+        thread_id = thread.thread_id
+
+        comment = create_comment(thread, owner)
+        comment_id = comment.comment_id
+
+        thread.delete()
+
+        self.assertEquals(True, User.objects.filter(username=self.username).exists())
+        self.assertEquals(True, Channel.objects.filter(channel_name=self.channel_name).exists())
+        self.assertEquals(False, Thread.objects.filter(channel__channel_name=self.channel_name, thread_id=thread_id).exists())
+        self.assertEquals(False, Thread.objects.filter(channel=None).exists())
+        self.assertEquals(False, Comment.objects.filter(thread__thread_id=thread_id, comment_id=comment_id).exists())
+        self.assertEquals(False, Comment.objects.filter(thread=None).exists())
+    
+    ## Test whether deleting a comment preserves its thread
+    def testCommentDelete(self):
+        owner = User.objects.create(username=self.username)
+        
+        # Create a channel
+        channel = create_channel(self.channel_name, owner)
+        thread = create_thread(channel, owner, self.thread_name)
+        thread_id = thread.thread_id
+
+        comment = create_comment(thread, owner)
+        comment_id = comment.comment_id
+
+        comment.delete()
+
+        self.assertEquals(True, User.objects.filter(username=self.username).exists())
+        self.assertEquals(True, Channel.objects.filter(channel_name=self.channel_name).exists())
+        self.assertEquals(True, Thread.objects.filter(channel__channel_name=self.channel_name, thread_id=thread_id).exists())
+        self.assertEquals(False, Comment.objects.filter(thread__thread_id=thread_id, comment_id=comment_id).exists())
+        self.assertEquals(False, Comment.objects.filter(thread=None).exists())
+
 #Confirm primary keys work as expected (esp. since comment has 3 primary keys and thread has 2)
 class UniqueValidationTests(ValidationErrorTestMixin, TestCase):
     username1 = "asdjghuetjw"
     username2 = username1[:8]
     channel_name1 = "channel1981719"
     channel_name2 = channel_name1[:10]
+
     def testUniqueUser(self):
         user1 = User.objects.create(username=self.username1)
         user2 = User.objects.create(username=self.username2)
