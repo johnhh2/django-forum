@@ -16,12 +16,13 @@ Including another URLconf
 from django.conf.urls import url, include
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
-from registration.views import SignUpView, LogInView
+from registration.views import SignUpView, LogInView, PasswordResetView
 
 urlpatterns = [
     url(r'login/', LogInView, name='login'),
     url(r'logout/', auth_views.logout, name='logout'),
     url(r'signup/', SignUpView, name='signup'),
+    url(r'password_reset/', PasswordResetView, name='password_reset'),
     url(r'^admin/', admin.site.urls),
     url(r'^foundation/', include('foundation.urls')),
     url(r'^forum/', include('forumapp.urls')),

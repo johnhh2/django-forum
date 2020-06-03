@@ -1,14 +1,15 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth import authenticate, login
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth.forms import AuthenticationForm, PasswordResetForm
+from .forms import SignUpForm
 
 def SignUpView(request):
     if request.user.is_authenticated:
         return redirect('forumapp:channel')
 
     elif request.method == 'POST':
-        form = UserCreationForm(request.POST)
+        form = SignUpForm(request.POST)
         if form.is_valid():
             form.save()
 
@@ -32,7 +33,7 @@ def SignUpView(request):
             else:
                 messages.error(request, 'Invalid username or password')
 
-    form = UserCreationForm()
+    form = SignUpForm()
     return render(request, 'registration/signup.html', {'form': form})
 
 def LogInView(request):
@@ -56,3 +57,21 @@ def LogInView(request):
 
     form = AuthenticationForm()
     return render(request, 'registration/login.html', {'form': form})
+
+def PasswordResetView(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+
+    elif request.method == 'POST':
+        form = PasswordResetForm(data=request.POST)
+
+        if form.is_valid():
+            form.save()
+            
+            return redirect('password_reset_success')
+        else:
+            messages.error(request, 'Email was not found')
+
+
+    form = PasswordResetForm()
+    return render(request, 'registration/password_reset.html', {'form': form})
