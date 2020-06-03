@@ -32,7 +32,7 @@ class ChannelView(generic.ListView):
             owner = request.user
             pub_date = timezone.now()
 
-            channel = Channel(channel_name=channel_name, description=description, owner=owner, pub_date=pub_date)
+            channel = Channel(channel_name=channel_name, description=description, owner=owner, pub_date=pub_date, recent_date=pub_date)
             channel.save()
 
             return HttpResponseRedirect(reverse('forumapp:thread', kwargs={'channel': channel_name}))
@@ -65,9 +65,12 @@ class ThreadView(generic.DetailView):
             description = form.cleaned_data.get('description')
             owner = request.user
             pub_date = timezone.now()
-
-            thread = Thread(channel=channel, thread_name=thread_name, description=description, owner=owner, pub_date=pub_date)
+            thread = Thread(channel=channel, thread_name=thread_name, description=description, owner=owner, pub_date=pub_date, recent_date=pub_date)
             thread.save()
+
+            #Update recent_date of the channel
+            channel.recent_date = pub_date
+            channel.save()
 
             return HttpResponseRedirect(reverse('forumapp:comment', kwargs={'channel': thread.channel.channel_name, 'thread': thread.thread_id}))
 
@@ -102,6 +105,13 @@ class CommentView(generic.DetailView):
 
             comment = Comment(thread=thread, text=text, owner=owner, pub_date=pub_date)
             comment.save()
+
+            #Update recent_date of the channel and thread
+            thread.channel.recent_date = pub_date
+            thread.channel.save()
+
+            thread.recent_date = pub_date
+            thread.save()
 
             return HttpResponseRedirect(reverse('forumapp:comment', kwargs={'channel': thread.channel.channel_name, 'thread': thread.thread_id}))
         else:

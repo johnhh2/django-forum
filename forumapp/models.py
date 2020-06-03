@@ -10,6 +10,10 @@ class Channel(models.Model):
     description = models.CharField(max_length=250, default='')
     owner = models.ForeignKey(User, to_field="username", null=True, on_delete=models.SET_NULL)
     pub_date = models.DateTimeField('date published')
+    recent_date = models.DateTimeField('date used', default=timezone.now())
+
+    class Meta:
+        ordering = ['-recent_date']
 
     def __str__(self):
         return self.channel_name
@@ -32,9 +36,11 @@ class Thread(models.Model):
 
     owner = models.ForeignKey(User, to_field="username", null=True, on_delete=models.SET_NULL)
     pub_date = models.DateTimeField('date published')
+    recent_date = models.DateTimeField('date used', default=timezone.now())
 
     class Meta:
         unique_together = (('channel', 'thread_id'))
+        ordering = ['-recent_date']
 
     def __str__(self):
         return self.thread_name
@@ -76,6 +82,7 @@ class Comment(models.Model):
 
     class Meta:
         unique_together = (('thread', 'comment_id'))
+        ordering = ['-pub_date']
 
     def __str__(self):
         return self.text
