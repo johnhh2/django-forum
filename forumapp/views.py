@@ -117,5 +117,5 @@ class CommentView(generic.DetailView):
             else:
                 return CommentView.get(self, request, *args, **kwargs)
         elif 'delete' in request.POST:
-            Thread.objects.get(thread_name=self.kwargs.get('thread')).delete()
-            return HttpResponseRedirect(reverse('forumapp:thread'), kwargs={'channel': thread.channel.channel_name})
+            Thread.objects.get(thread_id=self.kwargs.get('thread'), channel__channel_name=self.kwargs.get('channel')).delete()
+            return HttpResponseRedirect(reverse('forumapp:thread', kwargs={'channel': self.kwargs.get('channel')}))
