@@ -8,7 +8,7 @@ class Channel(models.Model):
     channel_name = models.SlugField(max_length=30, primary_key=True)
     moderators = models.CharField(max_length=250, default='[]')
     description = models.CharField(max_length=250, default='')
-    owner = models.ForeignKey(User, to_field="username", null=True)
+    owner = models.ForeignKey(User, to_field="username", null=True, on_delete=models.SET_NULL)
     pub_date = models.DateTimeField('date published')
 
     def __str__(self):
@@ -30,7 +30,7 @@ class Thread(models.Model):
     thread_name = models.CharField(max_length=90)
     description = models.CharField(max_length=150)
 
-    owner = models.ForeignKey(User, to_field="username", null=True)
+    owner = models.ForeignKey(User, to_field="username", null=True, on_delete=models.SET_NULL)
     pub_date = models.DateTimeField('date published')
 
     class Meta:
@@ -72,7 +72,7 @@ class Comment(models.Model):
     text = models.CharField(max_length=250)
 
     pub_date = models.DateTimeField('date published')
-    owner = models.ForeignKey(User, to_field="username", null=True)
+    owner = models.ForeignKey(User, to_field="username", null=True, on_delete=models.SET_NULL)
 
     class Meta:
         unique_together = (('thread', 'comment_id'))

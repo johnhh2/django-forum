@@ -1,4 +1,4 @@
-import datetime
+import datetime, json
 from contextlib import contextmanager
 from django.test import TestCase, Client
 from django.core.exceptions import ValidationError
@@ -199,6 +199,7 @@ class CascadeDeleteTests(TestCase):
     channel_name3 = "nhjtgrew"
     thread_name = "aaa"
     thread_name2 = "bbb"
+    thread_name3 = "ccc"
     text = "textt"
     def testUserCascadeDelete(self):
         owner = User.objects.create(username=self.username)
@@ -213,12 +214,12 @@ class CascadeDeleteTests(TestCase):
         comment_id1 = subcomment.comment_id
         # Create a thread under another users channel
         otherchannel = create_channel(self.channel_name2, otheruser, -2)
-        thread = create_thread(otherchannel, owner, self.thread_name, self.text, -1)
+        thread = create_thread(otherchannel, owner, self.thread_name2, self.text, -1)
 
-        thread_id2 = thread.thread_id
 
         # Create a comment under another users channel and thread
-        otherthread = create_thread(otherchannel, otheruser, self.thread_name2, self.text, -1)
+        otherthread = create_thread(otherchannel, otheruser, self.thread_name3, self.text, -1)
+        thread_id2 = otherthread.thread_id
 
         otherthread_id = otherthread.thread_id
         comment = create_comment(otherthread, owner, self.text, 0)
@@ -226,20 +227,35 @@ class CascadeDeleteTests(TestCase):
 
         owner.delete()
 
-        #Channel and its children should be removed
-        self.assertEqual(Channel.objects.filter(channel_name=self.channel_name).exists(), False)
-        self.assertEqual(Thread.objects.filter(channel__channel_name=self.channel_name, thread_id=thread_id1).exists(), False)
-        self.assertEqual(Comment.objects.filter(thread__channel__channel_name=self.channel_name, thread__thread_id=thread_id1, comment_id=comment_id1).exists(), False)
-
-        #the thread and comment under the other user's channel should still exist
-        self.assertEqual(Thread.objects.filter(channel__channel_name=self.channel_name2, thread_id=thread_id2).exists(), True)
-        self.assertEqual(Comment.objects.filter(thread__channel__channel_name=self.channel_name2, thread__thread_id=otherthread_id, comment_id=comment_id2).exists(), True)
+        # Channel and its children should be gone (this tests cascade deletion 
+        #   for channels->threads->comments)
+        self.assertEqual(False, Channel.objects.filter(owner=None).exists())
+        self.assertEqual(False, Thread.objects.filter(channel=None).exists())
+        self.assertEqual(False, Comment.objects.filter(thread=None).exists())
+        
+        # Verify that the thread and comment under the other user's channel should still exist
+        self.assertEqual(True, Channel.objects.filter(channel_name=self.channel_name2).exists())
+        self.assertEqual(True, Thread.objects.filter(channel__channel_name=self.channel_name2, thread_id=thread_id2).exists())
+        self.assertEqual(True, Comment.objects.filter(thread__channel__channel_name=self.channel_name2, thread__thread_id=otherthread_id, comment_id=comment_id2).exists())
 
     ## Tests whether a channel is correctly passed off to one of the channel moderators 
     ## if a channel moderator is specified when the owner is deleted
     def testChannelOwnerPassOff(self):
-        pass
+        owner = User.objects.create(username=self.username)
+        otheruser = User.objects.create(username=self.username[::-1])
 
+        channel = create_channel(self.channel_name, owner, -2)
+        subthread = create_thread(channel, owner, self.thread_name, self.text, -1)
+
+        # set moderator
+        channel.moderators = json.dumps([otheruser.username])
+        channel.save()
+
+        #delete channel and see if the owner was changed to to the otheruser
+        owner.delete()
+
+        self.assertEqual(True, Channel.objects.filter(channel_name=self.channel_name).exists())
+        self.assertEqual(self.username[::-1], Channel.objects.get(channel_name=self.channel_name).owner.username)
 
 #Confirm primary keys work as expected (esp. since comment has 3 primary keys and thread has 2)
 class UniqueValidationTests(ValidationErrorTestMixin, TestCase):
@@ -314,4 +330,3 @@ class UniqueValidationTests(ValidationErrorTestMixin, TestCase):
 
         with self.assertValidationErrors(['thread', 'comment_id']):
             co7.validate_unique()
-

@@ -1,31 +1,24 @@
-import shutil
-from django.db.models.signals import pre_delete 
+import json
 from django.dispatch import receiver
+from django.db.models.signals import post_delete 
 from django.contrib.auth.models import User
 from .models import Channel, Thread, Comment
 
-@receiver(pre_delete)
+#When we delete a user, reassign or delete channels without owners
+@receiver(post_delete, sender=User)
 def delete_repo(sender, instance, **kwargs):
-    if sender == User:
 
-        channels = Channel.objects.filter(owner__id=instance.id)
-        threads = Thread.objects.filter(owner__id=instance.id)
-        comments = Comment.objects.filter(owner__id=instance.id)
+    # Reassign owner of channel, otherwise delete it and anything in it
+    channels = Channel.objects.filter(owner=None)
 
-        for lsting in channels:
-            if lsting.moderators != '[]':
-                moderators = json.loads(lsting.moderators)
-                for username in moderators:
-                    if User.objects.filter(username=username).exists():
+    for chan in channels:
+        moderators = json.loads(chan.moderators)
+        for username in moderators:
+            if User.objects.filter(username=username).exists():
 
-                        lsting.owner = User.objects.get(username=username)
-                        lsting.save()
-                        break
-
-            lsting.save()
-
-
-        for group in threads, comments:
-            for lsting in group:
-                lsting.owner = None
-                lsting.save()
+                chan.owner = User.objects.get(username=username)
+                chan.save()
+                print(username)
+                break
+        else:
+            chan.delete()

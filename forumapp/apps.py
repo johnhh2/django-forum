@@ -6,3 +6,4 @@ class ForumappConfig(AppConfig):
 
     def ready(self):
         import forumapp.signals
+        pass
