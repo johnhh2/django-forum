@@ -31,9 +31,8 @@ class ChannelView(generic.ListView):
             channel_name = form.cleaned_data.get('channel_name')
             description = form.cleaned_data.get('description')
             owner = request.user
-            pub_date = timezone.now()
 
-            channel = Channel(channel_name=channel_name, description=description, owner=owner, pub_date=pub_date, recent_date=pub_date)
+            channel = Channel(channel_name=channel_name, description=description, owner=owner)
 
             try:
                 channel.validate_unique()
@@ -73,9 +72,8 @@ class ThreadView(generic.DetailView):
                 thread_name = form.cleaned_data.get('thread_name')
                 description = form.cleaned_data.get('description')
                 owner = request.user
-                pub_date = timezone.now()
 
-                thread = Thread(channel=channel, thread_name=thread_name, description=description, owner=owner, pub_date=pub_date, recent_date=pub_date)
+                thread = Thread(channel=channel, thread_name=thread_name, description=description, owner=owner)
                 thread.save()
 
                 #Update recent_date of the channel
@@ -119,16 +117,16 @@ class CommentView(generic.DetailView):
                 thread = Thread.objects.get(channel__channel_name=kwargs.get('channel'), thread_id=kwargs.get('thread'))
                 text = form.cleaned_data.get('text')
                 owner = request.user
-                pub_date = timezone.now()
 
-                comment = Comment(thread=thread, text=text, owner=owner, pub_date=pub_date)
+                comment = Comment(thread=thread, text=text, owner=owner)
                 comment.save()
 
                 #Update recent_date of the channel and thread
-                thread.channel.recent_date = pub_date
+                date = timezone.now()
+                thread.channel.recent_date = date
                 thread.channel.save()
 
-                thread.recent_date = pub_date
+                thread.recent_date = date
                 thread.save()
 
                 return HttpResponseRedirect(reverse('forumapp:comment', kwargs={'channel': thread.channel.channel_name, 'thread': thread.thread_id}))

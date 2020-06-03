@@ -9,8 +9,8 @@ class Channel(models.Model):
     moderators = models.CharField(max_length=250, default='[]')
     description = models.CharField(max_length=250, default='')
     owner = models.ForeignKey(User, to_field="username", null=True, on_delete=models.SET_NULL)
-    pub_date = models.DateTimeField('date published')
-    recent_date = models.DateTimeField('date used', default=timezone.now())
+    pub_date = models.DateTimeField('date published', default=timezone.now)
+    recent_date = models.DateTimeField('date used', default=timezone.now)
 
     class Meta:
         ordering = ['-recent_date']
@@ -35,8 +35,8 @@ class Thread(models.Model):
     description = models.CharField(max_length=150)
 
     owner = models.ForeignKey(User, to_field="username", null=True, on_delete=models.SET_NULL)
-    pub_date = models.DateTimeField('date published')
-    recent_date = models.DateTimeField('date used', default=timezone.now())
+    pub_date = models.DateTimeField('date published', default=timezone.now)
+    recent_date = models.DateTimeField('date used', default=timezone.now)
 
     class Meta:
         unique_together = (('channel', 'thread_id'))
@@ -77,7 +77,7 @@ class Comment(models.Model):
 
     text = models.CharField(max_length=250)
 
-    pub_date = models.DateTimeField('date published')
+    pub_date = models.DateTimeField('date published', default=timezone.now)
     owner = models.ForeignKey(User, to_field="username", null=True, on_delete=models.SET_NULL)
 
     class Meta:
