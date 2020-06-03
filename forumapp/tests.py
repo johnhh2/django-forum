@@ -197,7 +197,24 @@ class CommentTests(TestCase):
 
     # TODO: add test for is_recent
     def testCommentIsRecent(self):
-        pass
+        owner = User.objects.create(username=self.owner_name)
+        channel = create_channel(self.channel_name, owner)
+        owner2 = User.objects.create(username=self.owner_name2)
+        thread = create_thread(channel, owner2)
+        owner3 = User.objects.create(username=self.owner_name3)
+
+        c1 = create_comment(thread, owner3, days=-2)
+        c2 = create_comment(thread, owner3, days=-0.5)
+        c3 = create_comment(thread, owner2, days=0)
+        c4 = create_comment(thread, owner, days=1)
+
+        response = self.client.get(reverse('forumapp:comment', kwargs={'channel': self.channel_name, 'thread': thread.thread_id}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIs(c1.is_recent(), False)
+        self.assertIs(c2.is_recent(), True)
+        self.assertIs(c3.is_recent(), True)
+        self.assertIs(c4.is_recent(), False)
 
 ## Preserve data when a User is deleted
 ## Cascade-delete when channels/threads are removed (preserving users)
@@ -212,7 +229,7 @@ class CascadeDeleteTests(TestCase):
     def testUserDelete(self):
         owner = User.objects.create(username=self.username)
         otheruser = User.objects.create(username=self.username[::-1])
-        
+
         # Create a channel
         channel = create_channel(self.channel_name, owner)
         subthread = create_thread(channel, owner, self.thread_name)
@@ -236,18 +253,18 @@ class CascadeDeleteTests(TestCase):
 
         owner.delete()
 
-        # Channel and its children should be gone (this tests cascade deletion 
+        # Channel and its children should be gone (this tests cascade deletion
         #   for channels->threads->comments)
         self.assertEqual(False, Channel.objects.filter(owner=None).exists())
         self.assertEqual(False, Thread.objects.filter(channel=None).exists())
         self.assertEqual(False, Comment.objects.filter(thread=None).exists())
-        
+
         # Verify that the thread and comment under the other user's channel should still exist
         self.assertEqual(True, Channel.objects.filter(channel_name=self.channel_name2).exists())
         self.assertEqual(True, Thread.objects.filter(channel__channel_name=self.channel_name2, thread_id=thread_id2).exists())
         self.assertEqual(True, Comment.objects.filter(thread__channel__channel_name=self.channel_name2, thread__thread_id=otherthread_id, comment_id=comment_id2).exists())
 
-    ## Tests whether a channel is correctly passed off to one of the channel moderators 
+    ## Tests whether a channel is correctly passed off to one of the channel moderators
     ## if a channel moderator is specified when the owner is deleted
     def testChannelOwnerPassOff(self):
         owner = User.objects.create(username=self.username)
@@ -332,7 +349,7 @@ class UniqueValidationTests(ValidationErrorTestMixin, TestCase):
 
         with self.assertValidationErrors(['channel_name']):
             c3.validate_unique()
-            
+
         with self.assertValidationErrors(['channel_name']):
             c4.validate_unique()
 
@@ -348,7 +365,7 @@ class UniqueValidationTests(ValidationErrorTestMixin, TestCase):
 
         self.assertEquals(t1.thread_id, t3.thread_id)
         self.assertEquals(t2.thread_id, t4.thread_id)
-        
+
         t5 = Thread(thread_id=0, channel=c1, owner=user2, thread_name="aa", description="bb", pub_date=timezone.now())
 
         with self.assertValidationErrors(['channel', 'thread_id']):
@@ -372,13 +389,12 @@ class UniqueValidationTests(ValidationErrorTestMixin, TestCase):
         co5 = Comment(comment_id=0, thread=t1, owner=user2, text="", pub_date=timezone.now())
         co6 = Comment(comment_id=1, thread=t1, owner=user2, text="", pub_date=timezone.now())
         co7 = Comment(comment_id=1, thread=t2, owner=user1, text="", pub_date=timezone.now())
-        
+
         with self.assertValidationErrors(['thread', 'comment_id']):
             co5.validate_unique()
-      
+
         with self.assertValidationErrors(['thread', 'comment_id']):
             co6.validate_unique()
 
         with self.assertValidationErrors(['thread', 'comment_id']):
             co7.validate_unique()
-
