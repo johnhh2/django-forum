@@ -1,3 +1,4 @@
+from django.contrib import messages
 from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import render
 from django.views import generic
@@ -33,9 +34,13 @@ class ChannelView(generic.ListView):
             pub_date = timezone.now()
 
             channel = Channel(channel_name=channel_name, description=description, owner=owner, pub_date=pub_date)
-            channel.save()
-
-            return HttpResponseRedirect(reverse('forumapp:thread', kwargs={'channel': channel_name}))
+            try:
+                channel.validate_unique()
+                channel.save()
+                return HttpResponseRedirect(reverse('forumapp:thread', kwargs={'channel': channel_name}))
+            except:
+                messages.error(request, "Channel already exists with that name.")
+        return HttpResponseRedirect(reverse('forumapp:channel'))
 
 class ThreadView(generic.DetailView):
     model = Thread
@@ -58,18 +63,22 @@ class ThreadView(generic.DetailView):
         return render(request, self.template_name, {'form': form, self.context_object_name: self.get_object()})
 
     def post(self, request, *args, **kwargs):
-        form = self.form_class(request.POST)
-        if form.is_valid():
-            channel = Channel.objects.get(channel_name=self.kwargs.get('channel'))
-            thread_name = form.cleaned_data.get('thread_name')
-            description = form.cleaned_data.get('description')
-            owner = request.user
-            pub_date = timezone.now()
+        if 'create' in request.POST:
+            form = self.form_class(request.POST)
+            if form.is_valid():
+                channel = Channel.objects.get(channel_name=self.kwargs.get('channel'))
+                thread_name = form.cleaned_data.get('thread_name')
+                description = form.cleaned_data.get('description')
+                owner = request.user
+                pub_date = timezone.now()
 
-            thread = Thread(channel=channel, thread_name=thread_name, description=description, owner=owner, pub_date=pub_date)
-            thread.save()
+                thread = Thread(channel=channel, thread_name=thread_name, description=description, owner=owner, pub_date=pub_date)
+                thread.save()
 
-            return HttpResponseRedirect(reverse('forumapp:comment', kwargs={'channel': thread.channel.channel_name, 'thread': thread.thread_id}))
+                return HttpResponseRedirect(reverse('forumapp:comment', kwargs={'channel': thread.channel.channel_name, 'thread': thread.thread_id}))
+        elif 'delete' in request.POST:
+            Channel.objects.get(channel_name=self.kwargs.get('channel')).delete()
+            return HttpResponseRedirect(reverse('forumapp:channel'))
 
 class CommentView(generic.DetailView):
     model = Comment

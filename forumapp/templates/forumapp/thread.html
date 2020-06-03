@@ -1,19 +1,30 @@
 {% extends 'base.html' %}
 {% block content %}
-<p><button type="button" class="button float-right" data-open="newThread">Create a new channel</button></p>
-{% if thread_list %}
-    {% for thread in thread_list %}
-        {% include "forumapp/thread_listing.html" %}
-    {% endfor %}
-{% else %}
-    <p>No threads are available.</p>
-{% endif %}
+<div class="row">
+  <p><button type="button" class="button float-left" data-open="newThread">Create a new channel</button></p>
+  <!-- TODO: fix this so that we can check the owner even if thread_list is empty -->
+  {% if thread_list.0.channel.owner.username == user.get_username %}
+    <form action="?" method="post">
+      {% csrf_token %}
+      <p><input type="submit" class="alert button float-right" value="Delete this channel" name="delete"></p>
+    </form>
+  {% endif %}
+
+  {% if thread_list %}
+      {% for thread in thread_list %}
+          {% include "forumapp/thread_listing.html" %}
+      {% endfor %}
+  {% else %}
+      <p>No threads are available.</p>
+  {% endif %}
+</div>
+
 <div class="reveal" id="newThread" data-reveal>
 	<h3>Create a new thread:</h3>
 	<form action="?" method="post">
 		{% csrf_token %}
 	  	{{ form }}
-		<input type="submit" class="success button float-right" value="Create Thread">
+		<input type="submit" class="success button float-right" value="Create Thread" name="create">
 	</form>
 	<button type="button" class="close-button" data-close aria-label="Close modal">
 		<span aria-hidden="true">&times;</span>
