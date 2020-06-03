@@ -6,12 +6,10 @@
 -->
 
 <div class="row">
-  <div class="large-9 columns">
-    <div class="callout panel">
+  <div class="large-6 columns">
+    <div class="panel radius">
       <h3><a href="{% url 'forumapp:thread' channel=channel.channel_name %}">{{channel.channel_name}}</a></h3>
-      <div class="callout float-right" !important >
-        <h3>Owned by: {{channel.owner}}</h3>
-      </div>
+      <p class="text-right">Owned by: {{channel.owner}}</p>
       {{channel.description}}
     </div>
   </div>
