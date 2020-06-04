@@ -43,11 +43,12 @@
       </ul>
     </div>
     <div class="top-bar-right">
-        {% if user.is_authenticated %}
-	  Welcome, {{ user.get_username }} <a href="{% url 'registration:logout' %}">Logout</a>
+	    <li><a href="{%url 'forumapp:settings' %}">Settings</a></li>
+	<li>{% if user.is_authenticated %}
+		Welcome, {{ user.get_username }} <a href="{% url 'registration:logout' %}">Logout</a>
         {% else %}
-	Welcome, guest. <a href="{% url 'registration:login' %}">Login?</a>
-        {% endif %}
+		Welcome, guest. <a href="{% url 'registration:login' %}">Login?</a>
+	{% endif %}</li>
     </div>
   </div>
 

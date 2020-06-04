@@ -5,15 +5,33 @@ from django.shortcuts import render
 from django.views import generic
 from django.utils import timezone
 from django.urls import reverse
-from .models import Channel, Thread, Comment
+from .models import UserSettings, Channel, Thread, Comment
 from .forms import ChannelForm, ThreadForm, CommentForm
 
 class ViewMixin(generic.base.ContextMixin):
+    initial = {'key': 'value'}
+
     def get_context_data(self, **kwargs):
         context = super(ViewMixin, self).get_context_data(**kwargs)
-        context['form'] = self.form_class(initial=self.initial)
+        
         context[self.context_object_name] = self.get_object()
+        if hasattr(self, 'form_class'):
+            context['form'] = self.form_class(initial=self.initial)
         return context
+
+# Show the settings menu
+class UserSettingsView(ViewMixin, generic.DetailView):
+    model = UserSettings
+    template_name = 'forumapp/user_settings.html'
+
+    queryset = UserSettings.objects.all()
+    context_object_name = 'user_settings'
+
+    def get_object(self):
+        if self.request.user.is_authenticated:
+            return UserSettings.objects.get_or_create(user__username__exact=self.request.user.username)
+        
+        return UserSettings.objects.none()
 
 # Create your views here.
 class ChannelView(ViewMixin, generic.ListView):
@@ -21,7 +39,6 @@ class ChannelView(ViewMixin, generic.ListView):
     template_name = 'forumapp/channel.html'
 
     form_class = ChannelForm
-    initial = {'key': 'value'}
 
     queryset = Channel.objects.all()
     context_object_name = 'channel_list'
@@ -72,7 +89,6 @@ class ThreadView(ViewMixin, generic.DetailView):
     template_name = 'forumapp/thread.html'
 
     form_class = ThreadForm
-    initial = {'key': 'value'}
 
     queryset = Thread.objects.all()
     context_object_name = 'thread_list'
@@ -144,7 +160,6 @@ class CommentView(ViewMixin, generic.DetailView):
     template_name = 'forumapp/comment.html'
 
     form_class = CommentForm
-    initial = {'key': 'value'}
 
     queryset = Comment.objects.all()
     context_object_name = 'comment_list'
