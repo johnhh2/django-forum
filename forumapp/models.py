@@ -4,19 +4,27 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 
+# One-to-one with User
+class UserSettings(models.Model):
+    user = models.OneToOneField(User, primary_key=True)
+    favorites = models.TextField(default='["General"]')
+    bio = models.TextField(max_length=250, default='Hello world')
+
+# Store channel_name as primary_key
 class Channel(models.Model):
     channel_name = models.SlugField(max_length=30, primary_key=True)
-    moderators = models.CharField(max_length=250, default='[]')
+    moderators = models.TextField(default='[]')
     description = models.CharField(max_length=250, default='')
     owner = models.ForeignKey(User, to_field="username", null=True, on_delete=models.SET_NULL)
     pub_date = models.DateTimeField('date published', default=timezone.now)
     recent_date = models.DateTimeField('date used', default=timezone.now)
+    banned_users = models.TextField(default='[]')
 
     class Meta:
         ordering = ['-recent_date']
 
     def __str__(self):
-        return self.channel_name
+        return self.channel_name.replace('-', ' ')
 
     def is_recent(self):
         now = timezone.now()

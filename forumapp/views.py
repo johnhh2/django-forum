@@ -29,6 +29,10 @@ class ChannelView(ViewMixin, generic.ListView):
         return Channel.objects.all()
 
     def post(self, request, *args, **kwargs):
+
+        if not request.user.is_active:
+            return Http404("This account is disabled")
+
         form = self.form_class(request.POST)
         if form.is_valid():
             channel_name = form.cleaned_data.get('channel_name')
@@ -79,6 +83,9 @@ class ThreadView(ViewMixin, generic.DetailView):
         return Thread.objects.filter(channel__channel_name=c_name)
 
     def post(self, request, *args, **kwargs):
+
+        if not request.user.is_active:
+            return Http404("This account is disabled")
 
         if 'delete' in request.POST:
             Channel.objects.get(channel_name=self.kwargs.get('channel')).delete()
@@ -149,6 +156,9 @@ class CommentView(ViewMixin, generic.DetailView):
         return Comment.objects.filter(thread__thread_id=t_id, thread__channel__channel_name=c_name)
 
     def post(self, request, *args, **kwargs):
+
+        if not request.user.is_active:
+            return Http404("This account is disabled")
 
         if 'delete' in request.POST:
             Thread.objects.get(thread_id=self.kwargs.get('thread'), channel__channel_name=self.kwargs.get('channel')).delete()
