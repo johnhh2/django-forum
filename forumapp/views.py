@@ -7,8 +7,15 @@ from django.urls import reverse
 from .models import Channel, Thread, Comment
 from .forms import ChannelForm, ThreadForm, CommentForm
 
+class ViewMixin(generic.base.ContextMixin):
+    def get_context_data(self, **kwargs):
+        context = super(ViewMixin, self).get_context_data(**kwargs)
+        context['form'] = self.form_class(initial=self.initial)
+        context[self.context_object_name] = self.get_object()
+        return context
+
 # Create your views here.
-class ChannelView(generic.ListView):
+class ChannelView(ViewMixin, generic.ListView):
     model = Channel
     template_name = 'forumapp/channel.html'
 
@@ -20,10 +27,6 @@ class ChannelView(generic.ListView):
 
     def get_object(self):
         return Channel.objects.all()
-
-    def get(self, request, *args, **kwargs):
-        form = self.form_class(initial=self.initial)
-        return render(request, self.template_name, {'form': form, self.context_object_name: self.get_object()})
 
     def post(self, request, *args, **kwargs):
         form = self.form_class(request.POST)
@@ -40,10 +43,10 @@ class ChannelView(generic.ListView):
                 return HttpResponseRedirect(reverse('forumapp:thread', kwargs={'channel': channel_name}))
             except:
                 messages.error(request, "Channel already exists with that name.")
-        
+
         return HttpResponseRedirect(reverse('forumapp:channel'))
 
-class ThreadView(generic.DetailView):
+class ThreadView(ViewMixin, generic.DetailView):
     model = Thread
     template_name = 'forumapp/thread.html'
 
@@ -59,12 +62,8 @@ class ThreadView(generic.DetailView):
 
         return Thread.objects.filter(channel__channel_name=c_name)
 
-    def get(self, request, *args, **kwargs):
-        form = self.form_class(initial=self.initial)
-        return render(request, self.template_name, {'form': form, self.context_object_name: self.get_object()})
-
     def post(self, request, *args, **kwargs):
-            
+
         if 'create' in request.POST:
             form = self.form_class(request.POST)
             if form.is_valid():
@@ -82,13 +81,16 @@ class ThreadView(generic.DetailView):
                 channel.save()
 
                 return HttpResponseRedirect(reverse('forumapp:comment', kwargs={'channel': thread.channel.channel_name, 'thread': thread.thread_id}))
-        
+
         elif 'delete' in request.POST:
             Channel.objects.get(channel_name=self.kwargs.get('channel')).delete()
-            
+
             return HttpResponseRedirect(reverse('forumapp:channel'))
 
-class CommentView(generic.DetailView):
+        elif 'back' in request.POST:
+            return HttpResponseRedirect(reverse('forumapp:channel'))
+
+class CommentView(ViewMixin, generic.DetailView):
     model = Comment
     template_name = 'forumapp/comment.html'
 
@@ -104,10 +106,6 @@ class CommentView(generic.DetailView):
         c_name = self.kwargs.get('channel')
 
         return Comment.objects.filter(thread__thread_id=t_id, thread__channel__channel_name=c_name)
-
-    def get(self, request, *args, **kwargs):
-        form = self.form_class(initial=self.initial)
-        return render(request, self.template_name, {'form': form, self.context_object_name: self.get_object()})
 
     def post(self, request, *args, **kwargs):
 
@@ -136,4 +134,7 @@ class CommentView(generic.DetailView):
 
         elif 'delete' in request.POST:
             Thread.objects.get(thread_id=self.kwargs.get('thread'), channel__channel_name=self.kwargs.get('channel')).delete()
+            return HttpResponseRedirect(reverse('forumapp:thread', kwargs={'channel': self.kwargs.get('channel')}))
+
+        elif 'back' in request.POST:
             return HttpResponseRedirect(reverse('forumapp:thread', kwargs={'channel': self.kwargs.get('channel')}))

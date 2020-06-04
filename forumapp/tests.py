@@ -195,7 +195,6 @@ class CommentTests(TestCase):
         self.assertContains(response, self.text)
         self.assertContains(response, self.text[::-1])
 
-    # TODO: add test for is_recent
     def testCommentIsRecent(self):
         owner = User.objects.create(username=self.owner_name)
         channel = create_channel(self.channel_name, owner)
@@ -211,10 +210,10 @@ class CommentTests(TestCase):
         response = self.client.get(reverse('forumapp:comment', kwargs={'channel': self.channel_name, 'thread': thread.thread_id}))
 
         self.assertEqual(response.status_code, 200)
-        self.assertIs(c1.is_recent(), False)
-        self.assertIs(c2.is_recent(), True)
-        self.assertIs(c3.is_recent(), True)
-        self.assertIs(c4.is_recent(), False)
+        self.assertFalse(c1.is_recent())
+        self.assertTrue(c2.is_recent())
+        self.assertTrue(c3.is_recent())
+        self.assertFalse(c4.is_recent())
 
 ## Preserve data when a User is deleted
 ## Cascade-delete when channels/threads are removed (preserving users)
@@ -286,7 +285,7 @@ class CascadeDeleteTests(TestCase):
     ## Test whether deleting a thread preserves its channel and deletes its comments
     def testThreadDelete(self):
         owner = User.objects.create(username=self.username)
-        
+
         # Create a channel
         channel = create_channel(self.channel_name, owner)
         thread = create_thread(channel, owner, self.thread_name)
@@ -303,11 +302,11 @@ class CascadeDeleteTests(TestCase):
         self.assertEquals(False, Thread.objects.filter(channel=None).exists())
         self.assertEquals(False, Comment.objects.filter(thread__thread_id=thread_id, comment_id=comment_id).exists())
         self.assertEquals(False, Comment.objects.filter(thread=None).exists())
-    
+
     ## Test whether deleting a comment preserves its thread
     def testCommentDelete(self):
         owner = User.objects.create(username=self.username)
-        
+
         # Create a channel
         channel = create_channel(self.channel_name, owner)
         thread = create_thread(channel, owner, self.thread_name)

@@ -1,13 +1,15 @@
 {% extends 'base.html' %}
-{% load commenthelpers %}
+{% load comment_helpers %}
 {% block content %}
-<p><button type="button" class="button float-right radius" data-open="newComment">Create a new comment</button></p>
-{% if comment_list.0.thread.owner.username == user.get_username or perms.forumapp.delete_thread %}
-  <form action="?" method="post">
-    {% csrf_token %}
-    <p><input type="submit" class="alert button float-right radius" value="Delete this thread" name="delete"></p>
-  </form>
-{% endif %}
+
+<form action="?" method="post">
+  {% csrf_token %}
+  <input type="submit" class="primary button radius" value="Back to {{ view.kwargs.channel }}" name="back">
+  <button type="button" class="button float-right radius" data-open="newComment">Create a new comment</button>
+  {% if view.kwargs|isowner:user.get_username or perms.forumapp.delete_thread %}
+      <input type="submit" class="alert button float-right radius" value="Delete this thread" name="delete">
+  {% endif %}
+</form>
 
 {% if comment_list %}
     <ul>
