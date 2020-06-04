@@ -4,10 +4,10 @@
 
 <p>Last login: {{ user.last_login }}</p>
 
-{% if user.is_authenticated %}
+{% if user.is_staff %}
   <form action="?" method="post">
     {% csrf_token %}
-    <input type="submit" class="alert button radius" value="Ban this user" name="ban">
+    <input type="submit" class="alert button radius" value="Ban this user" name="admin_ban">
   </form>
 {% endif %}
 {# <p>Bio: {{ user.bio }} </p> #}
