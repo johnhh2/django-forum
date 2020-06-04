@@ -31,26 +31,17 @@
         <li class="menu-text">
           <h3><a href="/forum/">Forum</a></h3>
         </li>
-        <li>
-          <a href="#">Channels</a>
-          <!--
-          <ul class="menu-vertical">
-            <li><a href="/forum/test/">Test</a></li>
-            <li><a href="/forum/testing/">Testing</a></li>
-          </ul>
-        -->
-        </li>
-        <li><a href="#">Threads</a></li>
-        <li><a href="#">Comments</a></li>
       </ul>
     </div>
     <div class="top-bar-right">
-	    <li><a href="{%url 'forumapp:settings' %}">Settings</a></li>
-	<li>{% if request.user.is_authenticated %}
-		Welcome, {{ request.user.get_username }} <a href="{% url 'registration:logout' %}">Logout</a>
+      <p style="text-align:right">
+  	    {% if request.user.is_authenticated %}
+  		    Welcome, {{ request.user.get_username }} <a href="{% url 'registration:logout' %}">Logout</a>
         {% else %}
-		Welcome, guest. <a href="{% url 'registration:login' %}">Login?</a>
-	{% endif %}</li>
+  		    Welcome, guest. <a href="{% url 'registration:login' %}">Login</a>/<a href="{% url 'registration:signup' %}">Sign up</a>
+  	    {% endif %}
+      </p>
+      <a href="{%url 'forumapp:settings' %}">Settings</a>
     </div>
   </div>
 

@@ -2,6 +2,7 @@ from django.conf.urls import url
 from django.views.generic import TemplateView
 
 # Test pattern, renders Zurb Foundation default page using base template
+app_name = 'foundation'
 urlpatterns = [
     url(regex=r'^$',
         view=TemplateView.as_view(template_name="foundation/index.html"),

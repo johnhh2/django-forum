@@ -34,9 +34,9 @@ class UserSettingsView(ViewMixin, generic.DetailView):
             user = self.queryset.filter(user__username=self.request.user)
             if user.exists():
                 return user.get()
-            else: 
+            else:
                 self.queryset.create(user=self.request.user)
-        
+
         return self.queryset.none()
 
     def get(self, request, *args, **kwargs):
@@ -46,7 +46,7 @@ class UserSettingsView(ViewMixin, generic.DetailView):
 
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
-        
+
         if 'save' in request.POST:
             form = self.form_class(request.POST, instance=self.object)
 
@@ -70,7 +70,7 @@ class ChannelView(ViewMixin, generic.ListView):
 
     def get_object(self, exclude=None):
         return self.queryset.all()
-    
+
     def post(self, request, *args, **kwargs):
         owner = request.user
         channel = Channel(owner=owner)
@@ -260,14 +260,13 @@ class UserView(ViewMixin, generic.DetailView):
     def post(self, request, *args, **kwargs):
         username = self.kwargs.get('username')
         if 'admin_ban' in request.POST:
-            
+
             user = queryset.filter(username=username)
             if user.exists():
                 user = user.get()
                 user.is_active = False
-                
-                return HttpResponseRedirect(reverse('forumapp:user', kwargs={'username': username}))
-            
+                user.save()
+                return HttpResponseRedirect(self.request.path_info)
             else:
                 return Http404("User does not exist.")
 
@@ -276,8 +275,7 @@ class UserView(ViewMixin, generic.DetailView):
             if user.exists():
                 user = user.get()
                 user.is_active = True
-                
-                return HttpResponseRedirect(reverse('forumapp:user', kwargs={'username': username}))
- 
+                user.save()
+                return HttpResponseRedirect(self.request.path_info)
             else:
                 return Http404("User does not exist.")
