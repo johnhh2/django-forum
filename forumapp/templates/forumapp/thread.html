@@ -2,7 +2,7 @@
 {% load thread_helpers %}
 {% block content %}
 
-<form action="?" method="post">
+<form action="#" method="post">
   {% csrf_token %}
   <input type="submit" class="primary button radius" value="Back to channels" name="back">
   <button type="button" class="button float-left radius" data-open="newThread">Create a new thread</button>
@@ -21,7 +21,7 @@
 
 <div class="reveal" id="newThread" data-reveal>
 	<h3>Create a new thread:</h3>
-	<form action="?" method="post">
+	<form action="#" method="post">
 		{% csrf_token %}
 	  	{{ form }}
 		<input type="submit" class="success button float-right radius" value="Create Thread" name="create">

@@ -1,17 +1,30 @@
 {% extends 'base.html' %}
+{% load user_helpers %}
 {% block content %}
 <h2>User profile for {{ object.get_username }}</h2>
 
 <p>Last login: {{ object.last_login }}</p>
 
-{% if request.user.is_superuser and request.user.get_username != object.get_username %}
-  <form action="#" method="post">
-    {% csrf_token %}
+<form action="#" method="post">
+  {% csrf_token %}
+  {% if request.user.is_staff and request.user.get_username != object.get_username %}
     {% if object.is_active %}
       <input type="submit" class="alert button radius" value="Ban this user" name="admin_ban">
     {% else %}
       <input type="submit" class="alert button radius" value="Unban this user" name="admin_unban">
     {% endif %}
-  </form>
-{% endif %}
+  {% endif %}
+  {% if request.user|get_owned_channels %}
+    <h3>Ban from your channels</h3>
+    {% for channel in request.user|get_owned_channels %}
+      <input type="submit" class="tiny alert button radius" value="{{ channel }}" name="owner_ban">
+    {% endfor %}
+  {% endif %}
+  {% if request.user|get_moderated_channels %}
+    <h3>Ban from channels you moderate</h3>
+    {% for channel in request.user|get_moderated_channels %}
+      <input type="submit" class="tiny alert button radius" value="{{ channel }}" name="moderator_ban">
+    {% endfor %}
+  {% endif %}
+</form>
 {% endblock %}

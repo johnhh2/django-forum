@@ -29,7 +29,7 @@
 
 <div class="reveal" id="newComment" data-reveal>
 	<h3>Create a new comment:</h3>
-	<form action="?" method="post">
+	<form action="#" method="post">
 		{% csrf_token %}
 	  	{{ form }}
 		<input type="submit" class="success button float-right radius" value="Create Comment" name="create">

@@ -18,7 +18,7 @@ from django.contrib import admin
 from django.views.generic.base import TemplateView
 
 urlpatterns = [
-    url(r'^admin/', admin.site.urls, name='admin_page'),
+    url(r'^admin/', admin.site.urls),
     url(r'^foundation/', include('foundation.urls')),
     url(r'^forum/', include('forumapp.urls')),
     url(r'^registration/', include('registration.urls')),
