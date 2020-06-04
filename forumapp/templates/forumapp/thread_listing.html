@@ -1,9 +1,9 @@
 <div class="row">
   <div class="large-6 columns">
     <div class="callout panel radius">
-      <h3><a href="{% url 'forumapp:comment' channel=thread.channel.channel_name thread=thread.thread_id %}">{{thread.thread_name}}</a></h3>
-      <p class="text-right">Owned by: {{thread.owner}}</p>
-      {{thread.description}}
+      <h3><a href="{% url 'forumapp:comment' channel=listing.channel.channel_name thread=listing.thread_id %}">{{ listing.thread_name }}</a></h3>
+      <p class="text-right">Owned by: {% include 'forumapp/user_listing.html' %}</p>
+      {{ listing.description }}
     </div>
   </div>
 </div>

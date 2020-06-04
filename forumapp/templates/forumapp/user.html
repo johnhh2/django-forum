@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>User profile for {{ user.get_username }}</h2>
+
+<p>Last login: {{ user.last_login }}</p>
+
+{% if user.is_authenticated %}
+  <form action="?" method="post">
+    {% csrf_token %}
+    <input type="submit" class="alert button radius" value="Ban this user" name="ban">
+  </form>
+{% endif %}
+{# <p>Bio: {{ user.bio }} </p> #}
+
+{% endblock %}

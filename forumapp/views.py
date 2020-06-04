@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.contrib.auth.models import User
 from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import render
 from django.views import generic
@@ -138,3 +139,15 @@ class CommentView(ViewMixin, generic.DetailView):
 
         elif 'back' in request.POST:
             return HttpResponseRedirect(reverse('forumapp:thread', kwargs={'channel': self.kwargs.get('channel')}))
+
+class UserView(generic.DetailView):
+    model = User
+    template_name = 'forumapp/user.html'
+
+    context_object_name = "user"
+
+    def get_object(self):
+        username = self.kwargs.get('username')
+        if User.objects.filter(username=username).exists():
+            return User.objects.get(username=username)
+        return None
