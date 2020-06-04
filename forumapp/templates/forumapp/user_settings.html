@@ -1,5 +1,10 @@
 {% extends 'base.html' %}
 {% block content %}
-<h2>User settings for {{ user_settings.user.get_username }}</h2>
-
+<h2>User settings for {{ object.user }}</h2>
+<form action="#" method="post">
+	{% csrf_token %}
+	{{ form }}
+	<input type="submit" class="primary button radius" value="Apply" name="save">
+</form>
+  {% include "forumapp/messages.html" %}
 {% endblock %}

@@ -10,6 +10,9 @@ class UserSettings(models.Model):
     favorites = models.TextField(default='["General"]')
     bio = models.TextField(max_length=250, default='Hello world')
 
+    def __str__(self):
+        return user.get_username
+
 # Store channel_name as primary_key
 class Channel(models.Model):
     channel_name = models.SlugField(max_length=30, primary_key=True)
