@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.forms import AuthenticationForm, PasswordResetForm
+from django.urls import reverse
 from .forms import SignUpForm
 
 def SignUpView(request):
@@ -28,10 +29,11 @@ def SignUpView(request):
             password1 = form.cleaned_data.get('password1')
             password2 = form.cleaned_data.get('password2')
 
-            if form.fields['password1'] != form.fields['password2']:
+            if password1 != password2:
                 messages.error(request, 'Passwords do not match')
             else:
                 messages.error(request, 'Invalid username or password')
+        
 
     form = SignUpForm()
     return render(request, 'registration/signup.html', {'form': form})
@@ -60,7 +62,7 @@ def LogInView(request):
 
 def PasswordResetView(request):
     if not request.user.is_authenticated:
-        return redirect('login')
+        return redirect('registration:login')
 
     elif request.method == 'POST':
         form = PasswordResetForm(data=request.POST)
@@ -68,10 +70,13 @@ def PasswordResetView(request):
         if form.is_valid():
             form.save()
             
-            return redirect('password_reset_success')
+            return redirect('registration:password_reset_success')
         else:
             messages.error(request, 'Email was not found')
 
 
     form = PasswordResetForm()
     return render(request, 'registration/password_reset.html', {'form': form})
+
+def PasswordResetSuccessView(request):
+    return render(request, 'registration/password_reset_success.html')

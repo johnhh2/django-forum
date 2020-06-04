@@ -44,9 +44,9 @@
     </div>
     <div class="top-bar-right">
         {% if user.is_authenticated %}
-          Welcome, {{ user.get_username }} <a href="logout/">Logout</a>
+	  Welcome, {{ user.get_username }} <a href="{% url 'registration:logout' %}">Logout</a>
         {% else %}
-          Welcome, guest. <a href="login/">Login?</a>
+	Welcome, guest. <a href="{% url 'registration:login' %}">Login?</a>
         {% endif %}
     </div>
   </div>
