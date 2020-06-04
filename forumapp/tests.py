@@ -364,7 +364,16 @@ class CommentTests(ValidationErrorTestMixin, TestCase):
             co7.validate_unique()
 
     def testCommentFormErrors(self):
-        pass
+        text = self.username[::-1]
+        
+        user1 = User.objects.create(username=self.username)
+        c1 = create_channel(self.channel_name, user1)
+        t1 = create_thread(c1, user1)
+        co1 = create_comment(t1, user1)
+        response = self.client.post(reverse('forumapp:comment', kwargs={'channel': c1.channel_name, 'thread': t1.thread_id}), {'text': text}, follow=True)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, text)
 
     def testAdminRemoveComment(self):
         pass
@@ -426,3 +435,8 @@ class UserTests(ValidationErrorTestMixin, TestCase):
         with self.assertValidationErrors(['username']):
             User(username=self.username).validate_unique()
 
+    def testAdminBanUser(self):
+        pass
+
+    def testChannelBanUser(self):
+        pass

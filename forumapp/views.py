@@ -129,11 +129,12 @@ class CommentView(generic.DetailView):
                 thread.recent_date = date
                 thread.save()
 
-                return HttpResponseRedirect(reverse('forumapp:comment', kwargs={'channel': thread.channel.channel_name, 'thread': thread.thread_id}))
+                return HttpResponseRedirect(reverse('forumapp:comment', kwargs={'channel': thread.channel.channel.channel_name, 'thread': thread.thread_id}))
 
             else:
                 return CommentView.get(self, request, *args, **kwargs)
 
         elif 'delete' in request.POST:
             Thread.objects.get(thread_id=self.kwargs.get('thread'), channel__channel_name=self.kwargs.get('channel')).delete()
-            return HttpResponseRedirect(reverse('forumapp:thread', kwargs={'channel': self.kwargs.get('channel')}))
+        
+        return HttpResponseRedirect(reverse('forumapp:thread', kwargs={'channel': self.kwargs.get('channel')}))
