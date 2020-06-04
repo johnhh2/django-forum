@@ -1,9 +1,11 @@
+{% load channel_helpers %}
+
 <div class="row">
   <div class="large-6 columns">
     <div class="panel radius">
-      <h3><a href="{% url 'forumapp:thread' channel=listing.channel_name %}">{{ listing.channel_name }}</a></h3>
+      <h3><a href="{% url 'forumapp:thread' channel=channel.channel_name %}">{{ channel.channel_name|remove_hyphens }}</a></h3>
       <p class="text-right">Owned by: {% include 'forumapp/user_listing.html' %}</p>
-      {{ listing.description }}
+      {{channel.description}}
     </div>
   </div>
 </div>

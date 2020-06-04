@@ -112,9 +112,6 @@ class ChannelTests(ValidationErrorTestMixin, TestCase):
         with self.assertValidationErrors(['channel_name']):
             c4.validate_unique()
 
-    def testChannelFormErrors(self):
-        pass
-
     def testAdminRemoveChannel(self):
         pass
 
@@ -216,9 +213,6 @@ class ThreadTests(ValidationErrorTestMixin, TestCase):
 
         with self.assertValidationErrors(['channel', 'thread_id']):
             t5.validate_unique()
-
-    def testThreadFormErrors(self):
-        pass
 
     def testAdminRemoveThread(self):
         pass
@@ -363,9 +357,6 @@ class CommentTests(ValidationErrorTestMixin, TestCase):
         with self.assertValidationErrors(['thread', 'comment_id']):
             co7.validate_unique()
 
-    def testCommentFormErrors(self):
-        pass
-
     def testAdminRemoveComment(self):
         pass
 
@@ -426,3 +417,8 @@ class UserTests(ValidationErrorTestMixin, TestCase):
         with self.assertValidationErrors(['username']):
             User(username=self.username).validate_unique()
 
+    def testAdminBanUser(self):
+        pass
+
+    def testChannelBanUser(self):
+        pass
