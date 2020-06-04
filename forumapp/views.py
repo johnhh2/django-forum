@@ -6,7 +6,7 @@ from django.views import generic
 from django.utils import timezone
 from django.urls import reverse
 from .models import UserSettings, Channel, Thread, Comment
-from .forms import ChannelForm, ThreadForm, CommentForm
+from .forms import UserSettingsForm, ChannelForm, ThreadForm, CommentForm
 
 class ViewMixin(generic.base.ContextMixin):
     initial = {'key': 'value'}
@@ -25,14 +25,38 @@ class UserSettingsView(ViewMixin, generic.DetailView):
     model = UserSettings
     template_name = 'forumapp/user_settings.html'
 
-    queryset = UserSettings.objects.all()
-    context_object_name = 'user_settings'
+    form_class = UserSettingsForm
+
+    queryset = UserSettings.objects
 
     def get_object(self):
-        if self.request.user.is_authenticated:
-            return UserSettings.objects.get_or_create(user__username__exact=self.request.user.username)
+        if self.request.user.is_authenticated():
+            user = self.queryset.filter(user__username=self.request.user)
+            if user.exists():
+                return user.get()
+            else:
+                self.queryset.create(user=self.request.user)
 
-        return UserSettings.objects.none()
+        return self.queryset.none()
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+
+        return super(UserSettingsView, self).get(self, request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+
+        if 'save' in request.POST:
+            form = self.form_class(request.POST, self.object)
+
+            if form.is_valid():
+                form.save()
+
+            else:
+                messages.error(request, "Invalid input")
+
+        return HttpResponseRedirect(self.request.path_info)
 
 # Create your views here.
 class ChannelView(ViewMixin, generic.ListView):
@@ -41,14 +65,15 @@ class ChannelView(ViewMixin, generic.ListView):
 
     form_class = ChannelForm
 
-    queryset = Channel.objects.all()
+    queryset = Channel.objects
     context_object_name = 'channel_list'
 
-    def get_object(self):
-        return Channel.objects.all()
+    def get_object(self, exclude=None):
+        return self.queryset.all()
 
     def post(self, request, *args, **kwargs):
         form = self.form_class(request.POST)
+
         if form.is_valid():
             channel_name = form.cleaned_data.get('channel_name')
             description = form.cleaned_data.get('description')
@@ -87,14 +112,14 @@ class ThreadView(ViewMixin, generic.DetailView):
 
     form_class = ThreadForm
 
-    queryset = Thread.objects.all()
+    queryset = Thread.objects
     context_object_name = 'thread_list'
 
     # Return querylist of threads in the given channel
     def get_object(self):
         c_name = self.kwargs.get('channel')
 
-        return Thread.objects.filter(channel__channel_name=c_name)
+        return self.queryset.filter(channel__channel_name=c_name)
 
     def post(self, request, *args, **kwargs):
 
@@ -155,7 +180,7 @@ class CommentView(ViewMixin, generic.DetailView):
 
     form_class = CommentForm
 
-    queryset = Comment.objects.all()
+    queryset = Comment.objects
     context_object_name = 'comment_list'
 
     # Return querylist of comments in the given channel and thread
@@ -163,7 +188,7 @@ class CommentView(ViewMixin, generic.DetailView):
         t_id = self.kwargs.get('thread')
         c_name = self.kwargs.get('channel')
 
-        return Comment.objects.filter(thread__thread_id=t_id, thread__channel__channel_name=c_name)
+        return self.queryset.filter(thread__thread_id=t_id, thread__channel__channel_name=c_name)
 
     def post(self, request, *args, **kwargs):
 
@@ -218,11 +243,13 @@ class UserView(ViewMixin, generic.DetailView):
     model = User
     template_name = 'forumapp/user.html'
 
+    queryset = User.objects
     def get_object(self):
         username = self.kwargs.get('username')
-        if User.objects.filter(username=username).exists():
-            return User.objects.get(username=username)
-        return None
+        if self.queryset.filter(username=username).exists():
+            return self.queryset.get(username=username)
+
+        return self.queryset.none()
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
@@ -231,16 +258,20 @@ class UserView(ViewMixin, generic.DetailView):
     def post(self, request, *args, **kwargs):
         username = self.kwargs.get('username')
         if 'admin_ban' in request.POST:
-            if User.objects.filter(username=username).exists():
-                user = User.objects.get(username=username)
+
+            user = queryset.filter(username=username)
+            if user.exists():
+                user = user.get()
                 user.is_active = False
                 user.save()
                 return HttpResponseRedirect(self.request.path_info)
             else:
                 return Http404("User does not exist.")
+
         elif 'admin_unban' in request.POST:
-            if User.objects.filter(username=username).exists():
-                user = User.objects.get(username=username)
+            user = queryset.filter(username=username)
+            if user.exists():
+                user = user.get()
                 user.is_active = True
                 user.save()
                 return HttpResponseRedirect(self.request.path_info)

@@ -1,12 +1,22 @@
-from django import forms
+from django.forms import ModelForm
+from .models import UserSettings, Channel, Thread, Comment
 
-class ChannelForm(forms.Form):
-    channel_name = forms.SlugField(label='Channel name', max_length=30)
-    description = forms.CharField(label='Channel description', max_length=250)
+class ChannelForm(ModelForm):
+    class Meta:
+        model = Channel
+        fields = ['channel_name', 'description']
 
-class ThreadForm(forms.Form):
-    thread_name = forms.CharField(label='Thread name', max_length=90)
-    description = forms.CharField(label='Thread body', max_length=150)
+class ThreadForm(ModelForm):
+    class Meta:
+        model = Thread
+        fields = ['thread_name', 'description']
 
-class CommentForm(forms.Form):
-    text = forms.CharField(label='Message', max_length=250)
+class CommentForm(ModelForm):
+    class Meta:
+        model = Comment
+        fields = ['text']
+
+class UserSettingsForm(ModelForm):
+    class Meta:
+        model = UserSettings
+        exclude = ['user']
