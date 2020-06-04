@@ -1,12 +1,12 @@
 from django.conf.urls import url
 from django.views.generic import TemplateView
 
-# Test patern, renders Zurb Foundation default page using base template
+# Test pattern, renders Zurb Foundation default page using base template
 urlpatterns = [
     url(regex=r'^$',
         view=TemplateView.as_view(template_name="foundation/index.html"),
         name="foundation_index"),
-        
+
     url(regex=r'^original/$',
         view=TemplateView.as_view(template_name="foundation/original_index.html"),
         name="original_foundation_index"),

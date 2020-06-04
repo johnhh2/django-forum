@@ -50,16 +50,16 @@ class ChannelView(ViewMixin, generic.ListView):
                             messages.error(request, "Channel already exists with that name.")
 
                     else:
-                        messages.error(request, "Please log in to create channels")
+                        messages.error(request, "Please log in to create channels.")
 
                 else:
-                    messages.error(request, "Channel description must be at least 6 characters")
+                    messages.error(request, "Channel description must be at least 6 characters.")
 
             else:
-                messages.error(request, "Channel name must be at least 3 characters")
+                messages.error(request, "Channel name must be at least 3 characters.")
 
         else:
-            messages.error(request, "Invalid input. Channel name must contain hyphens in place of whitespace")
+            messages.error(request, "Invalid input. Channel name must contain hyphens in place of whitespace and cannot contain symbols.")
 
         return HttpResponseRedirect(self.request.path_info)
 
