@@ -46,8 +46,8 @@
     </div>
     <div class="top-bar-right">
 	    <li><a href="{%url 'forumapp:settings' %}">Settings</a></li>
-	<li>{% if user.is_authenticated %}
-		Welcome, {{ user.get_username }} <a href="{% url 'registration:logout' %}">Logout</a>
+	<li>{% if request.user.is_authenticated %}
+		Welcome, {{ request.user.get_username }} <a href="{% url 'registration:logout' %}">Logout</a>
         {% else %}
 		Welcome, guest. <a href="{% url 'registration:login' %}">Login?</a>
 	{% endif %}</li>

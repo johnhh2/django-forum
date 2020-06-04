@@ -13,10 +13,11 @@ class ViewMixin(generic.base.ContextMixin):
 
     def get_context_data(self, **kwargs):
         context = super(ViewMixin, self).get_context_data(**kwargs)
-        
-        context[self.context_object_name] = self.get_object()
+
         if hasattr(self, 'form_class'):
             context['form'] = self.form_class(initial=self.initial)
+        if hasattr(self, 'context_object_name'):
+            context[self.context_object_name] = self.get_object()
         return context
 
 # Show the settings menu
@@ -30,7 +31,7 @@ class UserSettingsView(ViewMixin, generic.DetailView):
     def get_object(self):
         if self.request.user.is_authenticated:
             return UserSettings.objects.get_or_create(user__username__exact=self.request.user.username)
-        
+
         return UserSettings.objects.none()
 
 # Create your views here.
@@ -213,11 +214,9 @@ class CommentView(ViewMixin, generic.DetailView):
 
         return HttpResponseRedirect(self.request.path_info)
 
-class UserView(generic.DetailView):
+class UserView(ViewMixin, generic.DetailView):
     model = User
     template_name = 'forumapp/user.html'
-
-    context_object_name = "user"
 
     def get_object(self):
         username = self.kwargs.get('username')
@@ -225,11 +224,25 @@ class UserView(generic.DetailView):
             return User.objects.get(username=username)
         return None
 
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        return super(UserView, self).get(self, request, *args, **kwargs)
+
     def post(self, request, *args, **kwargs):
         username = self.kwargs.get('username')
         if 'admin_ban' in request.POST:
             if User.objects.filter(username=username).exists():
-                User.objects.get(username=username).is_active = False
-                return HttpResponseRedirect(reverse('forumapp:user'), kwargs={'username': username})
+                user = User.objects.get(username=username)
+                user.is_active = False
+                user.save()
+                return HttpResponseRedirect(reverse('forumapp:user', kwargs={'username': username}))
+            else:
+                return Http404("User does not exist.")
+        elif 'admin_unban' in request.POST:
+            if User.objects.filter(username=username).exists():
+                user = User.objects.get(username=username)
+                user.is_active = True
+                user.save()
+                return HttpResponseRedirect(reverse('forumapp:user', kwargs={'username': username}))
             else:
                 return Http404("User does not exist.")
