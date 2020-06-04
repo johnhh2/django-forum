@@ -10,6 +10,9 @@ class UserSettings(models.Model):
     favorites = models.TextField(default='["General"]')
     bio = models.TextField(max_length=250, default='Hello world')
 
+    class Meta:
+        pass
+
     def __str__(self):
         return user.get_username
 
