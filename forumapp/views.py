@@ -21,7 +21,7 @@ class ViewMixin(generic.base.ContextMixin):
             context[self.context_object_name] = self.get_object()
         return context
 
-# Show the settings menu
+# Show the settings menu TODO: 404 when not logged in
 class UserSettingsView(ViewMixin, generic.DetailView):
     model = UserSettings
     template_name = 'forumapp/user_settings.html'
@@ -32,12 +32,11 @@ class UserSettingsView(ViewMixin, generic.DetailView):
 
     def get_object(self):
         if self.request.user.is_authenticated():
-            user = self.queryset.filter(user__username=self.request.user)
-            if user.exists():
-                return user.get()
+            settings = self.queryset.filter(user=self.request.user)
+            if settings.exists():
+                return settings.get()
             else:
-                self.queryset.create(user=self.request.user)
-
+                return self.queryset.create(user=self.request.user)
         return self.queryset.none()
 
     def get(self, request, *args, **kwargs):
@@ -47,13 +46,14 @@ class UserSettingsView(ViewMixin, generic.DetailView):
 
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
-
+        settings = UserSettings(user=request.user)
+        settings.save()
         if 'save' in request.POST:
-            form = self.form_class(request.POST, instance=self.object)
+            form = self.form_class(request.POST, instance=settings)
 
             if form.is_valid():
                 form.save()
-
+                
             else:
                 messages.error(request, "Invalid input")
 
