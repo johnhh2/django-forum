@@ -13,11 +13,11 @@ class ViewMixin(generic.base.ContextMixin):
 
     def get_context_data(self, **kwargs):
         context = super(ViewMixin, self).get_context_data(**kwargs)
-        
-        context[self.context_object_name] = self.get_object()
+
         if hasattr(self, 'form_class'):
             context['form'] = self.form_class(initial=self.initial)
-        
+        if hasattr(self, 'context_object_name'):
+            context[self.context_object_name] = self.get_object()
         return context
 
 # Show the settings menu
@@ -93,16 +93,16 @@ class ChannelView(ViewMixin, generic.ListView):
                             messages.error(request, "Channel already exists with that name.")
 
                     else:
-                        messages.error(request, "Please log in to create channels")
+                        messages.error(request, "Please log in to create channels.")
 
                 else:
-                    messages.error(request, "Channel description must be at least 6 characters")
+                    messages.error(request, "Channel description must be at least 6 characters.")
 
             else:
-                messages.error(request, "Channel name must be at least 3 characters")
+                messages.error(request, "Channel name must be at least 3 characters.")
 
         else:
-            messages.error(request, "Invalid input. Channel name must contain hyphens in place of whitespace")
+            messages.error(request, "Invalid input. Channel name must contain hyphens in place of whitespace and cannot contain symbols.")
 
         return HttpResponseRedirect(self.request.path_info)
 
@@ -239,19 +239,21 @@ class CommentView(ViewMixin, generic.DetailView):
 
         return HttpResponseRedirect(self.request.path_info)
 
-class UserView(generic.DetailView):
+class UserView(ViewMixin, generic.DetailView):
     model = User
     template_name = 'forumapp/user.html'
 
     queryset = User.objects
-    context_object_name = "user"
-
     def get_object(self):
         username = self.kwargs.get('username')
         if self.queryset.filter(username=username).exists():
             return self.queryset.get(username=username)
 
         return self.queryset.none()
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        return super(UserView, self).get(self, request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         username = self.kwargs.get('username')
@@ -261,7 +263,19 @@ class UserView(generic.DetailView):
             if user.exists():
                 user = user.get()
                 user.is_active = False
+                
+                return HttpResponseRedirect(reverse('forumapp:user', kwargs={'username': username}))
+            
+            else:
+                return Http404("User does not exist.")
 
-                return HttpResponseRedirect(reverse('forumapp:user'), kwargs={'username': username})
+        elif 'admin_unban' in request.POST:
+            user = queryset.filter(username=username)
+            if user.exists():
+                user = user.get()
+                user.is_active = True
+                
+                return HttpResponseRedirect(reverse('forumapp:user', kwargs={'username': username}))
+ 
             else:
                 return Http404("User does not exist.")

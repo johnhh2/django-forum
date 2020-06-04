@@ -1,15 +1,17 @@
 {% extends 'base.html' %}
 {% block content %}
-<h2>User profile for {{ user.get_username }}</h2>
+<h2>User profile for {{ object.get_username }}</h2>
 
-<p>Last login: {{ user.last_login }}</p>
+<p>Last login: {{ object.last_login }}</p>
 
-{% if user.is_staff %}
-  <form action="?" method="post">
+{% if request.user.is_superuser and request.user.get_username != object.get_username %}
+  <form action="#" method="post">
     {% csrf_token %}
-    <input type="submit" class="alert button radius" value="Ban this user" name="admin_ban">
+    {% if object.is_active %}
+      <input type="submit" class="alert button radius" value="Ban this user" name="admin_ban">
+    {% else %}
+      <input type="submit" class="alert button radius" value="Unban this user" name="admin_unban">
+    {% endif %}
   </form>
 {% endif %}
-{# <p>Bio: {{ user.bio }} </p> #}
-
 {% endblock %}
