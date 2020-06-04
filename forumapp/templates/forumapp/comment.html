@@ -13,12 +13,12 @@
 
 {% if comment_list %}
     <ul>
-    {% for comment in comment_list|dictsortreversed:'pub_date' %}
+    {% for listing in comment_list|dictsortreversed:'pub_date' %}
         <li>
-            {{ comment.text }} by {{comment.owner}}
-            at {{comment.pub_date|date:"g:i"}}
-            {% if not comment|isrecent  %}
-                  on {{comment.pub_date|date:"D, d M, Y"}}
+            {{ listing.text }} by {% include 'forumapp/user_listing.html' %}
+            at {{ listing.pub_date|date:"g:i" }}
+            {% if not listing|isrecent %}
+                  on {{ listing.pub_date|date:"D, d M, Y" }}
             {% endif %}
         </li>
     {% endfor %}

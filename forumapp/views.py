@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.contrib.auth.models import User
 from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import render
 from django.views import generic
@@ -37,7 +38,7 @@ class ChannelView(ViewMixin, generic.ListView):
         if form.is_valid():
             channel_name = form.cleaned_data.get('channel_name')
             description = form.cleaned_data.get('description')
-            
+
             if len(channel_name) > 3:
                 if len(description) > 5:
                     owner = request.user
@@ -45,7 +46,7 @@ class ChannelView(ViewMixin, generic.ListView):
                     if owner.is_authenticated:
 
                         channel = Channel(channel_name=channel_name, description=description, owner=owner)
-                        
+
                         try:
                             channel.save()
                             return HttpResponseRedirect(reverse('forumapp:thread', kwargs={'channel': channel_name}))
@@ -54,7 +55,7 @@ class ChannelView(ViewMixin, generic.ListView):
 
                     else:
                         messages.error(request, "Please log in to create channels")
-                        
+
                 else:
                     messages.error(request, "Channel description must be at least 6 characters")
 
@@ -63,7 +64,7 @@ class ChannelView(ViewMixin, generic.ListView):
 
         else:
             messages.error(request, "Invalid input. Channel name must contain hyphens in place of whitespace")
-        
+
         return HttpResponseRedirect(self.request.path_info)
 
 class ThreadView(ViewMixin, generic.DetailView):
@@ -94,13 +95,13 @@ class ThreadView(ViewMixin, generic.DetailView):
 
         elif 'back' in request.POST:
             return HttpResponseRedirect(reverse('forumapp:channel'))
-        
+
         elif 'create' in request.POST:
             form = self.form_class(request.POST)
             if form.is_valid():
                 thread_name = form.cleaned_data.get('thread_name')
                 description = form.cleaned_data.get('description')
-                
+
                 if len(form.cleaned_data.get('thread_name')) > 5:
 
                     if len(form.cleaned_data.get('description')) > 5:
@@ -109,7 +110,7 @@ class ThreadView(ViewMixin, generic.DetailView):
                         owner = request.user
 
                         if owner.is_authenticated:
-                            
+
                             thread = Thread(channel=channel, thread_name=thread_name, description=description, owner=owner)
                             try:
                                 thread.save()
@@ -126,16 +127,16 @@ class ThreadView(ViewMixin, generic.DetailView):
 
                         else:
                             messages.error(request, "Please log in to create threads")
-                
+
                     else:
                         messages.error(request, "Thread description must be at least 6 characters")
-                
+
                 else:
                     messages.error(request, "Thread name must be at least 6 characters")
 
             else:
                 messages.error(request, "Invalid input")
-        
+
         return HttpResponseRedirect(self.request.path_info)
 
 class CommentView(ViewMixin, generic.DetailView):
@@ -162,27 +163,27 @@ class CommentView(ViewMixin, generic.DetailView):
 
         if 'delete' in request.POST:
             Thread.objects.get(thread_id=self.kwargs.get('thread'), channel__channel_name=self.kwargs.get('channel')).delete()
-        
+
             return HttpResponseRedirect(reverse('forumapp:thread', kwargs={'channel': self.kwargs.get('channel')}))
 
         elif 'back' in request.POST:
             return HttpResponseRedirect(reverse('forumapp:thread', kwargs={'channel': self.kwargs.get('channel')}))
-        
+
         elif 'create' in request.POST:
             form = self.form_class(request.POST)
             if form.is_valid():
                 text = form.cleaned_data.get('text')
-                
+
                 if len(text) > 5:
                     thread = Thread.objects.get(channel__channel_name=self.kwargs.get('channel'), thread_id=self.kwargs.get('thread'))
                     owner = request.user
 
                     if owner.is_authenticated:
                         comment = Comment(thread=thread, text=text, owner=owner)
-                        
+
                         try:
                             comment.save()
-                        
+
                             #Update recent_date of the channel and thread
                             date = timezone.now()
                             thread.channel.recent_date = date
@@ -190,7 +191,7 @@ class CommentView(ViewMixin, generic.DetailView):
 
                             thread.recent_date = date
                             thread.save()
-                            
+
                             return HttpResponseRedirect(self.request.path_info)
 
                         except:
@@ -204,5 +205,17 @@ class CommentView(ViewMixin, generic.DetailView):
 
             else:
                 messages.error(request, "Invalid input")
- 
+
         return HttpResponseRedirect(self.request.path_info)
+
+class UserView(generic.DetailView):
+    model = User
+    template_name = 'forumapp/user.html'
+
+    context_object_name = "user"
+
+    def get_object(self):
+        username = self.kwargs.get('username')
+        if User.objects.filter(username=username).exists():
+            return User.objects.get(username=username)
+        return None

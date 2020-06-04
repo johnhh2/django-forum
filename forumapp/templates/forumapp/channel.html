@@ -2,7 +2,7 @@
 {% block content %}
 
 {% if channel_list %}
-    {% for channel in channel_list %}
+    {% for listing in channel_list %}
       {% include "forumapp/channel_listing.html" %}
     {% endfor %}
 {% else %}
