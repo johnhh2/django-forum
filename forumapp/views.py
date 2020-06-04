@@ -1,7 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.http import Http404, HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.views import generic
 from django.utils import timezone
 from django.urls import reverse
@@ -48,7 +48,7 @@ class UserSettingsView(ViewMixin, generic.DetailView):
         self.object = self.get_object()
         
         if 'save' in request.POST:
-            form = self.form_class(request.POST, self.object)
+            form = self.form_class(request.POST, instance=self.object)
 
             if form.is_valid():
                 form.save()
@@ -72,7 +72,9 @@ class ChannelView(ViewMixin, generic.ListView):
         return self.queryset.all()
     
     def post(self, request, *args, **kwargs):
-        form = self.form_class(request.POST)
+        owner = request.user
+        channel = Channel(owner=owner)
+        form = self.form_class(request.POST, instance=channel)
 
         if form.is_valid():
             channel_name = form.cleaned_data.get('channel_name')
@@ -80,11 +82,8 @@ class ChannelView(ViewMixin, generic.ListView):
 
             if len(channel_name) > 3:
                 if len(description) > 5:
-                    owner = request.user
 
                     if owner.is_authenticated:
-
-                        channel = Channel(channel_name=channel_name, description=description, owner=owner)
 
                         try:
                             channel.save()
@@ -122,9 +121,10 @@ class ThreadView(ViewMixin, generic.DetailView):
         return self.queryset.filter(channel__channel_name=c_name)
 
     def post(self, request, *args, **kwargs):
-
+        channel = get_object_or_404(Channel, channel_name=self.kwargs.get('channel'))
+ 
         if 'delete' in request.POST:
-            Channel.objects.get(channel_name=self.kwargs.get('channel')).delete()
+            channel.delete()
 
             return HttpResponseRedirect(reverse('forumapp:channel'))
 
@@ -132,23 +132,23 @@ class ThreadView(ViewMixin, generic.DetailView):
             return HttpResponseRedirect(reverse('forumapp:channel'))
 
         elif 'create' in request.POST:
-            form = self.form_class(request.POST)
+            owner = request.user
+
+            thread = Thread(channel=channel, owner=owner)
+            thread.save()
+            form = self.form_class(request.POST, instance=thread)
+
             if form.is_valid():
                 thread_name = form.cleaned_data.get('thread_name')
                 description = form.cleaned_data.get('description')
 
-                if len(form.cleaned_data.get('thread_name')) > 5:
+                if len(thread_name) > 5:
 
-                    if len(form.cleaned_data.get('description')) > 5:
-
-                        channel = Channel.objects.get(channel_name=self.kwargs.get('channel'))
-                        owner = request.user
+                    if len(description) > 5:
 
                         if owner.is_authenticated:
-
-                            thread = Thread(channel=channel, thread_name=thread_name, description=description, owner=owner)
                             try:
-                                thread.save()
+                                form.save()
 
                                 #Update recent_date of the channel
                                 date = timezone.now()
@@ -191,9 +191,10 @@ class CommentView(ViewMixin, generic.DetailView):
         return self.queryset.filter(thread__thread_id=t_id, thread__channel__channel_name=c_name)
 
     def post(self, request, *args, **kwargs):
+        thread = get_object_or_404(Thread, channel__channel_name=self.kwargs.get('channel'), thread_id=self.kwargs.get('thread'))
 
         if 'delete' in request.POST:
-            Thread.objects.get(thread_id=self.kwargs.get('thread'), channel__channel_name=self.kwargs.get('channel')).delete()
+            thread.delete()
 
             return HttpResponseRedirect(reverse('forumapp:thread', kwargs={'channel': self.kwargs.get('channel')}))
 
@@ -201,19 +202,20 @@ class CommentView(ViewMixin, generic.DetailView):
             return HttpResponseRedirect(reverse('forumapp:thread', kwargs={'channel': self.kwargs.get('channel')}))
 
         elif 'create' in request.POST:
-            form = self.form_class(request.POST)
+            owner = request.user
+            comment = Comment(thread=thread, owner=owner)
+            comment.save()
+            form = self.form_class(request.POST, instance=comment)
+
             if form.is_valid():
                 text = form.cleaned_data.get('text')
 
                 if len(text) > 5:
-                    thread = Thread.objects.get(channel__channel_name=self.kwargs.get('channel'), thread_id=self.kwargs.get('thread'))
-                    owner = request.user
 
                     if owner.is_authenticated:
-                        comment = Comment(thread=thread, text=text, owner=owner)
 
                         try:
-                            comment.save()
+                            form.save()
 
                             #Update recent_date of the channel and thread
                             date = timezone.now()
