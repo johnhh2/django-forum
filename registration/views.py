@@ -33,7 +33,7 @@ def SignUpView(request):
                 messages.error(request, 'Passwords do not match')
             else:
                 messages.error(request, 'Invalid username or password')
-        
+
 
     form = SignUpForm()
     return render(request, 'registration/signup.html', {'form': form})
@@ -56,7 +56,6 @@ def LogInView(request):
         else:
             messages.error(request, 'Invalid username or password')
 
-
     form = AuthenticationForm()
     return render(request, 'registration/login.html', {'form': form})
 
@@ -69,7 +68,7 @@ def PasswordResetView(request):
 
         if form.is_valid():
             form.save()
-            
+
             return redirect('registration:password_reset_success')
         else:
             messages.error(request, 'Email was not found')

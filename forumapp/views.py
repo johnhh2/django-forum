@@ -30,10 +30,6 @@ class ChannelView(ViewMixin, generic.ListView):
         return Channel.objects.all()
 
     def post(self, request, *args, **kwargs):
-
-        if not request.user.is_active:
-            return Http404("This account is disabled")
-
         form = self.form_class(request.POST)
         if form.is_valid():
             channel_name = form.cleaned_data.get('channel_name')
@@ -84,9 +80,6 @@ class ThreadView(ViewMixin, generic.DetailView):
         return Thread.objects.filter(channel__channel_name=c_name)
 
     def post(self, request, *args, **kwargs):
-
-        if not request.user.is_active:
-            return Http404("This account is disabled")
 
         if 'delete' in request.POST:
             Channel.objects.get(channel_name=self.kwargs.get('channel')).delete()
@@ -158,9 +151,6 @@ class CommentView(ViewMixin, generic.DetailView):
 
     def post(self, request, *args, **kwargs):
 
-        if not request.user.is_active:
-            return Http404("This account is disabled")
-
         if 'delete' in request.POST:
             Thread.objects.get(thread_id=self.kwargs.get('thread'), channel__channel_name=self.kwargs.get('channel')).delete()
 
@@ -219,3 +209,12 @@ class UserView(generic.DetailView):
         if User.objects.filter(username=username).exists():
             return User.objects.get(username=username)
         return None
+
+    def post(self, request, *args, **kwargs):
+        username = self.kwargs.get('username')
+        if 'admin_ban' in request.POST:
+            if User.objects.filter(username=username).exists():
+                User.objects.get(username=username).is_active = False
+                return HttpResponseRedirect(reverse('forumapp:user'), kwargs={'username': username})
+            else:
+                return Http404("User does not exist.")
