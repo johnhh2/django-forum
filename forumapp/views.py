@@ -235,7 +235,7 @@ class UserView(ViewMixin, generic.DetailView):
                 user = User.objects.get(username=username)
                 user.is_active = False
                 user.save()
-                return HttpResponseRedirect(reverse('forumapp:user', kwargs={'username': username}))
+                return HttpResponseRedirect(self.request.path_info)
             else:
                 return Http404("User does not exist.")
         elif 'admin_unban' in request.POST:
@@ -243,6 +243,6 @@ class UserView(ViewMixin, generic.DetailView):
                 user = User.objects.get(username=username)
                 user.is_active = True
                 user.save()
-                return HttpResponseRedirect(reverse('forumapp:user', kwargs={'username': username}))
+                return HttpResponseRedirect(self.request.path_info)
             else:
                 return Http404("User does not exist.")

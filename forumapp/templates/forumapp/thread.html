@@ -6,7 +6,7 @@
   {% csrf_token %}
   <input type="submit" class="primary button radius" value="Back to channels" name="back">
   <button type="button" class="button float-left radius" data-open="newThread">Create a new thread</button>
-  {% if view.kwargs.channel|isowner:user.get_username or perms.forumapp.delete_channel %}
+  {% if view.kwargs.channel|isownedby:user.get_username or perms.forumapp.delete_channel %}
       <input type="submit" class="alert button float-right radius" value="Delete this channel" name="delete">
   {% endif %}
 </form>
