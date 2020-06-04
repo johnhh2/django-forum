@@ -1,23 +1,23 @@
 {% extends 'base.html' %}
+{% load thread_helpers %}
 {% block content %}
-<div class="row">
-  <p><button type="button" class="button float-left radius" data-open="newThread">Create a new thread</button></p>
-  <!-- TODO: fix this so that we can check the owner even if thread_list is empty -->
-  {% if thread_list.0.channel.owner.username == user.get_username or perms.forumapp.delete_channel %}
-    <form action="?" method="post">
-      {% csrf_token %}
-      <p><input type="submit" class="alert button float-right radius" value="Delete this channel" name="delete"></p>
-    </form>
-  {% endif %}
 
-  {% if thread_list %}
-      {% for thread in thread_list %}
-          {% include "forumapp/thread_listing.html" %}
-      {% endfor %}
-  {% else %}
-      <p>No threads are available.</p>
+<form action="?" method="post">
+  {% csrf_token %}
+  <input type="submit" class="primary button radius" value="Back to channels" name="back">
+  <button type="button" class="button float-left radius" data-open="newThread">Create a new thread</button>
+  {% if view.kwargs.channel|isowner:user.get_username or perms.forumapp.delete_channel %}
+      <input type="submit" class="alert button float-right radius" value="Delete this channel" name="delete">
   {% endif %}
-</div>
+</form>
+
+{% if thread_list %}
+    {% for thread in thread_list %}
+        {% include "forumapp/thread_listing.html" %}
+    {% endfor %}
+{% else %}
+    <p>No threads are available.</p>
+{% endif %}
 
 <div class="reveal" id="newThread" data-reveal>
 	<h3>Create a new thread:</h3>
@@ -26,6 +26,7 @@
 	  	{{ form }}
 		<input type="submit" class="success button float-right radius" value="Create Thread" name="create">
 	</form>
+  {% include "forumapp/messages.html" %}
 	<button type="button" class="close-button radius" data-close aria-label="Close modal">
 		<span aria-hidden="true">&times;</span>
 	</button>

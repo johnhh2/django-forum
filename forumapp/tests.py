@@ -112,13 +112,10 @@ class ChannelTests(ValidationErrorTestMixin, TestCase):
         with self.assertValidationErrors(['channel_name']):
             c4.validate_unique()
 
-    def testChannelFormErrors(self):
-        pass
-
     def testAdminRemoveChannel(self):
         pass
 
-    # users SHOULD be able to remove their own threads
+    # users SHOULD be able to remove their own channels
     def testOwnerRemoveChannel(self):
         pass
 
@@ -216,9 +213,6 @@ class ThreadTests(ValidationErrorTestMixin, TestCase):
 
         with self.assertValidationErrors(['channel', 'thread_id']):
             t5.validate_unique()
-
-    def testThreadFormErrors(self):
-        pass
 
     def testAdminRemoveThread(self):
         pass
@@ -329,10 +323,10 @@ class CommentTests(ValidationErrorTestMixin, TestCase):
         response = self.client.get(reverse('forumapp:comment', kwargs={'channel': self.channel_name, 'thread': thread.thread_id}))
 
         self.assertEqual(response.status_code, 200)
-        self.assertIs(c1.is_recent(), False)
-        self.assertIs(c2.is_recent(), True)
-        self.assertIs(c3.is_recent(), True)
-        self.assertIs(c4.is_recent(), False)
+        self.assertFalse(c1.is_recent())
+        self.assertTrue(c2.is_recent())
+        self.assertTrue(c3.is_recent())
+        self.assertFalse(c4.is_recent())
 
     # Confirm that comments are unique on (thread, comment_id)
     def testUniqueComment(self):
@@ -362,18 +356,6 @@ class CommentTests(ValidationErrorTestMixin, TestCase):
 
         with self.assertValidationErrors(['thread', 'comment_id']):
             co7.validate_unique()
-
-    def testCommentFormErrors(self):
-        text = self.username[::-1]
-        
-        user1 = User.objects.create(username=self.username)
-        c1 = create_channel(self.channel_name, user1)
-        t1 = create_thread(c1, user1)
-        co1 = create_comment(t1, user1)
-        response = self.client.post(reverse('forumapp:comment', kwargs={'channel': c1.channel_name, 'thread': t1.thread_id}), {'text': text}, follow=True)
-
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, text)
 
     def testAdminRemoveComment(self):
         pass

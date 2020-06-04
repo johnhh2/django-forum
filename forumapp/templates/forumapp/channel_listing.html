@@ -5,10 +5,12 @@
 <p>{{channel.description}}</p>
 -->
 
+{% load channel_helpers %}
+
 <div class="row">
   <div class="large-6 columns">
     <div class="panel radius">
-      <h3><a href="{% url 'forumapp:thread' channel=channel.channel_name %}">{{channel.channel_name}}</a></h3>
+      <h3><a href="{% url 'forumapp:thread' channel=channel.channel_name %}">{{ channel.channel_name|remove_hyphens }}</a></h3>
       <p class="text-right">Owned by: {{channel.owner}}</p>
       {{channel.description}}
     </div>
