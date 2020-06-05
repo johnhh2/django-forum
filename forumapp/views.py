@@ -162,13 +162,13 @@ class ThreadView(ViewMixin, generic.DetailView):
                                 messages.error(request, "Thread already exists with that name.")
 
                         else:
-                            messages.error(request, "Please log in to create threads")
+                            messages.error(request, "Please log in to create threads.")
 
                     else:
-                        messages.error(request, "Thread description must be at least 6 characters")
+                        messages.error(request, "Thread description must be at least 6 characters.")
 
                 else:
-                    messages.error(request, "Thread name must be at least 6 characters")
+                    messages.error(request, "Thread name must be at least 6 characters.")
 
             else:
                 messages.error(request, "Invalid input")
@@ -232,13 +232,13 @@ class CommentView(ViewMixin, generic.DetailView):
                             messages.error(request, "Comment already exists with that name.")
 
                     else:
-                        messages.error(request, "Please log in to create comments")
+                        messages.error(request, "Please log in to create comments.")
 
                 else:
-                    messages.error(request, "Comments must be at least 6 characters")
+                    messages.error(request, "Comments must be at least 6 characters.")
 
             else:
-                messages.error(request, "Invalid input")
+                messages.error(request, "Invalid input.")
 
         return HttpResponseRedirect(self.request.path_info)
 
@@ -288,10 +288,79 @@ class UserView(ViewMixin, generic.DetailView):
                 channel_name = request.POST.get('owner_ban').replace(' ', '-')
                 channel = Channel.objects.filter(channel_name=channel_name)
                 if channel.exists():
-                    
+
                     channel = channel.get()
                     list = json.loads(channel.banned_users)
                     list.append(username)
+                    channel.banned_users = json.dumps(list)
+                    channel.save()
+                    return HttpResponseRedirect(self.request.path_info)
+
+                else:
+                    return Http404("Couldn't find that channel.")
+
+            else:
+                return Http404("User does not exist.")
+
+        elif 'owner_unban' in request.POST:
+            user = self.queryset.filter(username=username)
+            if user.exists():
+
+                channel_name = request.POST.get('owner_unban').replace(' ', '-')
+                channel = Channel.objects.filter(channel_name=channel_name)
+                if channel.exists():
+
+                    channel = channel.get()
+                    list = json.loads(channel.banned_users)
+                    for i in range(len(list)):
+                        if username in list[i]:
+                            list.pop(i)
+                    print(list)
+                    channel.banned_users = json.dumps(list)
+                    channel.save()
+                    return HttpResponseRedirect(self.request.path_info)
+
+                else:
+                    return Http404("Couldn't find that channel.")
+
+            else:
+                return Http404("User does not exist.")
+
+        elif 'moderator_ban' in request.POST:
+            user = self.queryset.filter(username=username)
+            if user.exists():
+
+                channel_name = request.POST.get('moderator_ban').replace(' ', '-')
+                channel = Channel.objects.filter(channel_name=channel_name)
+                if channel.exists():
+
+                    channel = channel.get()
+                    list = json.loads(channel.banned_users)
+                    list.append(username)
+                    channel.banned_users = json.dumps(list)
+                    channel.save()
+                    return HttpResponseRedirect(self.request.path_info)
+
+                else:
+                    return Http404("Couldn't find that channel.")
+
+            else:
+                return Http404("User does not exist.")
+
+        elif 'moderator_unban' in request.POST:
+            user = self.queryset.filter(username=username)
+            if user.exists():
+
+                channel_name = request.POST.get('moderator_unban').replace(' ', '-')
+                channel = Channel.objects.filter(channel_name=channel_name)
+                if channel.exists():
+
+                    channel = channel.get()
+                    list = json.loads(channel.banned_users)
+                    for i in range(len(list)):
+                        if username in list[i]:
+                            list.pop(i)
+                    print(list)
                     channel.banned_users = json.dumps(list)
                     channel.save()
                     return HttpResponseRedirect(self.request.path_info)

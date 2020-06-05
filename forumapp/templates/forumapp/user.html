@@ -7,22 +7,28 @@
 
 <form action="#" method="post">
   {% csrf_token %}
-  {% if request.user.is_staff and request.user.get_username != object.get_username %}
+  {% if request.user.is_staff and request.user != object %}
     {% if object.is_active %}
       <input type="submit" class="alert button radius" value="Ban this user" name="admin_ban">
     {% else %}
       <input type="submit" class="alert button radius" value="Unban this user" name="admin_unban">
     {% endif %}
   {% endif %}
-  {% if request.user|get_owned_channels %}
+  {% if request.user|get_owned_channels_minus_banned:object %}
     <h3>Ban from your channels</h3>
-    {% for channel in request.user|get_owned_channels %}
+    {% for channel in request.user|get_owned_channels_minus_banned:object %}
       <input type="submit" class="tiny alert button radius" value="{{ channel }}" name="owner_ban">
     {% endfor %}
   {% endif %}
-  {% if request.user|get_moderated_channels %}
+  {% if request.user|get_owned_channels_only_banned:object %}
+    <h3>Unban from your channels</h3>
+    {% for channel in request.user|get_owned_channels_only_banned:object %}
+      <input type="submit" class="tiny alert button radius" value="{{ channel }}" name="owner_unban">
+    {% endfor %}
+  {% endif %}
+  {% if request.user|get_moderated_channels_minus_banned:object %}
     <h3>Ban from channels you moderate</h3>
-    {% for channel in request.user|get_moderated_channels %}
+    {% for channel in request.user|get_moderated_channels_minus_banned:object %}
       <input type="submit" class="tiny alert button radius" value="{{ channel }}" name="moderator_ban">
     {% endfor %}
   {% endif %}
