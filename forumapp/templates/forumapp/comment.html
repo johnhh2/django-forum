@@ -6,7 +6,7 @@
 <form action="?" method="post">
   {% csrf_token %}
   <input type="submit" class="primary button radius" value="Back to {{ view.kwargs.channel }}" name="back">
-  <button type="button" class="button float-right radius" data-open="newComment">Create a new comment</button>
+  <button type="button" class="button float-right radius" data-reveal-id="newComment">Create a new comment</button>
   {% if view.kwargs|is_owner:user.get_username or perms.forumapp.delete_thread %}
       <input type="submit" class="alert button float-right radius" value="Delete this thread" name="delete">
   {% endif %}
@@ -15,6 +15,8 @@
 {% if request.user|is_banned_from:view.kwargs.channel %}
     <p>Sorry, this channel is unavailable.</p>
 {% else %}
+    <h2>{{ view.kwargs|get_thread_name }}</h2>
+    <h4>{{ view.kwargs|description }}</h4>
     <ul>
     {% for listing in comment_list|dictsortreversed:'pub_date' %}
         <li>
@@ -31,7 +33,7 @@
 {% endif %}
 
 
-<div class="reveal" id="newComment" data-reveal>
+<div class="reveal-modal" id="newComment" data-reveal>
 	<h3>Create a new comment:</h3>
 	<form action="#" method="post">
 		{% csrf_token %}
@@ -39,8 +41,6 @@
 		<input type="submit" class="success button float-right radius" value="Create Comment" name="create">
 	</form>
   {% include "forumapp/messages.html" %}
-	<button type="button" class="close-button radius" data-close aria-label="Close modal">
-		<span aria-hidden="true">&times;</span>
-	</button>
+	<a class="close-reveal-modal radius" aria-label="Close">&#215;</a>
 </div>
 {% endblock %}

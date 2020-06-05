@@ -73,9 +73,14 @@ class ChannelView(ViewMixin, generic.ListView):
         return self.queryset.all()
 
     def post(self, request, *args, **kwargs):
-        owner = request.user
-        channel = Channel(owner=owner)
-        form = self.form_class(request.POST, instance=channel)
+        try:
+            owner = request.user
+            channel = Channel(owner=owner)
+            form = self.form_class(request.POST, instance=channel)
+
+        except ValueError:
+            messages.error(request, "Please log in to create channels.")
+            return HttpResponseRedirect(self.request.path_info)
 
         if form.is_valid():
             channel_name = form.cleaned_data.get('channel_name')
@@ -84,14 +89,8 @@ class ChannelView(ViewMixin, generic.ListView):
             if len(channel_name) > 3:
                 if len(description) > 5:
 
-                    if owner.is_authenticated:
-
-                        channel.save()
-                        return HttpResponseRedirect(reverse('forumapp:thread', kwargs={'channel': channel_name}))
-
-                    else:
-                        channel.delete()
-                        messages.error(request, "Please log in to create channels.")
+                    channel.save()
+                    return HttpResponseRedirect(reverse('forumapp:thread', kwargs={'channel': channel_name}))
 
                 else:
                     channel.delete()
@@ -137,11 +136,15 @@ class ThreadView(ViewMixin, generic.DetailView):
             return HttpResponseRedirect(reverse('forumapp:channel'))
 
         elif 'create' in request.POST:
-            owner = request.user
+            try:
+                owner = request.user
+                thread = Thread(channel=channel, owner=owner)
+                thread.save()
+                form = self.form_class(request.POST, instance=thread)
 
-            thread = Thread(channel=channel, owner=owner)
-            thread.save()
-            form = self.form_class(request.POST, instance=thread)
+            except ValueError:
+                messages.error(request, "Please log in to create threads.")
+                return HttpResponseRedirect(self.request.path_info)
 
             if form.is_valid():
                 thread_name = form.cleaned_data.get('thread_name')
@@ -151,19 +154,14 @@ class ThreadView(ViewMixin, generic.DetailView):
 
                     if len(description) > 5:
 
-                        if owner.is_authenticated:
-                            form.save()
+                        form.save()
 
-                            #Update recent_date of the channel
-                            date = timezone.now()
-                            channel.recent_date = date
-                            channel.save()
+                        #Update recent_date of the channel
+                        date = timezone.now()
+                        channel.recent_date = date
+                        channel.save()
 
-                            return HttpResponseRedirect(reverse('forumapp:comment', kwargs={'channel': channel.channel_name, 'thread': thread.thread_id}))
-
-                        else:
-                            thread.delete()
-                            messages.error(request, "Please log in to create threads.")
+                        return HttpResponseRedirect(reverse('forumapp:comment', kwargs={'channel': channel.channel_name, 'thread': thread.thread_id}))
 
                     else:
                         thread.delete()
@@ -210,33 +208,32 @@ class CommentView(ViewMixin, generic.DetailView):
             return HttpResponseRedirect(reverse('forumapp:thread', kwargs={'channel': self.kwargs.get('channel')}))
 
         elif 'create' in request.POST:
-            owner = request.user
-            comment = Comment(thread=thread, owner=owner)
-            comment.save()
-            form = self.form_class(request.POST, instance=comment)
+            try:
+                owner = request.user
+                comment = Comment(thread=thread, owner=owner)
+                comment.save()
+                form = self.form_class(request.POST, instance=comment)
+
+            except ValueError:
+                messages.error(request, "Please log in to create comments.")
+                return HttpResponseRedirect(self.request.path_info)
 
             if form.is_valid():
                 text = form.cleaned_data.get('text')
 
                 if len(text) > 5:
 
-                    if owner.is_authenticated:
+                    form.save()
 
-                        form.save()
+                    #Update recent_date of the channel and thread
+                    date = timezone.now()
+                    thread.channel.recent_date = date
+                    thread.channel.save()
 
-                        #Update recent_date of the channel and thread
-                        date = timezone.now()
-                        thread.channel.recent_date = date
-                        thread.channel.save()
+                    thread.recent_date = date
+                    thread.save()
 
-                        thread.recent_date = date
-                        thread.save()
-
-                        return HttpResponseRedirect(self.request.path_info)
-
-                    else:
-                        comment.delete()
-                        messages.error(request, "Please log in to create comments.")
+                    return HttpResponseRedirect(self.request.path_info)
 
                 else:
                     comment.delete()
