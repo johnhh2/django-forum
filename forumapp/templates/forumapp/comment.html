@@ -1,31 +1,35 @@
 {% extends 'base.html' %}
 {% load comment_helpers %}
+{% load user_helpers %}
 {% block content %}
 
 <form action="?" method="post">
   {% csrf_token %}
   <input type="submit" class="primary button radius" value="Back to {{ view.kwargs.channel }}" name="back">
   <button type="button" class="button float-right radius" data-open="newComment">Create a new comment</button>
-  {% if view.kwargs|isowner:user.get_username or perms.forumapp.delete_thread %}
+  {% if view.kwargs|is_owner:user.get_username or perms.forumapp.delete_thread %}
       <input type="submit" class="alert button float-right radius" value="Delete this thread" name="delete">
   {% endif %}
 </form>
 
-{% if comment_list %}
+{% if request.user|is_banned_from:view.kwargs.channel %}
+    <p>Sorry, this channel is unavailable.</p>
+{% else %}
     <ul>
     {% for listing in comment_list|dictsortreversed:'pub_date' %}
         <li>
             {{ listing.text }} by {% include 'forumapp/user_listing.html' %}
             at {{ listing.pub_date|date:"g:i" }}
-            {% if not listing|isrecent %}
+            {% if not listing|is_recent %}
                   on {{ listing.pub_date|date:"D, d M, Y" }}
             {% endif %}
         </li>
+    {% empty %}
+        <p>No comments are available.</p>
     {% endfor %}
     </ul>
-{% else %}
-    <p>No comments are available.</p>
 {% endif %}
+
 
 <div class="reveal" id="newComment" data-reveal>
 	<h3>Create a new comment:</h3>

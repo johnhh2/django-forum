@@ -32,5 +32,11 @@
       <input type="submit" class="tiny alert button radius" value="{{ channel }}" name="moderator_ban">
     {% endfor %}
   {% endif %}
+  {% if request.user|get_moderated_channels_only_banned:object %}
+    <h3>Unban from channels you moderate</h3>
+    {% for channel in request.user|get_moderated_channels_only_banned:object %}
+      <input type="submit" class="tiny alert button radius" value="{{ channel }}" name="moderator_unban">
+    {% endfor %}
+  {% endif %}
 </form>
 {% endblock %}
