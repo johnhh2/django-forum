@@ -86,22 +86,26 @@ class ChannelView(ViewMixin, generic.ListView):
 
                     if owner.is_authenticated:
 
-                        try:
-                            channel.save()
-                            return HttpResponseRedirect(reverse('forumapp:thread', kwargs={'channel': channel_name}))
-                        except:
-                            messages.error(request, "Channel already exists with that name.")
+                        channel.save()
+                        return HttpResponseRedirect(reverse('forumapp:thread', kwargs={'channel': channel_name}))
 
                     else:
+                        channel.delete()
                         messages.error(request, "Please log in to create channels.")
 
                 else:
+                    channel.delete()
                     messages.error(request, "Channel description must be at least 6 characters.")
 
             else:
-                messages.error(request, "Channel name must be at least 3 characters.")
+                channel.delete()
+                messages.error(request, "Channel name must be at least 4 characters.")
+
+        elif Channel.objects.filter(channel_name=form. data.get('channel_name')).exists():
+            messages.error(request, "Channel already exists with that name.")
 
         else:
+            channel.delete()
             messages.error(request, "Invalid input. Channel name must contain hyphens in place of whitespace and cannot contain symbols.")
 
         return HttpResponseRedirect(self.request.path_info)
@@ -148,32 +152,35 @@ class ThreadView(ViewMixin, generic.DetailView):
                     if len(description) > 5:
 
                         if owner.is_authenticated:
-                            try:
-                                form.save()
+                            form.save()
 
-                                #Update recent_date of the channel
-                                date = timezone.now()
-                                channel.recent_date = date
-                                channel.save()
+                            #Update recent_date of the channel
+                            date = timezone.now()
+                            channel.recent_date = date
+                            channel.save()
 
-                                return HttpResponseRedirect(reverse('forumapp:comment', kwargs={'channel': channel.channel_name, 'thread': thread.thread_id}))
-
-                            except:
-                                messages.error(request, "Thread already exists with that name.")
+                            return HttpResponseRedirect(reverse('forumapp:comment', kwargs={'channel': channel.channel_name, 'thread': thread.thread_id}))
 
                         else:
+                            thread.delete()
                             messages.error(request, "Please log in to create threads.")
 
                     else:
+                        thread.delete()
                         messages.error(request, "Thread description must be at least 6 characters.")
 
                 else:
+                    thread.delete()
                     messages.error(request, "Thread name must be at least 6 characters.")
 
+            elif Thread.objects.filter(channel=channel, thread_name=form.data.get('thread_name')).exists():
+                messages.error(request, "Thread already exists with that name.")
+
             else:
+                thread.delete()
                 messages.error(request, "Invalid input")
 
-        return HttpResponseRedirect(self.request.path_info)
+            return HttpResponseRedirect(self.request.path_info)
 
 class CommentView(ViewMixin, generic.DetailView):
     model = Comment
@@ -215,32 +222,31 @@ class CommentView(ViewMixin, generic.DetailView):
 
                     if owner.is_authenticated:
 
-                        try:
-                            form.save()
+                        form.save()
 
-                            #Update recent_date of the channel and thread
-                            date = timezone.now()
-                            thread.channel.recent_date = date
-                            thread.channel.save()
+                        #Update recent_date of the channel and thread
+                        date = timezone.now()
+                        thread.channel.recent_date = date
+                        thread.channel.save()
 
-                            thread.recent_date = date
-                            thread.save()
+                        thread.recent_date = date
+                        thread.save()
 
-                            return HttpResponseRedirect(self.request.path_info)
-
-                        except:
-                            messages.error(request, "Comment already exists with that name.")
+                        return HttpResponseRedirect(self.request.path_info)
 
                     else:
+                        comment.delete()
                         messages.error(request, "Please log in to create comments.")
 
                 else:
+                    comment.delete()
                     messages.error(request, "Comments must be at least 6 characters.")
 
             else:
+                comment.delete()
                 messages.error(request, "Invalid input.")
 
-        return HttpResponseRedirect(self.request.path_info)
+            return HttpResponseRedirect(self.request.path_info)
 
 class UserView(ViewMixin, generic.DetailView):
     model = User
