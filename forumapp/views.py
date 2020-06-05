@@ -53,7 +53,7 @@ class UserSettingsView(ViewMixin, generic.DetailView):
 
             if form.is_valid():
                 form.save()
-                
+
             else:
                 messages.error(request, "Invalid input")
 
@@ -273,6 +273,7 @@ class UserView(ViewMixin, generic.DetailView):
         elif 'admin_unban' in request.POST:
             user = self.queryset.filter(username=username)
             if user.exists():
+
                 user = user.get()
                 user.is_active = True
                 user.save()
@@ -283,16 +284,20 @@ class UserView(ViewMixin, generic.DetailView):
         elif 'owner_ban' in request.POST:
             user = self.queryset.filter(username=username)
             if user.exists():
+
                 channel_name = request.POST.get('owner_ban').replace(' ', '-')
                 channel = Channel.objects.filter(channel_name=channel_name)
                 if channel.exists():
+                    
                     channel = channel.get()
                     list = json.loads(channel.banned_users)
                     list.append(username)
-                    channel.banned_users = list
+                    channel.banned_users = json.dumps(list)
                     channel.save()
                     return HttpResponseRedirect(self.request.path_info)
+
                 else:
                     return Http404("Couldn't find that channel.")
+
             else:
                 return Http404("User does not exist.")
