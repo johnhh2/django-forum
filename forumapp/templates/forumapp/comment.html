@@ -19,13 +19,7 @@
     <h4>{{ view.kwargs|description }}</h4>
     <ul>
     {% for listing in comment_list|dictsortreversed:'pub_date' %}
-        <li>
-            {{ listing.text }} by {% include 'forumapp/user_listing.html' %}
-            at {{ listing.pub_date|date:"f A" }}
-            {% if not listing|is_recent %}
-                  on {{ listing.pub_date|date:"l, F jS, Y" }}
-            {% endif %}
-        </li>
+      {% include 'forumapp/comment_listing.html' %}
     {% empty %}
         <p>No comments are available.</p>
     {% endfor %}
