@@ -1,9 +1,9 @@
 {% load static %}
 <!DOCTYPE html>
-<html>
+<html class="no-js" lang="en">
 <head>
   <title>Forum</title>
-	<link rel="stylesheet" type="text/css" href="{% static 'foundation/css/foundation.css' %}">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/foundation-sites@6.6.3/dist/css/foundation.min.css" integrity="sha256-ogmFxjqiTMnZhxCqVmcqTvjfe1Y/ec4WaRj/aQPvn+I=" crossorigin="anonymous">
 </head>
 <body>
 <!--
@@ -55,19 +55,12 @@
     </div>
   </div>
 
-  {% block foundation_jquery %}
-    <script src="{% static "foundation/js/vendor/jquery.js" %}"></script>
-  {% endblock foundation_jquery %}
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/foundation-sites@6.6.3/dist/js/foundation.min.js" integrity="sha256-pRF3zifJRA9jXGv++b06qwtSqX1byFQOLjqa2PTEb2o=" crossorigin="anonymous"></script>
 
-  {% block foundation_js %}
-    <script src="{% static "foundation/js/foundation.min.js" %}"></script>
-  {% endblock foundation_js %}
-
-  {% block foundation_js_init %}
-    <script>
-        $(document).foundation();
-    </script>
-  {% endblock foundation_js_init %}
+  <script>
+    $(document).foundation();
+  </script>
 
 
 </body>

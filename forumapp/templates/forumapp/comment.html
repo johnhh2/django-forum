@@ -6,9 +6,9 @@
 <form action="?" method="post">
   {% csrf_token %}
   <input type="submit" class="primary button radius" value="Back to {{ view.kwargs.channel }}" name="back">
-  <button type="button" class="button float-right radius" data-reveal-id="newComment">Create a new comment</button>
+  <button type="button" class="button float-right radius" data-open="newComment">Create a new comment</button>
   {% if view.kwargs|is_owner:user.get_username or perms.forumapp.delete_thread %}
-      <input type="submit" class="alert button float-right radius" value="Delete this thread" name="delete">
+      <input type="submit" class="alert button radius" value="Delete this thread" name="delete">
   {% endif %}
 </form>
 
@@ -33,7 +33,7 @@
 {% endif %}
 
 
-<div class="reveal-modal" id="newComment" data-reveal>
+<div class="reveal" id="newComment" data-reveal>
 	<h3>Create a new comment:</h3>
 	<form action="#" method="post">
 		{% csrf_token %}
@@ -41,6 +41,8 @@
 		<input type="submit" class="success button float-right radius" value="Create Comment" name="create">
 	</form>
   {% include "forumapp/messages.html" %}
-	<a class="close-reveal-modal radius" aria-label="Close">&#215;</a>
+	<button class="close-button" data-close aria-label="Close modal" type="button">
+		<span aria-hidden="true">&times;</span>
+	</button>
 </div>
 {% endblock %}

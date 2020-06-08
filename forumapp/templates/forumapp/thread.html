@@ -6,11 +6,12 @@
 <form action="#" method="post">
   {% csrf_token %}
   <input type="submit" class="primary button radius" value="Back to channels" name="back">
-  <button type="button" class="button float-left radius" data-reveal-id="newThread">Create a new thread</button>
+  <button type="button" class="button float-right radius" data-open="newThread">Create a thread</button>
   {% if view.kwargs.channel|is_owned_by:user.get_username or perms.forumapp.delete_channel %}
-    <input type="submit" class="alert button float-right radius" value="Delete this channel" name="delete">
+    <input type="submit" class="alert button radius" value="Delete this channel" name="delete">
   {% endif %}
 </form>
+
 {% if request.user|is_banned_from:view.kwargs.channel %}
   <p>Sorry, this channel is unavailable.</p>
 {% else %}
@@ -23,7 +24,7 @@
   {% endfor %}
 {% endif %}
 
-<div class="reveal-modal" id="newThread" data-reveal>
+<div class="reveal" id="newThread" data-reveal>
 	<h3>Create a new thread:</h3>
 	<form action="#" method="post">
 		{% csrf_token %}
@@ -31,6 +32,8 @@
 		<input type="submit" class="success button float-right radius" value="Create Thread" name="create">
 	</form>
   {% include "forumapp/messages.html" %}
-	<a class="close-reveal-modal radius" aria-label="Close">&#215;</a>
+	<button class="close-button" data-close aria-label="Close modal" type="button">
+		<span aria-hidden="true">&times;</span>
+	</button>
 </div>
 {% endblock %}

@@ -19,7 +19,7 @@ from django.views.generic.base import TemplateView
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'^foundation/', include('foundation.urls')),
+#    url(r'^foundation/', include('foundation.urls')),
     url(r'^forum/', include('forumapp.urls')),
     url(r'^registration/', include('registration.urls')),
     url(r'^$', TemplateView.as_view(template_name='index.html'), name='welcome')
