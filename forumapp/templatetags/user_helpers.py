@@ -36,8 +36,8 @@ def get_owned_channels_only_banned(owner, check):
 @register.filter
 def get_moderated_channels_minus_banned(moderator, check):
     channels = []
-    for c in Channel.objects.filter(moderators__contains=moderator.get_username):
-        if check.get_username not in json.loads(c.banned_users):
+    for c in Channel.objects.filter(moderators__contains=moderator.get_username()):
+        if check.get_username() not in json.loads(c.banned_users):
             channels.append(c.channel_name)
     return Channel.objects.filter(channel_name__in=channels)
 
@@ -45,7 +45,7 @@ def get_moderated_channels_minus_banned(moderator, check):
 @register.filter
 def get_moderated_channels_only_banned(moderator, check):
     channels = []
-    for c in Channel.objects.filter(moderators__contains=moderator.get_username):
-        if check.get_username in json.loads(c.banned_users):
+    for c in Channel.objects.filter(moderators__contains=moderator.get_username()):
+        if check.get_username() in json.loads(c.banned_users):
             channels.append(c.channel_name)
     return Channel.objects.filter(channel_name__in=channels)

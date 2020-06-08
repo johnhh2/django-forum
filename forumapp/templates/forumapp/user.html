@@ -4,7 +4,7 @@
 <h2>User profile for {{ object.get_username }}</h2>
 
 <p>Last login: {{ object.last_login }}</p>
-
+<div class="row">
 {% if request.user != object %}
   <form action="#" method="post">
     {% csrf_token %}
