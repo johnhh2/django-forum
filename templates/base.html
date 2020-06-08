@@ -27,23 +27,23 @@
   </div>
 -->
 
-  <div class="top-bar">
+  <div class="top-bar" style='background: #60b8b8;'>
     <div class="top-bar-left">
-      <ul class="dropdown menu" data-dropdown-menu>
+      <ul class="dropdown menu" data-dropdown-menu style='background: #60b8b8;'>
         <li class="menu-text">
-          <h3><a href="{% url 'forumapp:channel' %}">Forum</a></h3>
+          <h3><a href="{% url 'forumapp:channel' %}" style='color: #1468a0'>Forum</a></h3>
         </li>
       </ul>
     </div>
     <div class="top-bar-right">
       <p>
   	    {% if request.user.is_authenticated %}
-  		    Welcome, {{ request.user.get_username }} <a href="{% url 'registration:logout' %}">Logout</a>
+  		    Welcome, {{ request.user.get_username }} <a href="{% url 'registration:logout' %}" style='color: #1468a0'>Logout</a>
         {% else %}
-  		    Welcome, guest. <a href="{% url 'registration:login' %}">Login</a> or <a href="{% url 'registration:signup' %}">Sign up</a>
+  		    Welcome, guest. <a href="{% url 'registration:login' %}" style='color: #1468a0'>Login</a> or <a href="{% url 'registration:signup' %}" style='color: #1468a0'>Sign up</a>
   	    {% endif %}
       </p>
-      <a href="{% url 'forumapp:settings' %}">Settings</a>
+      <a href="{% url 'forumapp:settings' %}" style='color: #1468a0'>Settings</a>
     </div>
   </div>
 
