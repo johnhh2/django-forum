@@ -36,14 +36,17 @@
       </ul>
     </div>
     <div class="top-bar-right">
-      <p>
-  	    {% if request.user.is_authenticated %}
-  		    Welcome, {{ request.user.get_username }} <a href="{% url 'registration:logout' %}">Logout</a>
+      <ul class="menu">
+  	{% if request.user.is_authenticated %}
+	<li><a>Welcome, {{ request.user.get_username }}</a></li> 
+	<li><a href="{% url 'registration:logout' %}">Logout</a></li>
+	<li><a href="{% url 'forumapp:settings' %}">Settings</a></li>
         {% else %}
-  		    Welcome, guest. <a href="{% url 'registration:login' %}">Login</a> or <a href="{% url 'registration:signup' %}">Sign up</a>
-  	    {% endif %}
-      </p>
-      <a href="{% url 'forumapp:settings' %}">Settings</a>
+	<a><li>Welcome, guest.</a></li>
+	<li><a href="{% url 'registration:login' %}">Login</a></li>
+	<li><a href="{% url 'registration:signup' %}">Sign up</a></li>
+  	{% endif %}
+      </ul>
     </div>
   </div>
 
