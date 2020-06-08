@@ -36,6 +36,7 @@
       </ul>
     </div>
     <div class="top-bar-right">
+<<<<<<< HEAD
       <p>
   	    {% if request.user.is_authenticated %}
   		    Welcome, {{ request.user.get_username }} <a href="{% url 'registration:logout' %}" style='color: #1468a0'>Logout</a>
@@ -44,6 +45,19 @@
   	    {% endif %}
       </p>
       <a href="{% url 'forumapp:settings' %}" style='color: #1468a0'>Settings</a>
+=======
+      <ul class="menu">
+  	{% if request.user.is_authenticated %}
+	<li><a style='color: black'>Welcome, {{ request.user.get_username }}</a></li>
+	<li><a href="{% url 'registration:logout' %}" style='color: #1468a0'>Logout</a></li>
+	<li><a href="{% url 'forumapp:settings' %}" style='color: #1468a0'>Settings</a></li>
+        {% else %}
+	<a><li>Welcome, guest.</a></li>
+	<li><a href="{% url 'registration:login' %}" style='color: #1468a0'>Login</a></li>
+	<li><a href="{% url 'registration:signup' %}" style='color: #1468a0'>Sign up</a></li>
+  	{% endif %}
+      </ul>
+>>>>>>> 57f423062db31fbd122444dd8d2e7b8389003daf
     </div>
   </div>
 
