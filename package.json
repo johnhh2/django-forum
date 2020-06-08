@@ -1,0 +1,37 @@
+{
+  "name": "django-forum",
+  "version": "1.0.0",
+  "description": "Basic forum web application made with Django",
+  "main": "index.js",
+  "dependencies": {
+    "foundation-sites": "^6.6.3",
+    "jquery": "^3.5.1",
+    "what-input": "^5.2.10"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "python manage.py test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/johnhh2/django-forum.git"
+  },
+  "keywords": [
+    "django",
+    "forum",
+    "foundation",
+    "zurb",
+    "python",
+    "python3",
+    "python3.6",
+    "social",
+    "web",
+    "application"
+  ],
+  "author": "Matt Purnell and John-Hugh Hedrick",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/johnhh2/django-forum/issues"
+  },
+  "homepage": "https://github.com/johnhh2/django-forum#readme"
+}
