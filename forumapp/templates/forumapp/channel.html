@@ -2,11 +2,9 @@
 {% load channel_helpers %}
 {% block content %}
 
-<div class="grid-x">
-  <div class="cell">
-    <button type="button" class="button float-right radius" data-open="newChannel">Create a new channel</button>
-      {% include "forumapp/messages.html" %}
-  </div>
+<div class="clearfix">
+  <button type="button" class="button float-right radius" data-open="newChannel">Create a new channel</button>
+    {% include "forumapp/messages.html" %}
 </div>
 
 {% for listing in channel_list|minus_bans:request.user.get_username %}

@@ -1,30 +1,34 @@
 {% load channel_helpers %}
-<div class="grid-x">
-  <div class="small-9 cell">
-    <h3><a href="{% url 'forumapp:thread' channel=listing.channel_name %}">{{ listing }}</a></h3>
+<div class="callout panel">
+  <div class="grid-x">
+    <div class="small-9 cell">
+      <h3><a href="{% url 'forumapp:thread' channel=listing.channel_name %}">{{ listing }}</a></h3>
+    </div>
+    <div class="small-3 cell">
+      Owned by: {% include 'forumapp/user_listing.html' %}
+    </div>
   </div>
-  <div class="small-3 cell">
-    Owned by: {% include 'forumapp/user_listing.html' %}
+  <div class="grid-y">
+    <div class="cell">
+      {{ listing.description }}
+    </div>
   </div>
-</div>
-<div class="grid-y">
-  <div class="cell">
-    {{ listing.description }}
-  </div>
-</div>
 
-<div class="grid-y">
-  <div class="cell">
-    <form action="#" method="post">
-    {% csrf_token %}
-    {% if request.user.is_authenticated %}
-      <input type="hidden" value="{{ listing.channel_name }}" name="channel_name">
-      {% if not listing|is_favorite:request.user %}
-        <input type="submit" class="alert button radius" value="Favorite" name="add_favorite">
-      {% else %}
-        <input type="submit" class="alert button radius" value="Unfavorite" name="remove_favorite">
+  <br>
+
+  <div class="grid-y">
+    <div class="cell">
+      <form action="#" method="post">
+      {% csrf_token %}
+      {% if request.user.is_authenticated %}
+        <input type="hidden" value="{{ listing.channel_name }}" name="channel_name">
+        {% if not listing|is_favorite:request.user %}
+          <input type="submit" class="alert button radius" value="Favorite" name="add_favorite">
+        {% else %}
+          <input type="submit" class="alert button radius" value="Unfavorite" name="remove_favorite">
+        {% endif %}
       {% endif %}
-    {% endif %}
-    </form>
+      </form>
+    </div>
   </div>
 </div>
