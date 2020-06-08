@@ -1,9 +1,13 @@
-<div class="row">
-  <div class="large-12 columns">
-    <div class="callout panel radius">
-      <h3><a href="{% url 'forumapp:comment' channel=listing.channel.channel_name thread=listing.thread_id %}">{{ listing.thread_name }}</a></h3>
-      <p class="text-right">Owned by: {% include 'forumapp/user_listing.html' %}</p>
-      {{ listing.description }}
-    </div>
+<div class="grid-x">
+  <div class="small-9 cell">
+    <h3><a href="{% url 'forumapp:comment' channel=listing.channel.channel_name thread=listing.thread_id %}">{{ listing.thread_name }}</a></h3>
+  </div>
+  <div class="small-3 cell">
+    Owned by: {% include 'forumapp/user_listing.html' %}</p>
+  </div>
+</div>
+<div clas="grid-x">
+  <div class="cell">
+    {{ listing.description }}
   </div>
 </div>
