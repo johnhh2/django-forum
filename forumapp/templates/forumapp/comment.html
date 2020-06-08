@@ -3,7 +3,7 @@
 {% load user_helpers %}
 {% block content %}
 
-<form action="?" method="post">
+<form action="#" method="post">
   {% csrf_token %}
   <input type="submit" class="primary button radius" value="Back to {{ view.kwargs.channel }}" name="back">
   <button type="button" class="button float-right radius" data-open="newComment">Create a new comment</button>
@@ -21,9 +21,9 @@
     {% for listing in comment_list|dictsortreversed:'pub_date' %}
         <li>
             {{ listing.text }} by {% include 'forumapp/user_listing.html' %}
-            at {{ listing.pub_date|date:"g:i" }}
+            at {{ listing.pub_date|date:"f A" }}
             {% if not listing|is_recent %}
-                  on {{ listing.pub_date|date:"D, d M, Y" }}
+                  on {{ listing.pub_date|date:"l, F jS, Y" }}
             {% endif %}
         </li>
     {% empty %}

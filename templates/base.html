@@ -23,25 +23,26 @@
         <li><a href="#">Three</a></li>
       </ul>
     </div>
+  </div>
 -->
 
   <div class="top-bar">
     <div class="top-bar-left">
       <ul class="dropdown menu" data-dropdown-menu>
         <li class="menu-text">
-          <h3><a href="/forum/">Forum</a></h3>
+          <h3><a href="{% url 'forumapp:channel' %}">Forum</a></h3>
         </li>
       </ul>
     </div>
     <div class="top-bar-right">
-      <p style="text-align:right">
+      <p>
   	    {% if request.user.is_authenticated %}
   		    Welcome, {{ request.user.get_username }} <a href="{% url 'registration:logout' %}">Logout</a>
         {% else %}
-  		    Welcome, guest. <a href="{% url 'registration:login' %}">Login</a>/<a href="{% url 'registration:signup' %}">Sign up</a>
+  		    Welcome, guest. <a href="{% url 'registration:login' %}">Login</a> or <a href="{% url 'registration:signup' %}">Sign up</a>
   	    {% endif %}
       </p>
-      <a href="{%url 'forumapp:settings' %}">Settings</a>
+      <a href="{% url 'forumapp:settings' %}">Settings</a>
     </div>
   </div>
 

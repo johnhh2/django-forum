@@ -2,7 +2,9 @@
 {% load channel_helpers %}
 {% block content %}
 
-<p><button type="button" class="button float-right radius" data-open="newChannel">Create a new channel</button></p>
+<!-- TODO The float-right button only shows if there's another regular button. Fix this later -->
+<button type="button" class="tiny hidden clear button radius"></button>
+<button type="button" class="button float-right radius" data-open="newChannel">Create a new channel</button>
   {% include "forumapp/messages.html" %}
 
 {% for listing in channel_list|minus_bans:request.user.get_username %}
