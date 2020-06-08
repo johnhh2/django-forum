@@ -1,0 +1,15 @@
+{% load comment_helpers %}
+<div class="row">
+  <div class="large-10 columns">
+    <div class="callout panel radius grid-x">
+	<div class="cell large-1" align="center">
+	  {% include 'forumapp/user_listing.html' %}</br>
+	  {{ listing.pub_date|date:"f A" }}
+          {% if not listing|is_recent %}
+            on {{ listing.pub_date|date:"l, F jS, Y" }}
+	  {% endif %}
+        </div>
+	<div class="cell large-10"><p>{{ listing.text }}</p></div>
+    </div>
+  </div>
+</div>
