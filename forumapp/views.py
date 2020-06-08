@@ -9,6 +9,14 @@ from django.urls import reverse
 from .models import UserSettings, Channel, Thread, Comment
 from .forms import UserSettingsForm, ChannelForm, ThreadForm, CommentForm
 
+
+def get_settings(user):
+    us = UserSettings.objects.filter(user=user)
+    if us.exists():
+        return us.get()
+    else:
+        return UserSettings.objects.create(user=user)
+
 class ViewMixin(generic.base.ContextMixin):
     initial = {'key': 'value'}
 
@@ -31,7 +39,7 @@ class UserSettingsView(ViewMixin, generic.DetailView):
     queryset = UserSettings.objects
 
     def get_object(self):
-        if self.request.user.is_authenticated():
+        if self.request.user.is_authenticated:
             settings = self.queryset.filter(user=self.request.user)
             if settings.exists():
                 return settings.get()
@@ -45,11 +53,10 @@ class UserSettingsView(ViewMixin, generic.DetailView):
         return super(UserSettingsView, self).get(self, request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        settings = UserSettings(user=request.user)
-        settings.save()
+        self.object = get_settings(request.user)
+
         if 'save' in request.POST:
-            form = self.form_class(request.POST, instance=settings)
+            form = self.form_class(request.POST, instance=self.object)
 
             if form.is_valid():
                 form.save()
@@ -73,39 +80,65 @@ class ChannelView(ViewMixin, generic.ListView):
         return self.queryset.all()
 
     def post(self, request, *args, **kwargs):
-        try:
-            owner = request.user
-            channel = Channel(owner=owner)
-            form = self.form_class(request.POST, instance=channel)
 
-        except ValueError:
-            messages.error(request, "Please log in to create channels.")
-            return HttpResponseRedirect(self.request.path_info)
+        if 'add_favorite' in request.POST:
+            settings = get_settings(self.request.user)
+            favs = json.loads(settings.favorites)
+            channel_name = request.POST['channel_name']
 
-        if form.is_valid():
-            channel_name = form.cleaned_data.get('channel_name')
-            description = form.cleaned_data.get('description')
+            if not channel_name in favs:
+                favs.append(channel_name)
+                settings.favorites = json.dumps(favs)
+                settings.save()
+            else:
+                messages.error(request, "Channel already in favorites")
 
-            if len(channel_name) > 3:
-                if len(description) > 5:
+        elif 'remove_favorite' in request.POST:
+            settings = get_settings(self.request.user)
+            favs = json.loads(settings.favorites)
+            channel_name = request.POST['channel_name']
+            
+            if channel_name in favs:
+                favs.remove(channel_name)
+                settings.favorites = json.dumps(favs)
+                settings.save()
+            else:
+                messages.error(request, "Channel not found in favorites")        
 
-                    channel.save()
-                    return HttpResponseRedirect(reverse('forumapp:thread', kwargs={'channel': channel_name}))
+        elif 'create' in request.POST:
+            try:
+                owner = request.user
+                channel = Channel(owner=owner)
+                form = self.form_class(request.POST, instance=channel)
+
+            except ValueError:
+                messages.error(request, "Please log in to create channels.")
+                return HttpResponseRedirect(self.request.path_info)
+
+            if form.is_valid():
+                channel_name = form.cleaned_data.get('channel_name')
+                description = form.cleaned_data.get('description')
+
+                if len(channel_name) > 3:
+                    if len(description) > 5:
+
+                        channel.save()
+                        return HttpResponseRedirect(reverse('forumapp:thread', kwargs={'channel': channel_name}))
+
+                    else:
+                        channel.delete()
+                        messages.error(request, "Channel description must be at least 6 characters.")
 
                 else:
                     channel.delete()
-                    messages.error(request, "Channel description must be at least 6 characters.")
+                    messages.error(request, "Channel name must be at least 4 characters.")
+
+            elif Channel.objects.filter(channel_name=form. data.get('channel_name')).exists():
+                messages.error(request, "Channel already exists with that name.")
 
             else:
                 channel.delete()
-                messages.error(request, "Channel name must be at least 4 characters.")
-
-        elif Channel.objects.filter(channel_name=form. data.get('channel_name')).exists():
-            messages.error(request, "Channel already exists with that name.")
-
-        else:
-            channel.delete()
-            messages.error(request, "Invalid input. Channel name must contain hyphens in place of whitespace and cannot contain symbols.")
+                messages.error(request, "Invalid input. Channel name must contain hyphens in place of whitespace and cannot contain symbols.")
 
         return HttpResponseRedirect(self.request.path_info)
 
@@ -373,3 +406,48 @@ class UserView(ViewMixin, generic.DetailView):
 
             else:
                 return Http404("User does not exist.")
+
+class FavoritesView(ViewMixin, generic.DetailView):
+    model = Channel
+    template_name = 'forumapp/favorites.html'
+
+    queryset = Channel.objects
+    context_object_name = 'favorites_list'
+
+    def get_object(self):
+        if self.request.user.is_authenticated():
+            settings = get_settings(self.request.user)
+            return self.queryset.filter(channel_name__in=json.loads(settings.favorites))
+        
+        return self.queryset.none()
+
+    def post(self, request, *args, **kwargs):
+        if not self.request.user.is_authenticated:
+            return HttpResponseRedirect(reverse('forumapp:channel'))
+
+        if 'add_favorite' in request.POST:
+            settings = get_settings(self.request.user)
+            favs = json.loads(settings.favorites)
+            channel_name = request.POST['channel_name']
+
+            if not channel_name in favs:
+                favs.append(channel_name)
+                settings.favorites = json.dumps(favs)
+                settings.save()
+    
+            else:
+                messages.error(request, "Channel already in favorites")
+
+        elif 'remove_favorite' in request.POST:
+            settings = get_settings(self.request.user)
+            favs = json.loads(settings.favorites)
+            channel_name = request.POST['channel_name']
+            
+            if channel_name in favs:
+                favs.remove(channel_name)
+                settings.favorites = json.dumps(favs)
+                settings.save()
+            else:
+                messages.error(request, "Channel not found in favorites")
+        
+        return HttpResponseRedirect(self.request.path_info)
