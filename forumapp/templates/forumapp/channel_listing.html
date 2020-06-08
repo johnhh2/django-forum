@@ -1,9 +1,21 @@
+{% load channel_helpers %}
 <div class="row">
   <div class="large-12 columns">
     <div class="callout panel radius">
       <h3><a href="{% url 'forumapp:thread' channel=listing.channel_name %}">{{ listing }}</a></h3>
       <p class="text-right">Owned by: {% include 'forumapp/user_listing.html' %}</p>
       {{ listing.description }}
+      <form action="#" method="post">
+    	{% csrf_token %}
+	{% if request.user.is_authenticated %}
+	  <input type="hidden" value="{{ listing.channel_name }}" name="channel_name">
+	  {% if not listing|is_favorite:request.user %}
+	    <input type="submit" class="alert button radius" value="Favorite" name="add_favorite">
+	  {% else %}
+	    <input type="submit" class="alert button radius" value="Unfavorite" name="remove_favorite">
+	  {% endif %}
+	{% endif %}
+      </form>
     </div>
   </div>
 </div>

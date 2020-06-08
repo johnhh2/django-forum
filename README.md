@@ -19,6 +19,8 @@ source venv/bin/activate
 ```
 
 ### Dependencies
+
+#### Back-end dependencies
 Once in the virtual environment, download the poetry package manager
 ```
 pip install poetry
@@ -34,6 +36,10 @@ Next, use poetry to download the project dependencies
 poetry install
 ```
 
+#### Front-end dependencies
+```
+npm install
+```
 ### Set up database
 ```
 python manage.py makemigrations

@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block content %}
+
+{% if favorites_list %}
+    {% for listing in favorites_list %}
+      {% include "forumapp/channel_listing.html" %}
+    {% endfor %}
+{% else %}
+    <p>You have no favorite channels.</p>
+{% endif %}
+
+{% endblock %}
