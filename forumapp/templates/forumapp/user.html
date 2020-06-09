@@ -1,44 +1,60 @@
 {% extends 'base.html' %}
 {% load user_helpers %}
 {% block content %}
+
+<div class="clearfix grid-x">
+	{% if request.user != object and request.user.is_staff %}
+		<div class="cell small-1">
+		<form action="#" method="post">
+			{% csrf_token %}
+			{% if object.is_active %}
+			<input type="submit" class="alert button radius" value="Ban this user" name="admin_ban" style="width: 100%;">
+			{% else %}
+			<input type="submit" class="success button radius" value="Unban this user" name="admin_unban"style="width:100%;">
+			{% endif %}
+		</form>
+		</div>
+	{% endif %}
+	{% if request.user|get_moderated_channels_only_banned:object %}
+	<button type="button" class="warning button radius" data-open="channelUnban">Unban from a channel</button>
+	{% endif %}
+	{% if request.user|get_moderated_channels_minus_banned:object %}
+	<button type="button" class="warning button radius" data-open="channelBan">Ban from a channel</button>
+	{% endif %}
+</div>
 <h2>User profile for {{ object.get_username }}</h2>
 
 <p>Last login: {{ object.last_login }}</p>
 
 {% if request.user != object %}
-  <form action="#" method="post">
-    {% csrf_token %}
-    {% if request.user.is_staff %}
-      {% if object.is_active %}
-        <input type="submit" class="alert button radius" value="Ban this user" name="admin_ban">
-      {% else %}
-        <input type="submit" class="success button radius" value="Unban this user" name="admin_unban">
-      {% endif %}
-    {% endif %}
-    {% if request.user|get_owned_channels_minus_banned:object %}
-      <h3>Ban from your channels</h3>
-      {% for channel in request.user|get_owned_channels_minus_banned:object %}
-        <input type="submit" class="tiny alert button radius" value="{{ channel }}" name="owner_ban">
-      {% endfor %}
-    {% endif %}
-    {% if request.user|get_owned_channels_only_banned:object %}
-      <h3>Unban from your channels</h3>
-      {% for channel in request.user|get_owned_channels_only_banned:object %}
-        <input type="submit" class="tiny success button radius" value="{{ channel }}" name="owner_unban">
-      {% endfor %}
-    {% endif %}
-    {% if request.user|get_moderated_channels_minus_banned:object %}
-      <h3>Ban from channels you moderate</h3>
-      {% for channel in request.user|get_moderated_channels_minus_banned:object %}
-        <input type="submit" class="tiny alert button radius" value="{{ channel }}" name="moderator_ban">
-      {% endfor %}
-    {% endif %}
-    {% if request.user|get_moderated_channels_only_banned:object %}
-      <h3>Unban from channels you moderate</h3>
-      {% for channel in request.user|get_moderated_channels_only_banned:object %}
-        <input type="submit" class="tiny success button radius" value="{{ channel }}" name="moderator_unban">
-      {% endfor %}
-    {% endif %}
-  </form>
+	{% if request.user|get_moderated_channels_minus_banned:object %}
+		<div class="reveal" id="channelBan" data-reveal>
+			<h3>Ban user from a channel?</h3>
+			<form action="#" method="post">
+				{% csrf_token %}
+				{% for channel in request.user|get_moderated_channels_minus_banned:object %}
+				<input type="submit" class="tiny alert button radius" value="{{ channel }}" name="channel_ban">
+				{% endfor %}
+			</form>
+			<button class="close-button" data-close aria-label="Close modal" type="button">
+				<span aria-hidden="true">&times;</span>
+			</button>
+		</div>
+	{% endif %}
+	{% if request.user|get_moderated_channels_only_banned:object %}
+		<div class="reveal" id="channelUnban" data-reveal>
+			<h3>Unban user from a channel?</h3>
+			<form action="#" method="post">
+				{% csrf_token %}
+				{% for channel in request.user|get_moderated_channels_only_banned:object %}
+				<input type="submit" class="tiny success button radius" value="{{ channel }}" name="channel_unban">
+				{% endfor %}
+			</form>
+			<button class="close-button" data-close aria-label="Close modal" type="button">
+				<span aria-hidden="true">&times;</span>
+			</button>
+		</div>
+	{% endif %}
 {% endif %}
+
 {% endblock %}

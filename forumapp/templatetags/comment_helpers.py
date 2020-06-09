@@ -49,4 +49,4 @@ def is_moderator(user, channel):
     if user.get_username == channel.owner.get_username:
         return True
     else:
-        return user.get_username in json.loads(channel.moderators)
+        return user.get_username() in json.loads(channel.moderators)

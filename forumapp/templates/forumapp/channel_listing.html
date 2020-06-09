@@ -12,13 +12,22 @@
     <div class="small-1 cell">
       <form action="#" method="post">
       {% csrf_token %}
+      {% if request.user.is_staff %}
+        <input type="hidden" value="{{ listing.channel_name }}" name="channel_name">
+        {% if not listing.pin_date %}
+          <input type="submit" class="primary button radius" value="Pin" name="pin" style="width:100%;">
+        {% else %}
+          <input type="submit" class="secondary button radius" value="Unpin" name="unpin" style="width:100%;">
+        {% endif %}
+      {% endif %}
+      
       {% if request.user.is_authenticated %}
         <input type="hidden" value="{{ listing.channel_name }}" name="channel_name">
         {% if not listing|is_favorite:request.user %}
-          <input type="submit" class="success button radius" value="Favorite" name="add_favorite">
+          <input type="submit" class="success button radius" value="Favorite" name="add_favorite" style="width: 100%;">
         {% else %}
-          <input type="submit" class="secondary button radius" value="Unfavorite" name="remove_favorite">
-        {% endif %}
+	  <input type="submit" class="secondary button radius" value="Unfavorite" name="remove_favorite" style="width: 100%;">
+       {% endif %}
       {% endif %}
       </form>
     </div>

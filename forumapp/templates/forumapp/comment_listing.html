@@ -14,7 +14,7 @@
 	  <form action="#" method="post">
 		{% csrf_token %}
 		<input type="hidden" value="{{ listing.comment_id }}" name="comment_id">
-		<input type="submit" class="alert button float-right radius" value="Delete" name="delete_comment">
+		<input type="submit" class="alert button float-right radius" value="Delete" name="delete_comment" style="width:100%;">
 	  </form>
 	</div>
 	{% else %}

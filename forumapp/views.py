@@ -2,20 +2,30 @@ import json
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.http import Http404, HttpResponseRedirect
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render
 from django.views import generic
 from django.utils import timezone
 from django.urls import reverse
 from .models import UserSettings, Channel, Thread, Comment
 from .forms import UserSettingsForm, ChannelForm, ThreadForm, CommentForm
 
-
-def get_settings(user):
+## Get or create the user's settings (because get_or_create returns an annoying tuple)
+def get_or_create_settings(user):
     us = UserSettings.objects.filter(user=user)
     if us.exists():
         return us.get()
     else:
         return UserSettings.objects.create(user=user)
+ 
+## Return whether a user is staff or an owner or moderator of the channel
+def is_mod(obj, user):
+    # retrieve channel regardless of if we have a channel, thread, or comment
+    channel = isinstance(obj, Comment) and obj.thread.channel \
+            or (isinstance(obj, Thread) and obj.channel or obj)
+
+    # check if user is owner or moderator
+    return user.get_username == channel.owner.get_username \
+            or user.get_username in json.loads(channel.moderators)
 
 class ViewMixin(generic.base.ContextMixin):
     initial = {'key': 'value'}
@@ -53,7 +63,7 @@ class UserSettingsView(ViewMixin, generic.DetailView):
         return super(UserSettingsView, self).get(self, request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
-        self.object = get_settings(request.user)
+        self.object = get_or_create_settings(request.user)
 
         if 'save' in request.POST:
             form = self.form_class(request.POST, instance=self.object)
@@ -83,7 +93,7 @@ class ChannelView(ViewMixin, generic.ListView):
     def post(self, request, *args, **kwargs):
 
         if 'add_favorite' in request.POST:
-            settings = get_settings(self.request.user)
+            settings = get_or_create_settings(self.request.user)
             favs = json.loads(settings.favorites)
             channel_name = request.POST['channel_name']
 
@@ -95,7 +105,7 @@ class ChannelView(ViewMixin, generic.ListView):
                 messages.error(request, "Channel already in favorites")
 
         elif 'remove_favorite' in request.POST:
-            settings = get_settings(self.request.user)
+            settings = get_or_create_settings(self.request.user)
             favs = json.loads(settings.favorites)
             channel_name = request.POST['channel_name']
             
@@ -105,6 +115,30 @@ class ChannelView(ViewMixin, generic.ListView):
                 settings.save()
             else:
                 messages.error(request, "Channel not found in favorites")        
+
+        elif 'pin' in request.POST:
+            channel_name = request.POST['channel_name']
+            channel = self.queryset.filter(channel_name=channel_name)
+            
+            if channel.exists():
+                channel = channel.get()
+                
+                # Require staff status to pin channels
+                if request.user.is_staff:
+                    channel.pin_date = timezone.now()
+                    channel.save()
+
+        elif 'unpin' in request.POST:
+            channel_name = request.POST['channel_name']
+            channel = self.queryset.filter(channel_name=channel_name)
+            
+            if channel.exists():
+                channel = channel.get()
+                
+                # Require staff status to unpin channels
+                if request.user.is_staff:
+                    channel.pin_date = None
+                    channel.save()
 
         elif 'create' in request.POST:
             try:
@@ -124,7 +158,8 @@ class ChannelView(ViewMixin, generic.ListView):
                     if len(description) > 5:
 
                         channel.save()
-                        return HttpResponseRedirect(reverse('forumapp:thread', kwargs={'channel': channel_name}))
+                        return HttpResponseRedirect(reverse('forumapp:thread', \
+                                kwargs={'channel': channel_name}))
 
                     else:
                         channel.delete()
@@ -139,7 +174,8 @@ class ChannelView(ViewMixin, generic.ListView):
 
             else:
                 channel.delete()
-                messages.error(request, "Invalid input. Channel name must contain hyphens in place of whitespace and cannot contain symbols.")
+                messages.error(request, "Invalid input. Channel name must contain hyphens \
+                        in place of whitespace and cannot contain symbols.")
 
         return HttpResponseRedirect(self.request.path_info)
 
@@ -166,21 +202,66 @@ class ThreadView(ViewMixin, generic.DetailView):
 
         channel = channel.get()
 
-        if 'delete_thread' in request.POST:
-            if request.user.is_staff or request.user.get_username == channel.owner.get_username or request.user.get_username in json.loads(channel.moderators):
+        if 'back' in request.POST:
+            return HttpResponseRedirect(reverse('forumapp:channel'))
 
-                thread_id = request.POST['thread_id']
-                thread = self.queryset.filter(channel=channel, thread_id=thread_id)
+        elif 'delete_thread' in request.POST:
+            thread_id = request.POST['thread_id']
+            thread = self.queryset.filter(channel=channel, thread_id=thread_id)
+            
+            if is_mod(thread, request.user):
+                thread = thread.get()
+
+                # Require staff, owner, or mod status to delete threads
                 if thread.exists():
                     thread.delete()
+                
+                else:
+                    raise Http404("Couldn't find that channel.")
+
+            else:
+                raise Http404("Insufficient permissions.")
 
         elif 'delete_channel' in request.POST:
             channel.delete()
 
             return HttpResponseRedirect(reverse('forumapp:channel'))
 
-        elif 'back' in request.POST:
-            return HttpResponseRedirect(reverse('forumapp:channel'))
+        elif 'pin' in request.POST:
+            thread_id = request.POST['thread_id']
+            thread = self.queryset.filter(channel=channel, thread_id=thread_id)
+            
+            if thread.exists():
+                thread = thread.get()
+                
+                # Require staff, owner, or mod status to pin threads
+                if is_mod(thread, request.user):
+                    thread.pin_date = timezone.now()
+                    thread.save()
+                
+                else:
+                    raise Http404("Couldn't find that thread.")
+            
+            else:
+                raise Http404("Insufficient permissions.")
+
+        elif 'unpin' in request.POST:
+            thread_id = request.POST['thread_id']
+            thread = self.queryset.filter(channel=channel, thread_id=thread_id)
+            
+            if thread.exists():
+                thread = thread.get()
+                
+                # Require staff, owner, or mod status to unpin threads
+                if is_mod(thread, request.user):
+                    thread.pin_date = None
+                    thread.save()
+                
+                else:
+                    raise Http404("Couldn't find that thread.")
+            
+            else:
+                raise Http404("Insufficient permissions.")
 
         elif 'create' in request.POST:
             try:
@@ -208,7 +289,8 @@ class ThreadView(ViewMixin, generic.DetailView):
                         channel.recent_date = date
                         channel.save()
 
-                        return HttpResponseRedirect(reverse('forumapp:comment', kwargs={'channel': channel.channel_name, 'thread': thread.thread_id}))
+                        return HttpResponseRedirect(reverse('forumapp:comment', \
+                                kwargs={'channel': channel.channel_name, 'thread': thread.thread_id}))
 
                     else:
                         thread.delete()
@@ -245,27 +327,42 @@ class CommentView(ViewMixin, generic.DetailView):
     
     def post(self, request, *args, **kwargs):
         
-        thread = Thread.objects.filter(channel__channel_name=self.kwargs.get('channel'), thread_id=self.kwargs.get('thread'))
+        thread = Thread.objects.filter(channel__channel_name=self.kwargs.get('channel'), \
+                thread_id=self.kwargs.get('thread'))
+
         if not thread.exists():
             return HttpResponseRedirect(reverse('forumapp:thread', kwargs={'channel': self.kwargs.get('channel')}))
 
         thread = thread.get()
 
-        if 'delete_comment' in request.POST:
-            if request.user.is_staff or request.user.get_username == thread.channel.owner.get_username or request.user.get_username in json.loads(thread.channel.moderators):
-
+        if 'back' in request.POST:
+            return HttpResponseRedirect(reverse('forumapp:thread', kwargs={'channel': self.kwargs.get('channel')}))
+        
+        elif 'delete_comment' in request.POST:
+            
+            if is_mod(comment, request.user): 
                 comment_id = request.POST['comment_id']
                 comment = self.queryset.filter(thread=thread, comment_id=comment_id)
+                
+                # Require staff, owner, or mod status to delete comments
                 if comment.exists():
                     comment.delete()
+                else:
+                    raise Http404("Couldn't find that comment.")
+            
+            else:
+                raise Http404("Insufficient permissions.")
 
         elif 'delete_thread' in request.POST:
-            thread.delete()
 
-            return HttpResponseRedirect(reverse('forumapp:thread', kwargs={'channel': self.kwargs.get('channel')}))
+            if is_mod(thread, request.user):
+                thread.delete()
 
-        elif 'back' in request.POST:
-            return HttpResponseRedirect(reverse('forumapp:thread', kwargs={'channel': self.kwargs.get('channel')}))
+                return HttpResponseRedirect(reverse('forumapp:thread', \
+                        kwargs={'channel': self.kwargs.get('channel')}))
+            
+            else:
+                raise Http404("Insufficient permissions.")
 
         elif 'create' in request.POST:
             try:
@@ -312,6 +409,7 @@ class UserView(ViewMixin, generic.DetailView):
     queryset = User.objects
     def get_object(self):
         username = self.kwargs.get('username')
+
         if self.queryset.filter(username=username).exists():
             return self.queryset.get(username=username)
 
@@ -319,120 +417,97 @@ class UserView(ViewMixin, generic.DetailView):
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
+        
+        if not self.object:
+            return HttpResponseRedirect(reverse('forumapp:channel'))
+        
         return super(UserView, self).get(self, request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         username = self.kwargs.get('username')
+        user = self.queryset.filter(username=username)
+        
+        if not user.exists():
+            return HttpResponseRedirect(reverse('forumapp:channel'))
+
+        user = user.get()
+
         if 'admin_ban' in request.POST:
-            user = self.queryset.filter(username=username)
-            if user.exists():
-                user = user.get()
+        
+            if request.user.is_authenticated and request.user.is_staff:
                 user.is_active = False
                 user.save()
                 return HttpResponseRedirect(self.request.path_info)
+            
             else:
-                return Http404("User does not exist.")
+                raise Http404("User does not exist.")
 
         elif 'admin_unban' in request.POST:
-            user = self.queryset.filter(username=username)
-            if user.exists():
-
-                user = user.get()
+            
+            if request.user.is_authenticated and request.user.is_staff:
                 user.is_active = True
                 user.save()
+
                 return HttpResponseRedirect(self.request.path_info)
+            
             else:
-                return Http404("User does not exist.")
+                raise Http404("User does not exist.")
 
-        elif 'owner_ban' in request.POST:
-            user = self.queryset.filter(username=username)
-            if user.exists():
-
-                channel_name = request.POST.get('owner_ban').replace(' ', '-')
+        elif 'channel_ban' in request.POST:
+            
+            if request.user.is_authenticated:
+                channel_name = request.POST.get('channel_ban')
                 channel = Channel.objects.filter(channel_name=channel_name)
+                
                 if channel.exists():
-
                     channel = channel.get()
-                    list = json.loads(channel.banned_users)
-                    list.append(username)
-                    channel.banned_users = json.dumps(list)
-                    channel.save()
-                    return HttpResponseRedirect(self.request.path_info)
 
+                    if is_mod(channel, request.user):
+
+                        banned_users = json.loads(channel.banned_users)
+                        banned_users.append(username)
+                        
+                        channel.banned_users = json.dumps(banned_users)
+                        channel.save()
+
+                        return HttpResponseRedirect(self.request.path_info)
+                
+                    else:
+                        raise Http404("Insufficient permissions.")
+                
                 else:
-                    return Http404("Couldn't find that channel.")
+                    raise Http404("Couldn't find that channel.")
 
             else:
-                return Http404("User does not exist.")
+                raise Http404("User does not exist.")
 
-        elif 'owner_unban' in request.POST:
-            user = self.queryset.filter(username=username)
-            if user.exists():
-
-                channel_name = request.POST.get('owner_unban').replace(' ', '-')
+        elif 'channel_unban' in request.POST:
+            
+            if request.user.is_authenticated:
+                channel_name = request.POST.get('channel_unban')
                 channel = Channel.objects.filter(channel_name=channel_name)
+                
                 if channel.exists():
-
                     channel = channel.get()
-                    list = json.loads(channel.banned_users)
-                    for i in range(len(list)):
-                        if username in list[i]:
-                            list.pop(i)
-                    print(list)
-                    channel.banned_users = json.dumps(list)
-                    channel.save()
-                    return HttpResponseRedirect(self.request.path_info)
 
+                    if is_mod(channel, request.user):
+                    
+                        banned_users = json.loads(channel.banned_users)
+                        banned_users = [u for u in banned_users if not u == username]
+
+                        channel.banned_users = json.dumps(banned_users)
+                        channel.save()
+                        
+                        return HttpResponseRedirect(self.request.path_info)
+
+                    else:
+                        raise Http404("Insufficient permissions.")
+                
                 else:
-                    return Http404("Couldn't find that channel.")
+                    raise Http404("Couldn't find that channel.")
 
             else:
-                return Http404("User does not exist.")
-
-        elif 'moderator_ban' in request.POST:
-            user = self.queryset.filter(username=username)
-            if user.exists():
-
-                channel_name = request.POST.get('moderator_ban').replace(' ', '-')
-                channel = Channel.objects.filter(channel_name=channel_name)
-                if channel.exists():
-
-                    channel = channel.get()
-                    list = json.loads(channel.banned_users)
-                    list.append(username)
-                    channel.banned_users = json.dumps(list)
-                    channel.save()
-                    return HttpResponseRedirect(self.request.path_info)
-
-                else:
-                    return Http404("Couldn't find that channel.")
-
-            else:
-                return Http404("User does not exist.")
-
-        elif 'moderator_unban' in request.POST:
-            user = self.queryset.filter(username=username)
-            if user.exists():
-
-                channel_name = request.POST.get('moderator_unban').replace(' ', '-')
-                channel = Channel.objects.filter(channel_name=channel_name)
-                if channel.exists():
-
-                    channel = channel.get()
-                    list = json.loads(channel.banned_users)
-                    for i in range(len(list)):
-                        if username in list[i]:
-                            list.pop(i)
-                    print(list)
-                    channel.banned_users = json.dumps(list)
-                    channel.save()
-                    return HttpResponseRedirect(self.request.path_info)
-
-                else:
-                    return Http404("Couldn't find that channel.")
-
-            else:
-                return Http404("User does not exist.")
+                raise Http404("User does not exist.")
 
 class FavoritesView(ViewMixin, generic.DetailView):
     model = Channel
@@ -443,7 +518,7 @@ class FavoritesView(ViewMixin, generic.DetailView):
 
     def get_object(self):
         if self.request.user.is_authenticated():
-            settings = get_settings(self.request.user)
+            settings = get_or_create_settings(self.request.user)
             return self.queryset.filter(channel_name__in=json.loads(settings.favorites))
         
         return self.queryset.none()
@@ -453,7 +528,7 @@ class FavoritesView(ViewMixin, generic.DetailView):
             return HttpResponseRedirect(reverse('forumapp:channel'))
 
         if 'add_favorite' in request.POST:
-            settings = get_settings(self.request.user)
+            settings = get_or_create_settings(self.request.user)
             favs = json.loads(settings.favorites)
             channel_name = request.POST['channel_name']
 
@@ -466,7 +541,7 @@ class FavoritesView(ViewMixin, generic.DetailView):
                 messages.error(request, "Channel already in favorites")
 
         elif 'remove_favorite' in request.POST:
-            settings = get_settings(self.request.user)
+            settings = get_or_create_settings(self.request.user)
             favs = json.loads(settings.favorites)
             channel_name = request.POST['channel_name']
             

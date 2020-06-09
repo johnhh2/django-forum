@@ -4,10 +4,16 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 
+# manager that uses queryset with nulls last
+class NullsLastManager(models.Manager):
+
+    def get_queryset(self):
+        return models.QuerySet(self.model, using=self._db).order_by(models.F('pin_date').asc(nulls_last=True))
+
 # One-to-one with User
 class UserSettings(models.Model):
     user = models.OneToOneField(User, primary_key=True)
-    favorites = models.TextField(default='["General"]')
+    favorites = models.TextField(default='[]')
     bio = models.TextField(max_length=250, default='Hello world')
 
     class Meta:
@@ -18,13 +24,18 @@ class UserSettings(models.Model):
 
 # Store channel_name as primary_key
 class Channel(models.Model):
+    objects = NullsLastManager()
+
     channel_name = models.SlugField(max_length=30, primary_key=True)
-    moderators = models.TextField(default='[]')
     description = models.CharField(max_length=250, default='')
+
+    banned_users = models.TextField(default='[]')
+    moderators = models.TextField(default='[]')
+    pin_date = models.DateTimeField('date pinned', null=True)
+    
     owner = models.ForeignKey(User, to_field="username", null=True, on_delete=models.SET_NULL)
     pub_date = models.DateTimeField('date published', default=timezone.now)
     recent_date = models.DateTimeField('date used', default=timezone.now)
-    banned_users = models.TextField(default='[]')
 
     class Meta:
         ordering = ['-recent_date']
@@ -42,19 +53,22 @@ class Channel(models.Model):
 
 # Store channel and thread_id as primary keys
 class Thread(models.Model):
+    objects = NullsLastManager()
+    
     thread_id = models.IntegerField(default=0)
     channel = models.ForeignKey(Channel)
-
+    
     thread_name = models.CharField(max_length=90)
     description = models.CharField(max_length=150)
-
+    pin_date = models.DateTimeField('date pinned', null=True)
+    
     owner = models.ForeignKey(User, to_field="username", null=True, on_delete=models.SET_NULL)
     pub_date = models.DateTimeField('date published', default=timezone.now)
     recent_date = models.DateTimeField('date used', default=timezone.now)
 
     class Meta:
         unique_together = (('channel', 'thread_id'))
-        ordering = ['-recent_date']
+        ordering = ['pin_date', '-recent_date']
 
     def __str__(self):
         return self.thread_name

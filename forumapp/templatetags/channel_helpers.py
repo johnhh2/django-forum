@@ -7,7 +7,7 @@ register = template.Library()
 #Cyustom filter for Channels to make sure the current user isn't banned
 @register.filter
 def minus_bans(channel_list, username):
-    channels = [c.channel_name for c in channel_list if username not in json.loads(c.banned_users)]
+    channels = [c.channel_name for c in channel_list if str(username) not in json.loads(c.banned_users)]
     return Channel.objects.filter(channel_name__in=channels)
 
 @register.filter
