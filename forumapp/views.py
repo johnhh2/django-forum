@@ -17,7 +17,7 @@ def get_or_create_settings(user):
     else:
         return UserSettings.objects.create(user=user)
  
-## Return whether a user is staff or an owner or moderator of the channel
+## Return whether a user is an owner or moderator of the channel
 def is_mod(obj, user):
     # retrieve channel regardless of if we have a channel, thread, or comment
     channel = isinstance(obj, Comment) and obj.thread.channel \
@@ -27,6 +27,16 @@ def is_mod(obj, user):
     return user.get_username == channel.owner.get_username \
             or user.get_username in json.loads(channel.moderators)
 
+## Return whether a user is an owner of the channel
+def is_owner(obj, user):
+    # retrieve channel regardless of if we have a channel, thread, or comment
+    channel = isinstance(obj, Comment) and obj.thread.channel \
+            or (isinstance(obj, Thread) and obj.channel or obj)
+
+    # check if user is owner
+    return user.get_username == channel.owner.get_username
+
+## Automatically lets views attach form and context_objects to the context if defined
 class ViewMixin(generic.base.ContextMixin):
     initial = {'key': 'value'}
 
@@ -39,7 +49,7 @@ class ViewMixin(generic.base.ContextMixin):
             context[self.context_object_name] = self.get_object()
         return context
 
-# Show the settings menu TODO: 404 when not logged in
+# Show the settings menu
 class UserSettingsView(ViewMixin, generic.DetailView):
     model = UserSettings
     template_name = 'forumapp/user_settings.html'
@@ -59,6 +69,8 @@ class UserSettingsView(ViewMixin, generic.DetailView):
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
+        if not self.object:
+            return Http404("User does not exist. Are you logged in?")
 
         return super(UserSettingsView, self).get(self, request, *args, **kwargs)
 
@@ -174,7 +186,7 @@ class ChannelView(ViewMixin, generic.ListView):
 
             else:
                 channel.delete()
-                messages.error(request, "Invalid input. Channel name must contain hyphens \
+                messages.error(request, " Channel name must contain hyphens \
                         in place of whitespace and cannot contain symbols.")
 
         return HttpResponseRedirect(self.request.path_info)
@@ -398,7 +410,7 @@ class CommentView(ViewMixin, generic.DetailView):
 
             else:
                 comment.delete()
-                messages.error(request, "Invalid input.")
+                messages.error(request, "")
 
         return HttpResponseRedirect(self.request.path_info)
 
@@ -467,7 +479,11 @@ class UserView(ViewMixin, generic.DetailView):
                         banned_users = json.loads(channel.banned_users)
                         banned_users.append(username)
                         
+                        moderators = json.loads(channel.banned_users)
+                        moderators = [u for u in moderators if not u == username]
+                        
                         channel.banned_users = json.dumps(banned_users)
+                        channel.moderators = json.dumps(moderators)
                         channel.save()
 
                         return HttpResponseRedirect(self.request.path_info)
@@ -496,6 +512,62 @@ class UserView(ViewMixin, generic.DetailView):
                         banned_users = [u for u in banned_users if not u == username]
 
                         channel.banned_users = json.dumps(banned_users)
+                        channel.save()
+                        
+                        return HttpResponseRedirect(self.request.path_info)
+
+                    else:
+                        raise Http404("Insufficient permissions.")
+                
+                else:
+                    raise Http404("Couldn't find that channel.")
+
+            else:
+                raise Http404("User does not exist.")
+        
+        elif 'promote_mod' in request.POST:
+            
+            if request.user.is_authenticated:
+                channel_name = request.POST.get('channel_name')
+                channel = Channel.objects.filter(channel_name=channel_name)
+                
+                if channel.exists():
+                    channel = channel.get()
+
+                    if is_owner(channel, request.user):
+
+                        moderators = json.loads(channel.moderators)
+                        moderators.append(username)
+                        
+                        channel.moderators = json.dumps(moderators)
+                        channel.save()
+
+                        return HttpResponseRedirect(self.request.path_info)
+                
+                    else:
+                        raise Http404("Insufficient permissions.")
+                
+                else:
+                    raise Http404("Couldn't find that channel.")
+
+            else:
+                raise Http404("User does not exist.")
+
+        elif 'demote_mod' in request.POST:
+            
+            if request.user.is_authenticated:
+                channel_name = request.POST.get('channel_name')
+                channel = Channel.objects.filter(channel_name=channel_name)
+                
+                if channel.exists():
+                    channel = channel.get()
+
+                    if is_owner(channel, request.user):
+                    
+                        moderators = json.loads(channel.moderators)
+                        moderators = [u for u in moderators if not u == username]
+
+                        channel.moderators = json.dumps(moderators)
                         channel.save()
                         
                         return HttpResponseRedirect(self.request.path_info)

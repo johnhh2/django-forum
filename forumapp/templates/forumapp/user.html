@@ -15,6 +15,12 @@
 		</form>
 		</div>
 	{% endif %}
+	{% if request.user|get_owned_channels_not_moderated_by_user:object %}
+	<button type="button" class="warning button radius" data-open="promoteMod">Promote to moderator</button>
+	{% endif %}
+	{% if request.user|get_owned_channels_moderated_by_user:object %}
+	<button type="button" class="warning button radius" data-open="demoteMod">Demote moderator</button>
+	{% endif %}
 	{% if request.user|get_moderated_channels_only_banned:object %}
 	<button type="button" class="warning button radius" data-open="channelUnban">Unban from a channel</button>
 	{% endif %}
@@ -27,11 +33,50 @@
 <p>Last login: {{ object.last_login }}</p>
 
 {% if request.user != object %}
-	{% if request.user|get_moderated_channels_minus_banned:object %}
-		<div class="reveal" id="channelBan" data-reveal>
-			<h3>Ban user from a channel?</h3>
+	{% if request.user|get_owned_channels %}
+		<div class="reveal" id="promoteMod" data-reveal>
+			<h3>Promote user to moderator of a channel</h3>
 			<form action="#" method="post">
 				{% csrf_token %}
+
+				<label for="channel_name">Choose a channel:</label>
+				<select name="channel_name" id="channel_name">
+
+				{% for channel in request.user|get_owned_channels_not_moderated_by_user:object %}
+					<option value="{{ channel }}">{{ channel }}</option>
+				{% endfor %}
+				</select>
+				<button type="submit" class="warning button radius" name="promote_mod">Promote</button>
+			</form>
+			<button class="close-button" data-close aria-label="Close modal" type="button">
+				<span aria-hidden="true">&times;</span>
+			</button>
+		</div>
+		<div class="reveal" id="demoteMod" data-reveal>
+			<h3>Demote moderator of channel</h3>
+			<form action="#" method="post">
+				{% csrf_token %}
+
+				<label for="channel_name">Choose a channel:</label>
+				<select name="channel_name" id="channel_name">
+
+				{% for channel in request.user|get_owned_channels_moderated_by_user:object %}
+					<option value="{{ channel }}">{{ channel }}</option>
+				{% endfor %}
+				</select>
+				<button type="submit" class="warning button radius" name="demote_mod">Demote</button>
+			</form>
+			<button class="close-button" data-close aria-label="Close modal" type="button">
+				<span aria-hidden="true">&times;</span>
+			</button>
+		</div>
+	{% endif %}
+	{% if request.user|get_moderated_channels_minus_banned:object %}
+		<div class="reveal" id="channelBan" data-reveal>
+			<h3>Ban user from a channel</h3>
+			<form action="#" method="post">
+				{% csrf_token %}
+
 				<label for="channel_name">Choose a channel:</label>
 				<select name="channel_name" id="channel_name">
 
@@ -58,7 +103,7 @@
 					<option value="{{ channel }}">{{ channel }}</option>
 				{% endfor %}
 				</select>
-				<button type="submit" class="alert button radius" name="channel_unban">Ban</button>
+				<button type="submit" class="alert button radius" name="channel_unban">Unban</button>
 			</form>
 			<button class="close-button" data-close aria-label="Close modal" type="button">
 				<span aria-hidden="true">&times;</span>
