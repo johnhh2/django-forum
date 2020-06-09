@@ -8,6 +8,7 @@ migrations/
 node_modules/
 poetry.lock
 package-lock.json
+*.swp
 
 ### Django ###
 *.log
