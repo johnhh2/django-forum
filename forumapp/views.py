@@ -79,6 +79,7 @@ class ChannelView(ViewMixin, generic.ListView):
     def get_object(self, exclude=None):
         return self.queryset.all()
 
+    
     def post(self, request, *args, **kwargs):
 
         if 'add_favorite' in request.POST:
@@ -158,9 +159,22 @@ class ThreadView(ViewMixin, generic.DetailView):
         return self.queryset.filter(channel__channel_name=c_name)
 
     def post(self, request, *args, **kwargs):
-        channel = get_object_or_404(Channel, channel_name=self.kwargs.get('channel'))
+        
+        channel = Channel.objects.filter(channel_name=self.kwargs.get('channel'))
+        if not channel.exists():
+            return HttpResponseRedirect(reverse('forumapp:channel'))
 
-        if 'delete' in request.POST:
+        channel = channel.get()
+
+        if 'delete_thread' in request.POST:
+            if request.user.is_staff or request.user.get_username == channel.owner.get_username or request.user.get_username in json.loads(channel.moderators):
+
+                thread_id = request.POST['thread_id']
+                thread = self.queryset.filter(channel=channel, thread_id=thread_id)
+                if thread.exists():
+                    thread.delete()
+
+        elif 'delete_channel' in request.POST:
             channel.delete()
 
             return HttpResponseRedirect(reverse('forumapp:channel'))
@@ -211,7 +225,7 @@ class ThreadView(ViewMixin, generic.DetailView):
                 thread.delete()
                 messages.error(request, "Invalid input")
 
-            return HttpResponseRedirect(self.request.path_info)
+        return HttpResponseRedirect(self.request.path_info)
 
 class CommentView(ViewMixin, generic.DetailView):
     model = Comment
@@ -228,11 +242,24 @@ class CommentView(ViewMixin, generic.DetailView):
         c_name = self.kwargs.get('channel')
 
         return self.queryset.filter(thread__thread_id=t_id, thread__channel__channel_name=c_name)
-
+    
     def post(self, request, *args, **kwargs):
-        thread = get_object_or_404(Thread, channel__channel_name=self.kwargs.get('channel'), thread_id=self.kwargs.get('thread'))
+        
+        thread = Thread.objects.filter(channel__channel_name=self.kwargs.get('channel'), thread_id=self.kwargs.get('thread'))
+        if not thread.exists():
+            return HttpResponseRedirect(reverse('forumapp:thread', kwargs={'channel': self.kwargs.get('channel')}))
 
-        if 'delete' in request.POST:
+        thread = thread.get()
+
+        if 'delete_comment' in request.POST:
+            if request.user.is_staff or request.user.get_username == thread.channel.owner.get_username or request.user.get_username in json.loads(thread.channel.moderators):
+
+                comment_id = request.POST['comment_id']
+                comment = self.queryset.filter(thread=thread, comment_id=comment_id)
+                if comment.exists():
+                    comment.delete()
+
+        elif 'delete_thread' in request.POST:
             thread.delete()
 
             return HttpResponseRedirect(reverse('forumapp:thread', kwargs={'channel': self.kwargs.get('channel')}))
@@ -276,7 +303,7 @@ class CommentView(ViewMixin, generic.DetailView):
                 comment.delete()
                 messages.error(request, "Invalid input.")
 
-            return HttpResponseRedirect(self.request.path_info)
+        return HttpResponseRedirect(self.request.path_info)
 
 class UserView(ViewMixin, generic.DetailView):
     model = User

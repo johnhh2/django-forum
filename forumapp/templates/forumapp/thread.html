@@ -8,7 +8,7 @@
   <input type="submit" class="primary button radius" value="Back to channels" name="back">
   <button type="button" class="button float-right radius" data-open="newThread">Create a new thread</button>
   {% if view.kwargs.channel|is_owned_by:user.get_username or perms.forumapp.delete_channel %}
-    <input type="submit" class="alert button radius" value="Delete this channel" name="delete">
+    <input type="submit" class="alert button radius" value="Delete this channel" name="delete_channel">
   {% endif %}
 </form>
 

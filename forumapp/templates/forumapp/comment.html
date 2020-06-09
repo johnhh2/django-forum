@@ -8,7 +8,7 @@
   <input type="submit" class="primary button radius" value="Back to {{ view.kwargs.channel }}" name="back">
   <button type="button" class="button float-right radius" data-open="newComment">Create a new comment</button>
   {% if view.kwargs|is_owner:user.get_username or perms.forumapp.delete_thread %}
-      <input type="submit" class="alert button radius" value="Delete this thread" name="delete">
+      <input type="submit" class="alert button radius" value="Delete this thread" name="delete_thread">
   {% endif %}
 </form>
 
