@@ -42,7 +42,7 @@
           <li><a href="{% url 'registration:logout' %}" style='color: #1468a0'>Logout</a></li>
           <li><a href="{% url 'forumapp:settings' %}" style='color: #1468a0'>Settings</a></li>
         {% else %}
-          <a><li>Welcome, guest.</a></li>
+          <li><a style='color: black'>Welcome, guest</a></li>
           <li><a href="{% url 'registration:login' %}" style='color: #1468a0'>Login</a></li>
           <li><a href="{% url 'registration:signup' %}" style='color: #1468a0'>Sign up</a></li>
         {% endif %}
