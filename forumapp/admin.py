@@ -16,11 +16,12 @@ class ChannelAdmin(admin.ModelAdmin):
         ('Date Information', {'fields': ['pub_date']}),
         ('Owner',            {'fields': ['owner']}),
         ('Moderators',       {'fields': ['moderators']}),
+        ('Banned',           {'fields': ['banned_users']}),
     ]
 
     inlines = [ThreadInline]
 
-    list_display = ('channel_name', 'description', 'owner', 'moderators', 'pub_date', 'is_recent')
+    list_display = ('channel_name', 'description', 'owner', 'moderators', 'banned_users', 'pub_date', 'is_recent')
     list_filter = ['pub_date']
     search_fields = ['channel_name']
 

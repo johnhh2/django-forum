@@ -32,9 +32,14 @@
 			<h3>Ban user from a channel?</h3>
 			<form action="#" method="post">
 				{% csrf_token %}
+				<label for="channel_name">Choose a channel:</label>
+				<select name="channel_name" id="channel_name">
+
 				{% for channel in request.user|get_moderated_channels_minus_banned:object %}
-				<input type="submit" class="tiny alert button radius" value="{{ channel }}" name="channel_ban">
+					<option value="{{ channel }}">{{ channel }}</option>
 				{% endfor %}
+				</select>
+				<button type="submit" class="alert button radius" name="channel_ban">Ban</button>
 			</form>
 			<button class="close-button" data-close aria-label="Close modal" type="button">
 				<span aria-hidden="true">&times;</span>
@@ -46,9 +51,14 @@
 			<h3>Unban user from a channel?</h3>
 			<form action="#" method="post">
 				{% csrf_token %}
+				<label for="channel_name">Choose a channel:</label>
+				<select name="channel_name" id="channel_name">
+
 				{% for channel in request.user|get_moderated_channels_only_banned:object %}
-				<input type="submit" class="tiny success button radius" value="{{ channel }}" name="channel_unban">
+					<option value="{{ channel }}">{{ channel }}</option>
 				{% endfor %}
+				</select>
+				<button type="submit" class="alert button radius" name="channel_unban">Ban</button>
 			</form>
 			<button class="close-button" data-close aria-label="Close modal" type="button">
 				<span aria-hidden="true">&times;</span>

@@ -456,7 +456,7 @@ class UserView(ViewMixin, generic.DetailView):
         elif 'channel_ban' in request.POST:
             
             if request.user.is_authenticated:
-                channel_name = request.POST.get('channel_ban')
+                channel_name = request.POST.get('channel_name')
                 channel = Channel.objects.filter(channel_name=channel_name)
                 
                 if channel.exists():
@@ -484,7 +484,7 @@ class UserView(ViewMixin, generic.DetailView):
         elif 'channel_unban' in request.POST:
             
             if request.user.is_authenticated:
-                channel_name = request.POST.get('channel_unban')
+                channel_name = request.POST.get('channel_name')
                 channel = Channel.objects.filter(channel_name=channel_name)
                 
                 if channel.exists():
