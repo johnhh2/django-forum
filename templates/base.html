@@ -30,19 +30,23 @@
   <div class="top-bar" style='background: #60b8b8;'>
     <div class="top-bar-left">
       <ul class="dropdown menu" data-dropdown-menu style='background: #60b8b8;'>
-        <li class="menu-text">
-          <h3><a href="{% url 'forumapp:channel' %}" style='color: #1468a0'>Forum</a></h3>
-        </li>
+        <li class="menu-text">Forum</li>
+	<li><a href="{% url 'forumapp:channel' %}" style='color: #1468a0'>Channels</a></li>
+	<li><a href="{% url 'forumapp:favorites' %}" style='color: #1468a0'>Favorites</a></li>
       </ul>
     </div>
     <div class="top-bar-right">
       <ul class="menu" style='background: #60b8b8;'>
         {% if request.user.is_authenticated %}
-          <li><a style='color: black'>Welcome, {{ request.user.get_username }}</a></li>
+          <li class="menu-text">Welcome, {{ request.user.get_username }}</li>
           <li><a href="{% url 'registration:logout' %}" style='color: #1468a0'>Logout</a></li>
           <li><a href="{% url 'forumapp:settings' %}" style='color: #1468a0'>Settings</a></li>
         {% else %}
+<<<<<<< HEAD
           <li><a style='color: black'>Welcome, guest</a></li>
+=======
+          <li class="menu-text">Welcome, guest.</li>
+>>>>>>> 18d6bf3fc028aac8fcfa5ed43d772feb9187a79b
           <li><a href="{% url 'registration:login' %}" style='color: #1468a0'>Login</a></li>
           <li><a href="{% url 'registration:signup' %}" style='color: #1468a0'>Sign up</a></li>
         {% endif %}

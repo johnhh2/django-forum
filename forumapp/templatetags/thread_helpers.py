@@ -7,10 +7,24 @@ register = template.Library()
 #Create filter for threads to see if they are owned by the user passed in
 @register.filter
 def is_owned_by(channel_name, username):
-    return Channel.objects.get(channel_name=channel_name).owner.get_username() == username
+    channel = Channel.objects.filter(channel_name=channel_name)
+    if channel.exists():
+        return owner.get().get_username() == username
+    else:
+        return False
 
 #Custom filter for threads to return the channel they belong to's description
 @register.filter
 def description(channel_name):
-    if Channel.objects.filter(channel_name=channel_name).exists():
-        return Channel.objects.get(channel_name=channel_name).description
+    channel = Channel.objects.filter(channel_name=channel_name)
+    if channel.exists():
+        return channel.get().description
+    else:
+        return ''
+
+@register.filter
+def is_moderator(user, channel):
+    if user.get_username == channel.owner.get_username:
+        return True
+    else:
+        return user.get_username in json.loads(channel.moderators)
