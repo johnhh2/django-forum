@@ -6,6 +6,7 @@ from django.shortcuts import render
 from django.views import generic
 from django.utils import timezone
 from django.urls import reverse
+from django.forms.models import model_to_dict
 from .models import UserSettings, Channel, Thread, Comment
 from .forms import UserSettingsForm, ChannelForm, ThreadForm, CommentForm
 
@@ -44,12 +45,20 @@ class ViewMixin(generic.base.ContextMixin):
         context = super(ViewMixin, self).get_context_data(**kwargs)
 
         if hasattr(self, 'form_class'):
-            context['form'] = self.form_class(initial=self.initial)
+            if hasattr(self, 'form_object'):
+
+                #convert object to iterable for form constructor
+                context['form'] = self.form_class(initial=model_to_dict(self.object))
+            
+            else:
+                context['form'] = self.form_class(initial=self.initial)
+
         if hasattr(self, 'context_object_name'):
             context[self.context_object_name] = self.get_object()
+
         return context
 
-# Show the settings menu
+# Show the settings menu TODO: FIX
 class UserSettingsView(ViewMixin, generic.DetailView):
     model = UserSettings
     template_name = 'forumapp/user_settings.html'
@@ -60,22 +69,21 @@ class UserSettingsView(ViewMixin, generic.DetailView):
 
     def get_object(self):
         if self.request.user.is_authenticated:
-            settings = self.queryset.filter(user=self.request.user)
-            if settings.exists():
-                return settings.get()
-            else:
-                return self.queryset.create(user=self.request.user)
+            return get_or_create_settings(self.request.user)
+
         return self.queryset.none()
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
-        if not self.object:
-            return Http404("User does not exist. Are you logged in?")
+        self.form_object = True
 
+        if not hasattr(self, 'object'):
+            return Http404("User does not exist. Are you logged in?")
+        
         return super(UserSettingsView, self).get(self, request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
-        self.object = get_or_create_settings(request.user)
+        self.object = self.get_object()
 
         if 'save' in request.POST:
             form = self.form_class(request.POST, instance=self.object)
@@ -87,6 +95,8 @@ class UserSettingsView(ViewMixin, generic.DetailView):
                 messages.error(request, "Invalid input")
 
         return HttpResponseRedirect(self.request.path_info)
+
+# TODO: Channel settings view
 
 # Create your views here.
 class ChannelView(ViewMixin, generic.ListView):
@@ -109,24 +119,18 @@ class ChannelView(ViewMixin, generic.ListView):
             favs = json.loads(settings.favorites)
             channel_name = request.POST['channel_name']
 
-            if not channel_name in favs:
-                favs.append(channel_name)
-                settings.favorites = json.dumps(favs)
-                settings.save()
-            else:
-                messages.error(request, "Channel already in favorites")
+            favs.append(channel_name)
+            settings.favorites = json.dumps(favs)
+            settings.save()
 
         elif 'remove_favorite' in request.POST:
             settings = get_or_create_settings(self.request.user)
             favs = json.loads(settings.favorites)
             channel_name = request.POST['channel_name']
             
-            if channel_name in favs:
-                favs.remove(channel_name)
-                settings.favorites = json.dumps(favs)
-                settings.save()
-            else:
-                messages.error(request, "Channel not found in favorites")        
+            favs = [c for c in favs if not c == channel_name]
+            settings.favorites = json.dumps(favs)
+            settings.save()
 
         elif 'pin' in request.POST:
             channel_name = request.POST['channel_name']
@@ -419,6 +423,7 @@ class UserView(ViewMixin, generic.DetailView):
     template_name = 'forumapp/user.html'
 
     queryset = User.objects
+
     def get_object(self):
         username = self.kwargs.get('username')
 
@@ -449,7 +454,6 @@ class UserView(ViewMixin, generic.DetailView):
             if request.user.is_authenticated and request.user.is_staff:
                 user.is_active = False
                 user.save()
-                return HttpResponseRedirect(self.request.path_info)
             
             else:
                 raise Http404("User does not exist.")
@@ -459,8 +463,6 @@ class UserView(ViewMixin, generic.DetailView):
             if request.user.is_authenticated and request.user.is_staff:
                 user.is_active = True
                 user.save()
-
-                return HttpResponseRedirect(self.request.path_info)
             
             else:
                 raise Http404("User does not exist.")
@@ -485,8 +487,6 @@ class UserView(ViewMixin, generic.DetailView):
                         channel.banned_users = json.dumps(banned_users)
                         channel.moderators = json.dumps(moderators)
                         channel.save()
-
-                        return HttpResponseRedirect(self.request.path_info)
                 
                     else:
                         raise Http404("Insufficient permissions.")
@@ -513,8 +513,6 @@ class UserView(ViewMixin, generic.DetailView):
 
                         channel.banned_users = json.dumps(banned_users)
                         channel.save()
-                        
-                        return HttpResponseRedirect(self.request.path_info)
 
                     else:
                         raise Http404("Insufficient permissions.")
@@ -541,8 +539,6 @@ class UserView(ViewMixin, generic.DetailView):
                         
                         channel.moderators = json.dumps(moderators)
                         channel.save()
-
-                        return HttpResponseRedirect(self.request.path_info)
                 
                     else:
                         raise Http404("Insufficient permissions.")
@@ -570,8 +566,6 @@ class UserView(ViewMixin, generic.DetailView):
                         channel.moderators = json.dumps(moderators)
                         channel.save()
                         
-                        return HttpResponseRedirect(self.request.path_info)
-
                     else:
                         raise Http404("Insufficient permissions.")
                 
@@ -580,6 +574,8 @@ class UserView(ViewMixin, generic.DetailView):
 
             else:
                 raise Http404("User does not exist.")
+
+        return HttpResponseRedirect(self.request.path_info)
 
 class FavoritesView(ViewMixin, generic.DetailView):
     model = Channel

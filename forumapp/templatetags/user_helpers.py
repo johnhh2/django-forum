@@ -1,6 +1,6 @@
 import json
 from django.contrib.auth.models import User
-from forumapp.models import Channel, Thread, Comment
+from forumapp.models import UserSettings, Channel, Thread, Comment
 from django import template
 from django.db.models import Q
 register = template.Library()
@@ -49,3 +49,12 @@ def get_moderated_channels_only_banned(moderator, user):
 
     # only include banned users
     return channels.filter(banned_users__contains='"'+user.get_username()+'"')
+
+@register.filter
+def get_bio(user):
+    settings = UserSettings.objects.filter(user=user)
+
+    if settings.exists():
+        return settings.get().bio
+    else:    
+        return UserSettings.objects.create(user=user).bio

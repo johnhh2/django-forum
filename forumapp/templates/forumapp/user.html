@@ -2,6 +2,8 @@
 {% load user_helpers %}
 {% block content %}
 
+
+{% if request.user != object %}
 <div class="clearfix grid-x">
 	{% if request.user != object and request.user.is_staff %}
 		<div class="cell small-1">
@@ -28,9 +30,15 @@
 	<button type="button" class="warning button radius" data-open="channelBan">Ban from a channel</button>
 	{% endif %}
 </div>
-<h2>User profile for {{ object.get_username }}</h2>
+{% else %}
+	</br>
+{% endif %}
 
-<p>Last login: {{ object.last_login }}</p>
+<div class="callout panel grid-y">
+	<h2>{{ object.get_username }}'s profile</h2>
+	<p>{{ object|get_bio }}</p>
+	<p>Last login: {{ object.last_login }}</p>
+</div>
 
 {% if request.user != object %}
 	{% if request.user|get_owned_channels %}

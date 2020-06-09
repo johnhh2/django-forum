@@ -20,7 +20,7 @@ class UserSettings(models.Model):
         pass
 
     def __str__(self):
-        return user.get_username
+        return self.user.get_username
 
 # Store channel_name as primary_key
 class Channel(models.Model):

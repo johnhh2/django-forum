@@ -19,4 +19,4 @@ class CommentForm(ModelForm):
 class UserSettingsForm(ModelForm):
     class Meta:
         model = UserSettings
-        exclude = ['user']
+        fields = ['bio',]
