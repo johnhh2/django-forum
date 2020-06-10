@@ -9,7 +9,7 @@
 	{% else %}
 		<div class="clearfix small-12">
 	{% endif %}
-	
+
 	<a href="{% url 'forumapp:thread' view.kwargs.channel %}" class="button" name="back">Back to {{ view.kwargs.channel }}</a>
 	<button type="button" class="button float-right radius" data-open="newComment">Create a new comment</button>
 </div>
@@ -17,14 +17,14 @@
 	<div class="small-1">
 		<form action="#" method="post">
 			{% csrf_token %}
-			<input type="submit" class="alert button radius" value="Delete this thread" name="delete_thread">
+			<button type="submit" class="alert button radius" name="delete_thread">Delete this thread</button>
 		</form>
 	</div>
 {% endif %}
 </div>
 
-<a href="{% url 'forumapp:channel' %}">Forum</a> &gt; 
-<a href="{% url 'forumapp:thread' view.kwargs.channel %}">{{ view.kwargs.channel }}</a> &gt; 
+<a href="{% url 'forumapp:channel' %}">Forum</a> &gt;
+<a href="{% url 'forumapp:thread' view.kwargs.channel %}">{{ view.kwargs.channel }}</a> &gt;
 <a href="{% url 'forumapp:comment' view.kwargs.channel view.kwargs.thread %}">{{ view.kwargs|get_thread_name }}
 </a>&gt; ...<hr>
 
@@ -51,7 +51,7 @@
 	<form action="#" method="post">
 		{% csrf_token %}
 	  	{{ form }}
-		<input type="submit" class="success button float-right radius" value="Create Comment" name="create">
+		<button type="submit" class="success button float-right radius" name="create">Create Comment</button>
 	</form>
   {% include "forumapp/messages.html" %}
 	<button class="close-button" data-close aria-label="Close modal" type="button">

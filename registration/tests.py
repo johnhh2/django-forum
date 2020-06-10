@@ -1,6 +1,7 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
 from django.urls import reverse
+
 class RegistrationTests(TestCase):
     def setUp(self):
         self.credentials = {
@@ -29,12 +30,12 @@ class RegistrationTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertTrue(User.objects.filter(username=username).exists())
-        
+
         response = self.client.post(reverse('registration:logout'), {}, follow=True)
 
         self.assertEqual(response.status_code, 200)
         self.assertFalse(response.context['user'].is_authenticated)
-        
+
         response = self.client.post(reverse('registration:login'), {'username': username, 'password': password}, follow=True)
 
         self.assertEqual(response.status_code, 200)
@@ -50,13 +51,13 @@ class RegistrationTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Passwords do not match")
         self.assertFalse(User.objects.filter(username=username).exists())
-        
+
         response = self.client.post(reverse('registration:signup'), {'username': "%", 'password1': password, 'password2': password, 'email':email}, follow=True)
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Invalid username or password")
         self.assertFalse(User.objects.filter(username=username).exists())
-    
+
     def testLogInErrors(self):
 
         username = "testuser2"

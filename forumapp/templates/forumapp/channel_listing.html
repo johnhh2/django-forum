@@ -1,7 +1,7 @@
 {% load channel_helpers %}
 <div class="callout panel">
   <div class="grid-x">
-    <div class="small-10 cell">
+    <div class="small-9 medium-9 large-10 cell">
       <h3><a href="{% url 'forumapp:thread' channel=listing.channel_name %}">{{ listing }}</a></h3>
       {{ listing.description }}
     </div>
@@ -9,7 +9,7 @@
       Owned by: {% include 'forumapp/user_listing.html' %}
     </div>
 
-    <div class="small-1 cell">
+    <div class="small-2 medium-2 large-1 cell">
       <form action="#" method="post">
       {% csrf_token %}
       {% if request.user.is_staff %}
@@ -20,7 +20,7 @@
           <input type="submit" class="secondary button radius" value="Unpin" name="unpin" style="width:100%;">
         {% endif %}
       {% endif %}
-      
+
       {% if request.user.is_authenticated %}
         <input type="hidden" value="{{ listing.channel_name }}" name="channel_name">
         {% if not listing|is_favorite:request.user %}

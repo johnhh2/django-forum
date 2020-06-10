@@ -3,7 +3,7 @@
 {% block content %}
 
 <div class="clearfix">
-    <button type="button" class="button float-right radius" data-open="newChannel">Create a new channel</button>
+    <button type="button" class="button float-right" data-open="newChannel">Create a new channel</button>
 </div>
 
 <a href="{% url 'forumapp:channel' %}">Forum</a> &gt; ...<hr>
@@ -18,10 +18,10 @@
 
 <div class="reveal" id="newChannel" data-reveal>
 	<h3>Create a new channel:</h3>
-	<form action="#" method="post">
+	<form method="post">
 		{% csrf_token %}
 	  	{{ form }}
-		<input type="submit" class="success button float-right radius" value="Create Channel" name="create">
+		<button type="submit" class="success button float-right submit" name="create">Create Channel</button>
 	</form>
 	<button class="close-button" data-close aria-label="Close modal" type="button">
 		<span aria-hidden="true">&times;</span>

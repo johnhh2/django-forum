@@ -6,6 +6,7 @@ from django.core.exceptions import ValidationError
 from django.utils import timezone
 from django.urls import reverse
 
+from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from .models import Channel, Thread, Comment
 
@@ -21,11 +22,11 @@ class ValidationErrorTestMixin(object):
             self.assertEqual(set(fields), set(e.message_dict.keys()))
 
 ## Helper functions
-def create_channel(name, owner, days=0):
+def create_channel(name, owner, desc="testdesc", days=0):
     time = timezone.now() + datetime.timedelta(days=days)
-    return Channel.objects.create(channel_name=name, owner=owner, pub_date=time)
+    return Channel.objects.create(channel_name=name, owner=owner, description=desc, pub_date=time)
 
-def create_thread(channel, owner, name="name", desc="desc", days=0):
+def create_thread(channel, owner, name="thread123", desc="testdesc", days=0):
     time = timezone.now() + datetime.timedelta(days=days)
     return Thread.objects.create(channel=channel, owner=owner, thread_name=name, description=desc, pub_date=time)
 
@@ -33,12 +34,19 @@ def create_comment(thread, owner, text="text", days=0):
     time = timezone.now() + datetime.timedelta(days=days)
     return Comment.objects.create(thread=thread, text=text, owner=owner, pub_date=time)
 
+def create_user(username, password="password1"):
+    return User.objects.create_user(username=username, password=password)
+
+def login(username, password="password1"):
+    return authenticate(None, username=username, password=password)
+
 ##TODO: create_reply
 
 ## Channel tests
 class ChannelTests(ValidationErrorTestMixin, TestCase):
     channel_name = "Test-channel-123456789"
     channel_name2 = channel_name[:8]
+    channel_desc = "description"
     username = 'owner'
     username2 = 'other'
 
@@ -69,16 +77,15 @@ class ChannelTests(ValidationErrorTestMixin, TestCase):
     def testChannelsAreDisplayed(self):
         owner = User.objects.create(username=self.username)
 
-        channel_name_2 = "testchannel2"
         c = create_channel(self.channel_name, owner)
-        c = create_channel(channel_name_2, owner)
+        c = create_channel(self.channel_name2, owner)
 
         response = self.client.get(reverse('forumapp:channel'))
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, self.channel_name)
-        self.assertContains(response, channel_name_2)
-    
+        self.assertContains(response, self.channel_name2)
+
     ## Tests whether a channel is correctly passed off to one of the channel moderators
     ## if a channel moderator is specified when the owner is deleted
     def testChannelOwnerPassOff(self):
@@ -118,6 +125,23 @@ class ChannelTests(ValidationErrorTestMixin, TestCase):
     # users SHOULD be able to remove their own channels
     def testOwnerRemoveChannel(self):
         pass
+
+    def testCreateChannelUsingForm(self):
+        response = self.client.post(reverse('forumapp:channel'), {'channel_name': self.channel_name, 'description': self.channel_desc}, follow=True)
+        print(response.content)
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.context['user'].is_authenticated)
+        self.assertContains(response, 'Please log in to create channels')
+
+        create_user(self.username)
+        login(self.username)
+
+        response = self.client.post(reverse('forumapp:channel'), {'channel_name': self.channel_name2, 'description': self.channel_desc}, follow=True)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context['user'].is_authenticated)
+        self.assertContains(response, self.channel_name2)
+        self.assertContains(response, self.channel_desc)
 
 ## Thread tests
 class ThreadTests(ValidationErrorTestMixin, TestCase):
@@ -177,7 +201,7 @@ class ThreadTests(ValidationErrorTestMixin, TestCase):
     ## Test whether deleting a thread preserves its channel and deletes its comments
     def testThreadDelete(self):
         owner = User.objects.create(username=self.username)
-        
+
         # Create a channel
         channel = create_channel(self.channel_name, owner)
         thread = create_thread(channel, owner, self.thread_name)
@@ -194,7 +218,7 @@ class ThreadTests(ValidationErrorTestMixin, TestCase):
         self.assertEquals(False, Thread.objects.filter(channel=None).exists())
         self.assertEquals(False, Comment.objects.filter(thread__thread_id=thread_id, comment_id=comment_id).exists())
         self.assertEquals(False, Comment.objects.filter(thread=None).exists())
-    
+
     # Confirm that threadss are unique on (channel, thread_id)
     def testUniqueThread(self):
         user1 = User.objects.create(username=self.username)
@@ -287,11 +311,11 @@ class CommentTests(ValidationErrorTestMixin, TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, self.text)
         self.assertContains(response, self.text[::-1])
-    
+
     ## Test whether deleting a comment preserves its thread
     def testCommentDelete(self):
         owner = User.objects.create(username=self.username)
-        
+
         # Create a channel
         channel = create_channel(self.channel_name, owner)
         thread = create_thread(channel, owner)

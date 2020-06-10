@@ -31,8 +31,11 @@
     <div class="top-bar-left">
       <ul class="dropdown menu" data-dropdown-menu style='background: #60b8b8;'>
         <li class="menu-text">Forum</li>
-	<li><a href="{% url 'forumapp:channel' %}" style='color: #1468a0'>Channels</a></li>
-	<li><a href="{% url 'forumapp:favorites' %}" style='color: #1468a0'>Favorites</a></li>
+        <li><a href="{% url 'forumapp:channel' %}" style='color: #1468a0'>Channels</a></li>
+        <li><a href="{% url 'forumapp:favorites' %}" style='color: #1468a0'>Favorites</a></li>
+        {% if request.user.is_staff %}
+          <li><a href="{% url 'admin:index' %}" style='color: #1468a0'>Administration</a></li>
+        {% endif %}
       </ul>
     </div>
     <div class="top-bar-right">
