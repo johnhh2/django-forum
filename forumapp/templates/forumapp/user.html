@@ -6,13 +6,13 @@
 {% if request.user != object %}
 <div class="clearfix grid-x">
 	{% if request.user != object and request.user.is_staff %}
-		<div class="cell small-1">
+		<div class="cell small-2">
 		<form action="#" method="post">
 			{% csrf_token %}
 			{% if object.is_active %}
 			<input type="submit" class="alert button radius" value="Ban this user" name="admin_ban" style="width: 100%;">
 			{% else %}
-			<input type="submit" class="success button radius" value="Unban this user" name="admin_unban"style="width:100%;">
+			<input type="submit" class="success button radius" value="Unban this user" name="admin_unban" style="width: 100%;">
 			{% endif %}
 		</form>
 		</div>
