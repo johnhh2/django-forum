@@ -3,24 +3,13 @@
 {% load global_helpers %}
 {% block content %}
 
-<div class="grid-x">
-	{% if view.kwargs|is_moderator:request.user or request.user.is_staff %}
-		<div class="clearfix small-11">
-	{% else %}
-		<div class="clearfix small-12">
-	{% endif %}
-
+<div class="clearfix">
 	<a href="{% url 'forumapp:thread' view.kwargs.channel %}" class="button" name="back">Back to {{ view.kwargs.channel }}</a>
+	{% if view.kwargs|is_moderator:request.user or request.user.is_staff %}
+		<button type="button" class="alert button float-right radius" data-open="deleteThread">Delete this thread</button>
+	{% endif %}
 	<button type="button" class="button float-right radius" data-open="newComment">Create a new comment</button>
-</div>
-{% if view.kwargs|is_moderator:request.user or request.user.is_staff %}
-	<div class="small-1">
-		<form action="#" method="post">
-			{% csrf_token %}
-			<input type="submit" class="alert button radius" value="Delete this thread" name="delete_thread">
-		</form>
-	</div>
-{% endif %}
+	
 </div>
 
 <a href="{% url 'forumapp:channel' %}">Forum</a> &gt;
@@ -57,5 +46,12 @@
 	<button class="close-button" data-close aria-label="Close modal" type="button">
 		<span aria-hidden="true">&times;</span>
 	</button>
+</div>
+<div class="reveal" id="deleteThread" data-reveal>
+	<h3>Are you sure you want to delete this thread?</h3>
+	<form action="#" method="post">
+		{% csrf_token %}
+		<input type="submit" class="alert button float-right radius" value="Delete this thread" name="delete_thread">
+	</form>
 </div>
 {% endblock %}
