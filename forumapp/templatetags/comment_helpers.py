@@ -15,7 +15,6 @@ def format_date(date):
     localtz = dateutil.tz.tzlocal()
     localoffset = localtz.utcoffset(datetime.datetime.now(localtz))
     tz = int(localoffset.total_seconds() / 3600)
-    print(localoffset)
     time_diff = timezone.now() - date
     if time_diff > datetime.timedelta(days=365.25):
         return str(date.month) + "/" + str(date.day) + "/" + str(date.year)
