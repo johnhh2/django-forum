@@ -588,12 +588,16 @@ class UserView(ViewMixin, generic.DetailView):
 
                     if is_owner(channel, request.user):
 
-                        moderators = json.loads(channel.moderators)
-                        moderators.append(username)
-                        
-                        channel.moderators = json.dumps(moderators)
-                        channel.save()
+                        if not '"'+username+'"' in channel.banned_users:
+                            moderators = json.loads(channel.moderators)
+                            moderators.append(username)
+                            
+                            channel.moderators = json.dumps(moderators)
+                            channel.save()
                 
+                        else:
+                            messages.error(request, "Channel-banned users cannot be promoted.")
+
                     else:
                         raise Http404("Insufficient permissions.")
                 
