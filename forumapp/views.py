@@ -132,7 +132,7 @@ class ChannelSettingsView(ViewMixin, generic.DetailView):
         self.object = self.get_object()
         
         # make sure user is owner/mod/admin
-        if not (request.user.staff or is_mod(self.object, request.user)):
+        if not (request.user.is_staff or is_mod(self.object, request.user)):
             raise Http404("Insufficient permissions")
 
         if 'save' in request.POST:
