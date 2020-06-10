@@ -1,4 +1,4 @@
-import json, datetime, dateutil.tz
+import json, datetime
 from django import template
 from django.utils import timezone
 from forumapp.models import Channel, Thread, Comment
@@ -11,21 +11,20 @@ def is_recent(comment):
     return comment.is_recent()
 
 @register.filter
-def format_date(date):
-    localtz = dateutil.tz.tzlocal()
-    localoffset = localtz.utcoffset(datetime.datetime.now(localtz))
-    tz = int(localoffset.total_seconds() / 3600)
+def how_recent(date):
     time_diff = timezone.now() - date
     if time_diff > datetime.timedelta(days=365.25):
-        return str(date.month) + "/" + str(date.day) + "/" + str(date.year)
+        return "year"
     elif time_diff > datetime.timedelta(days=30):
-        return str(date.month) + "/" + str(date.day) + " " + str(date.hour + tz) + ":" + str(date.minute)
+        return "month"
     elif time_diff > datetime.timedelta(days=7):
-        pass
+        return "week"
     elif time_diff > datetime.timedelta(days=1):
-        pass
+        return "day"
+    elif timezone.now() > date:
+        return "new"
     else:
-        pass
+        return "future"
 
 #Create filter for comments to see if they are owned by the user passed in
 @register.filter
