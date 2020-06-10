@@ -23,6 +23,14 @@
 {% endif %}
 </div>
 
+<a href="{% url 'forumapp:channel' %}">Forum</a> &gt; 
+<a href="{% url 'forumapp:thread' view.kwargs.channel %}">{{ view.kwargs.channel }}</a> &gt; 
+<a href="{% url 'forumapp:comment' view.kwargs.channel view.kwargs.thread %}">{{ view.kwargs|get_thread_name }}
+</a>&gt; ...<hr>
+
+{% include "forumapp/messages.html" %}
+
+
 {% if request.user|is_banned_from:view.kwargs.channel %}
     <p>Sorry, this channel is unavailable.</p>
 {% else %}

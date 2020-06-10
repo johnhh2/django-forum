@@ -5,7 +5,10 @@
 <div class="clearfix">
     <button type="button" class="button float-right radius" data-open="newChannel">Create a new channel</button>
 </div>
-    {% include "forumapp/messages.html" %}
+
+<a href="{% url 'forumapp:channel' %}">Forum</a> &gt; ...<hr>
+
+{% include "forumapp/messages.html" %}
 
 {% for listing in channel_list|minus_bans:request.user.get_username %}
   {% include "forumapp/channel_listing.html" %}

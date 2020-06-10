@@ -3,16 +3,22 @@
 {% load user_helpers %}
 {% block content %}
 
-<div class="grid-x">
+<div class="clearfix grid-x">
 	{% if view.kwargs|is_moderator:request.user or request.user.is_staff %}
 		<div class="clearfix small-11">
+		<a href="{% url 'forumapp:channel' %}" class="button" name="back">Back to Channels</a>
+		<button type="button" class="button float-right radius" data-open="newThread">
+			Create a new thread
+		</button>
 		<a href="{% url 'forumapp:channel_settings' view.kwargs.channel %}" class="button" name="settings">Settings</a>
 	{% else %}
 		<div class="clearfix small-12">
+		<a href="{% url 'forumapp:channel' %}" class="button" name="back">Back to Channels</a>
+		<button type="button" class="button float-right radius" data-open="newThread">
+			Create a new thread
+		</button>
 	{% endif %}
 	
-	<a href="{% url 'forumapp:channel' %}" class="button" name="back">Back to Channels</a>
-	<button type="button" class="button float-right radius" data-open="newThread">Create a new thread</button>
 </div>
 {% if view.kwargs|is_moderator:user or request.user.is_staff %}
 	<div class="small-1">
@@ -23,6 +29,11 @@
 	</div>
 {% endif %}
 </div>
+
+<a href="{% url 'forumapp:channel' %}">Forum</a> &gt; 
+<a href="{% url 'forumapp:thread' view.kwargs.channel %}">{{ view.kwargs.channel }}</a> &gt; ...<hr>
+
+{% include "forumapp/messages.html" %}
 
 {% if request.user|is_banned_from:view.kwargs.channel %}
   <p>Sorry, this channel is unavailable.</p>
