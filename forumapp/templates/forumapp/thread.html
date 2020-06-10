@@ -4,7 +4,7 @@
 {% block content %}
 
 <div class="clearfix grid-x">
-	{% if view.kwargs|is_moderator:request.user or request.user.is_staff %}
+	{% if view.kwargs|is_owner:request.user or request.user.is_staff %}
 		<div class="clearfix small-11">
 		<a href="{% url 'forumapp:channel' %}" class="button" name="back">Back to Channels</a>
 		<button type="button" class="button float-right radius" data-open="newThread">
@@ -20,7 +20,7 @@
 	{% endif %}
 	
 </div>
-{% if view.kwargs|is_moderator:user or request.user.is_staff %}
+{% if view.kwargs|is_owner:user or request.user.is_staff %}
 	<div class="small-1">
 		<form action="#" method="post">
 			{% csrf_token %}

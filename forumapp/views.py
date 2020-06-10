@@ -35,7 +35,7 @@ def is_owner(obj, user):
             or (isinstance(obj, Thread) and obj.channel or obj)
 
     # check if user is owner
-    return user.get_username == channel.owner.get_username
+    return user == channel.owner
 
 ## Automatically lets views attach form and context_objects to the context if defined
 class ViewMixin(generic.base.ContextMixin):
@@ -285,7 +285,14 @@ class ThreadView(ViewMixin, generic.DetailView):
                 raise Http404("Couldn't find that channel.")
 
         elif 'delete_channel' in request.POST:
-            channel.delete()
+
+            if is_owner(channel, request.user):
+                channel.delete()
+
+                return HttpResponseRedirect(reverse('forumapp:channel'))
+            
+            else:
+                raise Http404("Insufficient permissions.")
 
             return HttpResponseRedirect(reverse('forumapp:channel'))
 
