@@ -1,36 +1,32 @@
 {% load thread_helpers %}
 <div class="row">
     <div class="callout panel radius grid-x">
-	{% if request.user.is_staff or view.kwargs|is_moderator:request.user %}
-		<div class="cell small-10">
-	{% else %}
-		<div class="cell small-11">
-	{% endif %}
-	<h3><a href="{% url 'forumapp:comment' channel=listing.channel.channel_name thread=listing.thread_id %}">{{ listing.thread_name }}</a></h3>
-      	{{ listing.description }}
+	<div class="cell small-10">
+		<h3><a href="{% url 'forumapp:comment' channel=listing.channel.channel_name thread=listing.thread_id %}">{{ listing.thread_name }}</a></h3>
+      		{{ listing.description }}
 	</div>
 	<div class="cell small-1"> 
 		Owned by: {% include 'forumapp/user_listing.html' %}
 	</div>
-	{% if request.user.is_staff or view.kwargs|is_moderator:request.user %}
 	<div class="cell small-1">
+	    {% if request.user.is_staff or view.kwargs|is_moderator:request.user %}
 	    <form action="#" method="post">
 		{% csrf_token %}
-		<input type="hidden" value="{{ listing.thread_id }}" name="thread_id">
-		{% if view.kwargs|is_moderator:request.user %}
-		    {% if not listing.pin_date %}
-			<input type="submit" class="primary button radius" value="Pin" name="pin" style="width:100%;">
-		    {% else %}
-			<input type="submit" class="secondary button radius" value="Unpin" name="unpin" style="width:100%;">
+		    <input type="hidden" value="{{ listing.thread_id }}" name="thread_id">
+		    {% if not request.user.is_staff %}
+			    {% if not listing.pin_date %}
+				<input type="submit" class="primary button radius" value="Pin" name="pin" style="width:100%;">
+			    {% else %}
+				<input type="submit" class="secondary button radius" value="Unpin" name="unpin" style="width:100%;">
+			    {% endif %}
 		    {% endif %}
-		{% endif %}
+		    <input type="submit" class="alert button float-right radius" value="Delete" name="delete_thread" style="width:100%;">
 
-		<input type="submit" class="alert button float-right radius" value="Delete" name="delete_thread" style="width:100%;">
 	    </form>
+	    {% elif listing.pin_date %}
+		<p style="text-align: center;">Pinned</p>
+	    {% endif %}
 	</div>
-	{% else %}
-	    <div class="cell small-10"><p>{{ listing.text }}</p></div>
-	{% endif %}
    
     </div>
 </div>

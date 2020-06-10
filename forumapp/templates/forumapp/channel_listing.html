@@ -19,6 +19,8 @@
         {% else %}
           <input type="submit" class="secondary button radius" value="Unpin" name="unpin" style="width:100%;">
         {% endif %}
+      {% elif listing.pin_date %}
+	<p style="text-align: center;">Pinned</p>
       {% endif %}
 
       {% if request.user.is_authenticated %}
