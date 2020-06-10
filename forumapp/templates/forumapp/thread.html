@@ -20,7 +20,7 @@
 	{% endif %}
 
 </div>
-{% if view.kwargs|is_owner:user or request.user.is_staff %}
+{% if view.kwargs|is_owner:request.user or request.user.is_staff %}
 	<div class="small-1">
 		<form action="#" method="post">
 			{% csrf_token %}
