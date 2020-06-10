@@ -8,5 +8,5 @@ urlpatterns = [
     url(r'logout/', auth_views.logout, {'template_name': 'registration/logout.html'}, name='logout'),
     url(r'signup/', SignUpView, name='signup'),
     url(r'password_reset/', PasswordResetView, name='password_reset'),
-    url(r'password_reset_success/', PasswordResetSuccessView, {'template_name': 'registration/password_reset_success.html'}, name='password_reset_success'),
+    url(r'password_reset_success/', PasswordResetSuccessView, name='password_reset_success'),
 ]

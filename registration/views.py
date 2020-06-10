@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth import authenticate, login
-from django.contrib.auth.forms import AuthenticationForm, PasswordResetForm
+from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm
 from django.urls import reverse
 from .forms import SignUpForm
 
@@ -64,7 +64,7 @@ def PasswordResetView(request):
         return redirect('registration:login')
 
     elif request.method == 'POST':
-        form = PasswordResetForm(data=request.POST)
+        form = PasswordChangeForm(data=request.POST, user=request.user)
 
         if form.is_valid():
             form.save()
@@ -74,7 +74,7 @@ def PasswordResetView(request):
             messages.error(request, 'Email was not found')
 
 
-    form = PasswordResetForm()
+    form = PasswordChangeForm(user=request.user)
     return render(request, 'registration/password_reset.html', {'form': form})
 
 def PasswordResetSuccessView(request):

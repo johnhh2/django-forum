@@ -4,6 +4,8 @@
 <div class="callout panel">
 	<h2>User settings for {{ object.user }}</h2>
 	{% include "forumapp/messages.html" %}
+	<a class="button" href="{% url 'registration:password_reset' %}">Reset your password</a>
+
 	<form action="#" method="post">
 		{% csrf_token %}
 		{{ form }}
