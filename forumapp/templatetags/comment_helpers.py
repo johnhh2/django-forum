@@ -43,18 +43,3 @@ def description(kwargs):
         return thread.get().description
     else:
         return ''
-
-@register.filter
-def is_moderator(kwargs, user):
-    channel_name = kwargs['channel']
-    thread_id = kwargs['thread']
-
-    thread = Thread.objects.filter(channel__channel_name=channel_name, thread_id=thread_id)
-    if thread.exists():
-        thread = thread.get()
-        if user == thread.channel.owner:
-            return True
-        else:
-            return user.get_username() in json.loads(thread.channel.moderators)
-
-    return False
