@@ -40,7 +40,7 @@ class ThreadAdmin(admin.ModelAdmin):
 
 class CommentAdmin(admin.ModelAdmin):
     fieldsets = [
-        (None,               {'fields': ['thread', 'text']}),
+        (None,               {'fields': ['thread', 'comment_id', 'text']}),
         ('Date Information', {'fields': ['pub_date']}),
         ('Owner'           , {'fields': ['owner']}),
     ]
