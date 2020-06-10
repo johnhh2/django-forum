@@ -5,14 +5,14 @@
 
 <div class="clearfix grid-x">
 	{% if view.kwargs|is_owner:request.user or request.user.is_staff %}
-		<div class="clearfix small-11">
+		<div class="small-11">
 		<a href="{% url 'forumapp:channel' %}" class="button" name="back">Back to Channels</a>
 		<button type="button" class="button float-right radius" data-open="newThread">
 			Create a new thread
 		</button>
 		<a href="{% url 'forumapp:channel_settings' view.kwargs.channel %}" class="button" name="settings">Settings</a>
 	{% else %}
-		<div class="clearfix small-12">
+		<div class="small-12">
 		<a href="{% url 'forumapp:channel' %}" class="button" name="back">Back to Channels</a>
 		<button type="button" class="button float-right radius" data-open="newThread">
 			Create a new thread
@@ -24,7 +24,7 @@
 	<div class="small-1">
 		<form action="#" method="post">
 			{% csrf_token %}
-			<button type="submit" class="alert button radius" name="delete_channel">Delete this channel</button>
+			<input type="submit" class="alert button radius" value="Delete this channel" name="delete_channel">
 		</form>
 	</div>
 {% endif %}
