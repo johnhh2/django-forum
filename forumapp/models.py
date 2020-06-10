@@ -8,7 +8,7 @@ from django.core.exceptions import ValidationError
 class NullsLastManager(models.Manager):
 
     def get_queryset(self):
-        return models.QuerySet(self.model, using=self._db).order_by(models.F('pin_date').asc(nulls_last=True))
+        return models.QuerySet(self.model, using=self._db).order_by(models.F('pin_date').asc(nulls_last=True), models.F('recent_date').desc())
 
 # One-to-one with User
 class UserSettings(models.Model):
