@@ -17,7 +17,7 @@ def is_owned_by(kwargs, username):
     
     thread = Thread.objects.filter(channel__channel_name=channel_name, thread_id=thread_id)
     if thread.exists():
-        return thread.get().owner.get_username == username
+        return thread.get().owner == user
     else:
         return ''
 
@@ -52,7 +52,7 @@ def is_moderator(kwargs, user):
     thread = Thread.objects.filter(channel__channel_name=channel_name, thread_id=thread_id)
     if thread.exists():
         thread = thread.get()
-        if user.get_username() == thread.channel.owner.get_username:
+        if user == thread.channel.owner:
             return True
         else:
             return user.get_username() in json.loads(thread.channel.moderators)
