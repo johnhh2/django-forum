@@ -42,7 +42,7 @@ npm install
 ```
 ### Set up database
 ```
-python manage.py makemigrations
+python manage.py makemigrations forumapp
 python manage.py migrate
 ```
 
