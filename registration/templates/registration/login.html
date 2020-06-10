@@ -1,6 +1,8 @@
 {% extends 'base.html' %}
 
 {% block content %}
+</br>
+<div class="callout panel">
   <h2>Login</h2>
   <form method="post">
     {% csrf_token %}
@@ -8,4 +10,5 @@
     <button type="submit" class="button submit">Login</button>
   </form>
   {% include 'registration/messages.html' %}
+</div>
 {% endblock %}
