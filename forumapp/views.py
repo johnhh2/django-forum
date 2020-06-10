@@ -123,7 +123,7 @@ class ChannelSettingsView(ViewMixin, generic.DetailView):
             raise Http404("User does not exist. Are you logged in?")
         
         # make sure user is owner/mod/admin
-        if not (is_mod(self.object, request.user) or request.user.is_staff):
+        if not (request.user.is_staff or is_mod(self.object, request.user)):
             raise Http404("Insufficient permissions")
 
         return super(ChannelSettingsView, self).get(self, request, *args, **kwargs)
@@ -132,7 +132,7 @@ class ChannelSettingsView(ViewMixin, generic.DetailView):
         self.object = self.get_object()
         
         # make sure user is owner/mod/admin
-        if not (is_mod(self.object, request.user) or request.user.is_staff):
+        if not (request.user.staff or is_mod(self.object, request.user)):
             raise Http404("Insufficient permissions")
 
         if 'save' in request.POST:
@@ -274,7 +274,7 @@ class ThreadView(ViewMixin, generic.DetailView):
                 thread = thread.get()
 
                 # Require staff, owner, or mod status to delete threads
-                if is_mod(thread, request.user):
+                if request.user.is_staff or is_mod(thread, request.user): 
 
                     thread.delete()
 
@@ -286,7 +286,7 @@ class ThreadView(ViewMixin, generic.DetailView):
 
         elif 'delete_channel' in request.POST:
 
-            if is_owner(channel, request.user):
+            if request.user.is_staff or is_owner(channel, request.user):
                 channel.delete()
 
                 return HttpResponseRedirect(reverse('forumapp:channel'))
@@ -413,7 +413,7 @@ class CommentView(ViewMixin, generic.DetailView):
                 comment = comment.get()
 
                 # Require staff, owner, or mod status to delete comments
-                if is_mod(comment, request.user): 
+                if request.user.is_staff or is_mod(comment, request.user): 
                     
                     comment.delete()
                 
@@ -425,7 +425,7 @@ class CommentView(ViewMixin, generic.DetailView):
 
         elif 'delete_thread' in request.POST:
 
-            if is_mod(thread, request.user):
+            if request.user.is_staff or is_mod(thread, request.user):
                 thread.delete()
 
                 return HttpResponseRedirect(reverse('forumapp:thread', \
