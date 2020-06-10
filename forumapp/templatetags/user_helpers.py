@@ -12,7 +12,6 @@ def get_owned_channels(user):
 @register.filter
 def get_owned_channels_moderated_by_user(owner, user):
     return Channel.objects.filter(owner=owner, moderators__contains='"'+user.get_username()+'"') 
-    
 
 @register.filter
 def get_owned_channels_not_moderated_by_user(owner, user):
@@ -20,6 +19,7 @@ def get_owned_channels_not_moderated_by_user(owner, user):
     
     # exclude banned users
     return channels.filter(~Q(banned_users__contains='"'+user.get_username()+'"'))
+
 @register.filter
 def is_banned_from(user, channel_name):
     channel = Channel.objects.filter(channel_name=channel_name)
@@ -38,8 +38,11 @@ def get_moderated_channels_minus_banned(moderator, user):
     channels = Channel.objects.filter(moderators__contains='"'+moderator.get_username()+'"') | \
             Channel.objects.filter(owner=moderator)
     
-    # exclude banned users
-    return channels.filter(~Q(banned_users__contains='"'+user.get_username()+'"'))
+    # exclude cahannels where user is banned
+    channels = channels.filter(~Q(banned_users__contains='"'+user.get_username()+'"'))
+    
+    # eclude channels where user is owner or moderator
+    return channels.filter(~Q(owner=user), ~Q(moderators__contains='"'+user.get_username()+'"'))
 
 # get owned channels that user is banned from assuming calling user has permissions
 @register.filter

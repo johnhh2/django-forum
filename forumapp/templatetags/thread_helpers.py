@@ -6,10 +6,11 @@ register = template.Library()
 
 #Create filter for threads to see if they are owned by the user passed in
 @register.filter
-def is_owned_by(channel_name, username):
-    channel = Channel.objects.filter(channel_name=channel_name)
+def is_owner(kwargs, user):
+    channel = Channel.objects.filter(channel_name=kwargs['channel_name'])
+
     if channel.exists():
-        return owner.get().get_username() == username
+        return owner.get() == user
     else:
         return False
 

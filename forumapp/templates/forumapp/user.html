@@ -34,6 +34,8 @@
 	</br>
 {% endif %}
 
+{% include "forumapp/messages.html" %}
+
 <div class="callout panel grid-y">
 	<h2>{{ object.get_username }}'s profile</h2>
 	<p>{{ object|get_bio }}</p>
