@@ -66,7 +66,7 @@ Set up database
 
 ::
 
-   python manage.py makemigrations
+   python manage.py makemigrations forumapp
    python manage.py migrate
 
 Run the test server
