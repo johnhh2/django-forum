@@ -4,7 +4,7 @@
 {% block content %}
 
 <div class="grid-x">
-	{% if view.kwargs|is_moderator:user or request.user.is_staff %}
+	{% if view.kwargs|is_moderator:request.user or request.user.is_staff %}
 		<div class="clearfix small-11">
 		<a href="{% url 'forumapp:channel_settings' view.kwargs.channel %}" class="button" name="settings">Settings</a>
 	{% else %}

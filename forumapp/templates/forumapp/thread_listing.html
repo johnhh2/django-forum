@@ -19,7 +19,7 @@
 		<input type="hidden" value="{{ listing.thread_id }}" name="thread_id">
 		{% if view.kwargs|is_moderator:request.user %}
 		    {% if not listing.pin_date %}
-				<input type="submit" class="primary button radius" value="Pin" name="pin" style="width:100%;">
+			<input type="submit" class="primary button radius" value="Pin" name="pin" style="width:100%;">
 		    {% else %}
 			<input type="submit" class="secondary button radius" value="Unpin" name="unpin" style="width:100%;">
 		    {% endif %}

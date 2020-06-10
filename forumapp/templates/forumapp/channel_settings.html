@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block content %}
+</br>
+<div class="callout panel">
+	<h2>Channel settings for {{ object }}</h2>
+	{% include "forumapp/messages.html" %}
+	
+	<form action="#" method="post">
+		{% csrf_token %}
+		{{ form }}
+		<input type="submit" class="primary button radius" value="Apply" name="save">
+	</form>
+</div>
+{% endblock %}

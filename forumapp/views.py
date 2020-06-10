@@ -25,7 +25,7 @@ def is_mod(obj, user):
             or (isinstance(obj, Thread) and obj.channel or obj)
 
     # check if user is owner or moderator
-    return user.get_username == channel.owner.get_username \
+    return user == channel.owner \
             or user.get_username in json.loads(channel.moderators)
 
 ## Return whether a user is an owner of the channel
@@ -270,18 +270,19 @@ class ThreadView(ViewMixin, generic.DetailView):
             thread_id = request.POST['thread_id']
             thread = self.queryset.filter(channel=channel, thread_id=thread_id)
             
-            if is_mod(thread, request.user):
+            if thread.exists():
                 thread = thread.get()
 
                 # Require staff, owner, or mod status to delete threads
-                if thread.exists():
-                    thread.delete()
-                
-                else:
-                    raise Http404("Couldn't find that channel.")
+                if is_mod(thread, request.user):
 
+                    thread.delete()
+
+                else:
+                    raise Http404("Insufficient permissions.")
+            
             else:
-                raise Http404("Insufficient permissions.")
+                raise Http404("Couldn't find that channel.")
 
         elif 'delete_channel' in request.POST:
             channel.delete()
@@ -398,18 +399,22 @@ class CommentView(ViewMixin, generic.DetailView):
 
         if 'delete_comment' in request.POST:
             
-            if is_mod(comment, request.user): 
-                comment_id = request.POST['comment_id']
-                comment = self.queryset.filter(thread=thread, comment_id=comment_id)
-                
+            comment_id = request.POST['comment_id']
+            comment = self.queryset.filter(thread=thread, comment_id=comment_id)
+            
+            if comment.exists():
+                comment = comment.get()
+
                 # Require staff, owner, or mod status to delete comments
-                if comment.exists():
+                if is_mod(comment, request.user): 
+                    
                     comment.delete()
+                
                 else:
-                    raise Http404("Couldn't find that comment.")
+                    raise Http404("Insufficient permissions.")
             
             else:
-                raise Http404("Insufficient permissions.")
+                raise Http404("Couldn't find that comment.")
 
         elif 'delete_thread' in request.POST:
 
@@ -661,5 +666,29 @@ class FavoritesView(ViewMixin, generic.DetailView):
                 settings.save()
             else:
                 messages.error(request, "Channel not found in favorites")
+        
+        elif 'pin' in request.POST:
+            channel_name = request.POST['channel_name']
+            channel = self.queryset.filter(channel_name=channel_name)
+            
+            if channel.exists():
+                channel = channel.get()
+                
+                # Require staff status to pin channels
+                if request.user.is_staff:
+                    channel.pin_date = timezone.now()
+                    channel.save()
+
+        elif 'unpin' in request.POST:
+            channel_name = request.POST['channel_name']
+            channel = self.queryset.filter(channel_name=channel_name)
+            
+            if channel.exists():
+                channel = channel.get()
+                
+                # Require staff status to unpin channels
+                if request.user.is_staff:
+                    channel.pin_date = None
+                    channel.save()
         
         return HttpResponseRedirect(self.request.path_info)

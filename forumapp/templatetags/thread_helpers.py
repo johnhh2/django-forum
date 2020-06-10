@@ -27,7 +27,7 @@ def is_moderator(kwargs, user):
     channel = Channel.objects.filter(channel_name=kwargs.get('channel'))
     if channel.exists():
         channel = channel.get()
-        if user.get_username() == channel.owner.get_username:
+        if user == channel.owner:
             return True
         else:
             return user.get_username() in json.loads(channel.moderators)
