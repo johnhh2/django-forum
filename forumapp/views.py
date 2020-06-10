@@ -26,7 +26,7 @@ def is_mod(obj, user):
 
     # check if user is owner or moderator
     return user == channel.owner \
-            or user.get_username in json.loads(channel.moderators)
+            or user.get_username() in json.loads(channel.moderators)
 
 ## Return whether a user is an owner of the channel
 def is_owner(obj, user):
