@@ -1,7 +1,7 @@
 {% load thread_helpers %}
 <div class="row">
     <div class="callout panel radius grid-x">
-	{% if request.user.is_staff or request.user|is_moderator:listing.channel %}
+	{% if request.user.is_staff or view.kwargs|is_moderator:request.user %}
 		<div class="cell small-10">
 	{% else %}
 		<div class="cell small-11">
@@ -12,12 +12,12 @@
 	<div class="cell small-1"> 
 		Owned by: {% include 'forumapp/user_listing.html' %}
 	</div>
-	{% if request.user.is_staff or request.user|is_moderator:listing.channel %}
+	{% if request.user.is_staff or view.kwargs|is_moderator:request.user %}
 	<div class="cell small-1">
 	    <form action="#" method="post">
 		{% csrf_token %}
 		<input type="hidden" value="{{ listing.thread_id }}" name="thread_id">
-	        {% if request.user|is_moderator:listing.channel %}
+		{% if view.kwargs|is_moderator:request.user %}
 		    {% if not listing.pin_date %}
 				<input type="submit" class="primary button radius" value="Pin" name="pin" style="width:100%;">
 		    {% else %}

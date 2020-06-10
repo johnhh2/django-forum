@@ -23,8 +23,13 @@ def description(channel_name):
         return ''
 
 @register.filter
-def is_moderator(user, channel):
-    if user.get_username == channel.owner.get_username:
-        return True
-    else:
-        return user.get_username in json.loads(channel.moderators)
+def is_moderator(kwargs, user):
+    channel = Channel.objects.filter(channel_name=kwargs.get('channel'))
+    if channel.exists():
+        channel = channel.get()
+        if user.get_username() == channel.owner.get_username:
+            return True
+        else:
+            return user.get_username() in json.loads(channel.moderators)
+
+    return False

@@ -58,7 +58,7 @@ class ViewMixin(generic.base.ContextMixin):
 
         return context
 
-# Show the settings menu TODO: FIX
+# Show the settings menu
 class UserSettingsView(ViewMixin, generic.DetailView):
     model = UserSettings
     template_name = 'forumapp/user_settings.html'
@@ -78,7 +78,7 @@ class UserSettingsView(ViewMixin, generic.DetailView):
         self.form_object = True
 
         if not hasattr(self, 'object'):
-            return Http404("User does not exist. Are you logged in?")
+            raise Http404("User does not exist. Are you logged in?")
         
         return super(UserSettingsView, self).get(self, request, *args, **kwargs)
 
@@ -96,7 +96,55 @@ class UserSettingsView(ViewMixin, generic.DetailView):
 
         return HttpResponseRedirect(self.request.path_info)
 
-# TODO: Channel settings view
+# Show the channel settings menu
+class ChannelSettingsView(ViewMixin, generic.DetailView):
+    model = Channel
+    template_name = 'forumapp/channel_settings.html'
+
+    form_class = ChannelForm
+
+    queryset = Channel.objects
+
+    def get_object(self):
+        if self.request.user.is_authenticated:
+            channel_name = self.kwargs.get('channel')
+            channel = self.queryset.filter(channel_name=channel_name)
+
+            if channel.exists():
+                return channel.get()
+
+        return self.queryset.none()
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        self.form_object = True
+
+        if not hasattr(self, 'object'):
+            raise Http404("User does not exist. Are you logged in?")
+        
+        # make sure user is owner/mod/admin
+        if not (is_mod(self.object, request.user) or request.user.is_staff):
+            raise Http404("Insufficient permissions")
+
+        return super(ChannelSettingsView, self).get(self, request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        
+        # make sure user is owner/mod/admin
+        if not (is_mod(self.object, request.user) or request.user.is_staff):
+            raise Http404("Insufficient permissions")
+
+        if 'save' in request.POST:
+            form = self.form_class(request.POST, instance=self.object)
+
+            if form.is_valid():
+                form.save()
+
+            else:
+                messages.error(request, "Invalid input")
+
+        return HttpResponseRedirect(self.request.path_info)
 
 # Create your views here.
 class ChannelView(ViewMixin, generic.ListView):
@@ -218,10 +266,7 @@ class ThreadView(ViewMixin, generic.DetailView):
 
         channel = channel.get()
 
-        if 'back' in request.POST:
-            return HttpResponseRedirect(reverse('forumapp:channel'))
-
-        elif 'delete_thread' in request.POST:
+        if 'delete_thread' in request.POST:
             thread_id = request.POST['thread_id']
             thread = self.queryset.filter(channel=channel, thread_id=thread_id)
             
@@ -351,10 +396,7 @@ class CommentView(ViewMixin, generic.DetailView):
 
         thread = thread.get()
 
-        if 'back' in request.POST:
-            return HttpResponseRedirect(reverse('forumapp:thread', kwargs={'channel': self.kwargs.get('channel')}))
-        
-        elif 'delete_comment' in request.POST:
+        if 'delete_comment' in request.POST:
             
             if is_mod(comment, request.user): 
                 comment_id = request.POST['comment_id']

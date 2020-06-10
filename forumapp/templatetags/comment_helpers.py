@@ -11,7 +11,7 @@ def is_recent(comment):
 
 #Create filter for comments to see if they are owned by the user passed in
 @register.filter
-def is_owner(kwargs, username):
+def is_owned_by(kwargs, username):
     channel_name = kwargs['channel']
     thread_id = kwargs['thread']
     
@@ -45,8 +45,16 @@ def description(kwargs):
         return ''
 
 @register.filter
-def is_moderator(user, channel):
-    if user.get_username == channel.owner.get_username:
-        return True
-    else:
-        return user.get_username() in json.loads(channel.moderators)
+def is_moderator(kwargs, user):
+    channel_name = kwargs['channel']
+    thread_id = kwargs['thread']
+
+    thread = Thread.objects.filter(channel__channel_name=channel_name, thread_id=thread_id)
+    if thread.exists():
+        thread = thread.get()
+        if user.get_username() == thread.channel.owner.get_username:
+            return True
+        else:
+            return user.get_username() in json.loads(thread.channel.moderators)
+
+    return False

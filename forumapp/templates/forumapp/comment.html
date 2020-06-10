@@ -3,14 +3,25 @@
 {% load user_helpers %}
 {% block content %}
 
-<form action="#" method="post">
-  {% csrf_token %}
-  <input type="submit" class="primary button radius" value="Back to {{ view.kwargs.channel }}" name="back">
-  <button type="button" class="button float-right radius" data-open="newComment">Create a new comment</button>
-  {% if view.kwargs|is_owner:user.get_username or perms.forumapp.delete_thread %}
-      <input type="submit" class="alert button radius" value="Delete this thread" name="delete_thread">
-  {% endif %}
-</form>
+<div class="grid-x">
+	{% if view.kwargs|is_moderator:request.user or request.user.is_staff %}
+		<div class="clearfix small-11">
+	{% else %}
+		<div class="clearfix small-12">
+	{% endif %}
+	
+	<a href="{% url 'forumapp:thread' view.kwargs.channel %}" class="button" name="back">Back to {{ view.kwargs.channel }}</a>
+	<button type="button" class="button float-right radius" data-open="newComment">Create a new comment</button>
+</div>
+{% if view.kwargs|is_moderator:request.user or request.user.is_staff %}
+	<div class="small-1">
+		<form action="#" method="post">
+			{% csrf_token %}
+			<input type="submit" class="alert button radius" value="Delete this thread" name="delete_thread">
+		</form>
+	</div>
+{% endif %}
+</div>
 
 {% if request.user|is_banned_from:view.kwargs.channel %}
     <p>Sorry, this channel is unavailable.</p>

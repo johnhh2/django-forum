@@ -3,14 +3,26 @@
 {% load user_helpers %}
 {% block content %}
 
-<form action="#" method="post">
-  {% csrf_token %}
-  <input type="submit" class="primary button radius" value="Back to channels" name="back">
-  <button type="button" class="button float-right radius" data-open="newThread">Create a new thread</button>
-  {% if view.kwargs.channel|is_owned_by:user.get_username or perms.forumapp.delete_channel %}
-    <input type="submit" class="alert button radius" value="Delete this channel" name="delete_channel">
-  {% endif %}
-</form>
+<div class="grid-x">
+	{% if view.kwargs|is_moderator:user or request.user.is_staff %}
+		<div class="clearfix small-11">
+		<a href="{% url 'forumapp:channel_settings' view.kwargs.channel %}" class="button" name="settings">Settings</a>
+	{% else %}
+		<div class="clearfix small-12">
+	{% endif %}
+	
+	<a href="{% url 'forumapp:channel' %}" class="button" name="back">Back to Channels</a>
+	<button type="button" class="button float-right radius" data-open="newThread">Create a new thread</button>
+</div>
+{% if view.kwargs|is_moderator:user or request.user.is_staff %}
+	<div class="small-1">
+		<form action="#" method="post">
+			{% csrf_token %}
+			<input type="submit" class="alert button radius" value="Delete this channel" name="delete_channel">
+		</form>
+	</div>
+{% endif %}
+</div>
 
 {% if request.user|is_banned_from:view.kwargs.channel %}
   <p>Sorry, this channel is unavailable.</p>

@@ -1,10 +1,13 @@
 {% extends 'base.html' %}
 {% block content %}
-<h2>User settings for {{ object.user }}</h2>
-<form action="#" method="post">
-	{% csrf_token %}
-	{{ form }}
-	<input type="submit" class="primary button radius" value="Apply" name="save">
-</form>
-  {% include "forumapp/messages.html" %}
+</br>
+<div class="callout panel">
+	<h2>User settings for {{ object.user }}</h2>
+	{% include "forumapp/messages.html" %}
+	<form action="#" method="post">
+		{% csrf_token %}
+		{{ form }}
+		<input type="submit" class="primary button radius" value="Apply" name="save">
+	</form>
+</div>
 {% endblock %}
