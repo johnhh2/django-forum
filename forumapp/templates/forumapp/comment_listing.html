@@ -4,11 +4,8 @@
     <div class="callout panel radius grid-x">
 	<div class="cell small-1" align="center">
 	  {% include 'forumapp/user_listing.html' %}</br>
-	  {{ listing.pub_date|date:"f A" }}
-          {% if not listing|is_recent %}
-            on {{ listing.pub_date|date:"l, F jS, Y" }}
-	  {% endif %}
-        </div>
+	  {{ listing.pub_date|format_date }}
+  </div>
 	{% if request.user.is_staff or view.kwargs|is_moderator:request.user %}
 	<div class="cell small-10"><p>{{ listing.text }}</p></div>
 	<div class="cell small-1">
