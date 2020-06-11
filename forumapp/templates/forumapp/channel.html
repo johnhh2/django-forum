@@ -15,14 +15,14 @@
 {% empty %}
   <p>No channels are available.</p>
 {% endfor %}
-<form method="post">
-  {% csrf_token %}
-    {{ form }}
-  <button type="submit" class="success button float-right submit" name="create">Create Channel</button>
-</form>
 
 <div class="reveal" id="newChannel" data-reveal>
 	<h3>Create a new channel:</h3>
+  <form method="post">
+    {% csrf_token %}
+      {{ form }}
+    <button type="submit" class="success button float-right submit" name="create">Create Channel</button>
+  </form>
 	<button class="close-button" data-close aria-label="Close modal" type="button">
 		<span aria-hidden="true">&times;</span>
 	</button>

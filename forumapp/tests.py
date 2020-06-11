@@ -131,7 +131,7 @@ class ChannelTests(ValidationErrorTestMixin, TestCase):
         self.client.login(username=self.username, password=password)
 
         response = self.client.post(reverse('forumapp:channel'), {'channel_name': self.channel_name2, 'description': self.channel_desc}, follow=True)
-        print(response.content)
+        #print(response.content)
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.context['user'].is_authenticated)
         self.assertContains(response, self.channel_name2)
@@ -140,7 +140,7 @@ class ChannelTests(ValidationErrorTestMixin, TestCase):
 
 ## Thread tests
 class ThreadTests(ValidationErrorTestMixin, TestCase):
-    channel_name = "channelforthreadtest"
+    channel_name = "channelfortestthread"
     channel_name2 = channel_name[:8]
     username = 'owner'
     username2 = 'other'
@@ -239,7 +239,22 @@ class ThreadTests(ValidationErrorTestMixin, TestCase):
     # users SHOULD be able to remove their own threads
     def testOwnerRemoveThread(self):
         pass
+'''
+    def testCreateThreadUsingForm(self):
+        password = "P@ssw0rd1"
+        user = User.objects.create_user(username=self.username, password=password)
 
+        self.client.login(username=self.username, password=password)
+        ch = create_channel(self.channel_name, user)
+
+        response = self.client.post(reverse('forumapp:thread', kwargs={'channel': ch.channel_name}), {'thread_name': self.thread_name, 'description': self.thread_desc}, follow=True)
+
+        #print(response.content)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context['user'].is_authenticated)
+        self.assertContains(response, self.thread_name)
+        self.assertContains(response, self.thread_desc)
+'''
 
 ## Comment tests
 class CommentTests(ValidationErrorTestMixin, TestCase):
@@ -382,6 +397,23 @@ class CommentTests(ValidationErrorTestMixin, TestCase):
     # users SHOULD NOT be able to remove their own comments
     def testOwnerRemoveComment(self):
         pass
+
+
+    def testCreateThreadUsingForm(self):
+        password = "P@ssw0rd1"
+        user = User.objects.create_user(username=self.username, password=password)
+
+        self.client.login(username=self.username, password=password)
+        ch = create_channel(self.channel_name, user)
+        th = create_thread(ch, user)
+
+        response = self.client.post(reverse('forumapp:comment', kwargs={'channel': ch.channel_name, 'thread': th.thread_id}), {'text': self.text}, follow=True)
+
+        #print(response.content)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context['user'].is_authenticated)
+        self.assertContains(response, self.text)
+
 
 class UserTests(ValidationErrorTestMixin, TestCase):
     username = "randomuser91387245"
