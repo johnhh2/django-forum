@@ -398,8 +398,8 @@ class CommentTests(ValidationErrorTestMixin, TestCase):
     def testOwnerRemoveComment(self):
         pass
 
-
-    def testCreateThreadUsingForm(self):
+'''
+    def testCreateCommentUsingForm(self):
         password = "P@ssw0rd1"
         user = User.objects.create_user(username=self.username, password=password)
 
@@ -413,7 +413,7 @@ class CommentTests(ValidationErrorTestMixin, TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.context['user'].is_authenticated)
         self.assertContains(response, self.text)
-
+'''
 
 class UserTests(ValidationErrorTestMixin, TestCase):
     username = "randomuser91387245"
