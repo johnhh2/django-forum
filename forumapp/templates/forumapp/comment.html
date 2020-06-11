@@ -37,7 +37,7 @@
 
 <div class="reveal" id="newComment" data-reveal>
 	<h3>Create a new comment:</h3>
-	<form action="#" method="post">
+	<form action="#" method="post" autofocus>
 		{% csrf_token %}
 	  	{{ form }}
 		<button type="submit" class="success button float-right radius" name="create">Create Comment</button>
