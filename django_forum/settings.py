@@ -34,6 +34,7 @@ ALLOWED_HOSTS = ['testserver', '127.0.0.1', 'localhost', '*']
 # Application definition
 
 INSTALLED_APPS = [
+    'captcha',
     'forumapp.apps.ForumappConfig',
     'registration.apps.RegistrationConfig',
     'django.contrib.admin',
@@ -43,6 +44,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 ]
+
+RECAPTCHA_PUBLIC_KEY = '6LdwdKMZAAAAAEGXNInEZy_ZaEcvuX15kGsuTDev'
+RECAPTCHA_PRIVATE_KEY = '6LdwdKMZAAAAAFeyHohJVAvpgVOUPA6zbaH-nVBH'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

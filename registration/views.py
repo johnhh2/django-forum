@@ -32,7 +32,7 @@ def SignUpView(request):
             if password1 != password2:
                 messages.error(request, 'Passwords do not match')
             else:
-                messages.error(request, 'Invalid username or password')
+                messages.error(request, 'Invalid username, password, or captcha')
 
 
     form = SignUpForm()
