@@ -34,12 +34,6 @@ def create_comment(thread, owner, text="text", days=0):
     time = timezone.now() + datetime.timedelta(days=days)
     return Comment.objects.create(thread=thread, text=text, owner=owner, pub_date=time)
 
-def create_user(username, password="password1"):
-    return User.objects.create_user(username=username, password=password)
-
-def login(username, password="password1"):
-    return authenticate(None, username=username, password=password)
-
 ##TODO: create_reply
 
 ## Channel tests
@@ -127,16 +121,17 @@ class ChannelTests(ValidationErrorTestMixin, TestCase):
         pass
 '''
     def testCreateChannelUsingForm(self):
+        password = "P@ssw0rd1"
         response = self.client.post(reverse('forumapp:channel'), {'channel_name': self.channel_name, 'description': self.channel_desc}, follow=True)
         self.assertEqual(response.status_code, 200)
         self.assertFalse(response.context['user'].is_authenticated)
         self.assertContains(response, 'Please log in to create channels')
 
-        create_user(self.username)
-        login(self.username)
+        User.objects.create_user(username=self.username, password=password)
+        self.client.login(username=self.username, password=password)
 
         response = self.client.post(reverse('forumapp:channel'), {'channel_name': self.channel_name2, 'description': self.channel_desc}, follow=True)
-
+        print(response.content)
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.context['user'].is_authenticated)
         self.assertContains(response, self.channel_name2)

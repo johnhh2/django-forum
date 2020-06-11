@@ -1,11 +1,11 @@
-{% load global_helpers %}
+{% load common_helpers %}
 <div class="row">
     <div class="callout panel radius grid-x">
 	<div class="cell small-10">
 		<h3><a href="{% url 'forumapp:comment' channel=listing.channel.channel_name thread=listing.thread_id %}">{{ listing.thread_name }}</a></h3>
       		{{ listing.description }}
 	</div>
-	<div class="cell small-1"> 
+	<div class="cell small-1">
 		Owned by: {% include 'forumapp/user_listing.html' %}
 	</div>
 	<div class="cell small-1">
@@ -27,6 +27,6 @@
 		<p style="text-align: center;">Pinned</p>
 	    {% endif %}
 	</div>
-   
+
     </div>
 </div>

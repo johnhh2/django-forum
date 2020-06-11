@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load comment_helpers %}
-{% load global_helpers %}
+{% load common_helpers %}
 {% block content %}
 
 <div class="clearfix">
@@ -9,7 +9,7 @@
 		<button type="button" class="alert button float-right radius" data-open="deleteThread">Delete this thread</button>
 	{% endif %}
 	<button type="button" class="button float-right radius" data-open="newComment">Create a new comment</button>
-	
+
 </div>
 
 <a href="{% url 'forumapp:channel' %}">Forum</a> &gt;

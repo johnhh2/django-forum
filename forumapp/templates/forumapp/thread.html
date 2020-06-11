@@ -1,16 +1,16 @@
 {% extends 'base.html' %}
 {% load thread_helpers %}
-{% load global_helpers %}
+{% load common_helpers %}
 {% block content %}
 
 <div class="clearfix">
-		
+
 		<a href="{% url 'forumapp:channel' %}" class="button" name="back">Back to Channels</a>
-		
+
 		{% if view.kwargs|is_owner:request.user or request.user.is_staff %}
 			<a href="{% url 'forumapp:channel_settings' view.kwargs.channel %}" class="button" name="settings">Settings</a>
 		{% endif %}
-		
+
 		{% if view.kwargs|is_owner:request.user or request.user.is_staff %}
 			<button type="button" class="alert button float-right radius" data-open="deleteChannel">
 				Delete this channel
