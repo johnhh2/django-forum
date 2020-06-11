@@ -11,20 +11,30 @@ def is_recent(comment):
     return comment.is_recent()
 
 @register.filter
-def how_recent(date):
+def format_date(date):
+    ## TODO: this date is in UTC for some reason. It needs to be converted
     time_diff = timezone.now() - date
+
     if time_diff > datetime.timedelta(days=365.25):
-        return "year"
+        return template.defaultfilters.date(date, "n/j/Y Z")
+
     elif time_diff > datetime.timedelta(days=30):
-        return "month"
+        return template.defaultfilters.date(date, "n/j")
+
     elif time_diff > datetime.timedelta(days=7):
-        return "week"
+        return template.defaultfilters.date(date, "n/j g:i")
+
     elif time_diff > datetime.timedelta(days=1):
-        return "day"
-    elif timezone.now() > date:
-        return "new"
+        return template.defaultfilters.date(date, "D n/j g:i")
+
+    elif time_diff < datetime.timedelta(days=1) and time_diff > datetime.timedelta(seconds=0):
+        return template.defaultfilters.date(date, "g:i")
+
+    elif time_diff < datetime.timedelta(seconds=0):
+        return template.defaultfilters.date(date, "g:i n/j/Y")
+
     else:
-        return "future"
+        return "error"
 
 #Create filter for comments to see if they are owned by the user passed in
 @register.filter

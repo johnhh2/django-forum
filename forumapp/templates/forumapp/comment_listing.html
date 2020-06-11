@@ -1,22 +1,13 @@
 {% load global_helpers %}
 {% load comment_helpers %}
+{% load tz %}
 <div class="row">
     <div class="callout panel radius grid-x">
 	<div class="cell small-3 medium-2 large-1" align="center">
 	  {% include 'forumapp/user_listing.html' %}</br>
-	  {% if listing.pub_date|how_recent == "year" %}
-      {{ listing.pub_date|date:"n/j/Y" }}
-	  {% elif listing.pub_date|how_recent == "month" %}
-      {{ listing.pub_date|date:"n/j" }}
-    {% elif listing.pub_date|how_recent == "week" %}
-      {{ listing.pub_date|date:"n/j g:i" }}
-    {% elif listing.pub_date|how_recent == "day" %}
-      {{ listing.pub_date|date:"D n/j g:i" }}
-    {% elif listing.pub_date|how_recent == "new" %}
-      {{ listing.pub_date|date:"g:i" }}
-    {% elif listing.pub_date|how_recent == "future" %}
-      {{ listing.pub_date|date:"" }}
-    {% endif %}
+    {% localtime on %}
+	    {{ listing.pub_date|format_date }}
+    {% endlocaltime %}
   </div>
 	{% if request.user.is_staff or view.kwargs|is_moderator:request.user %}
 	<div class="cell small-7 medium-8 large-10"><p>{{ listing.text }}</p></div>
