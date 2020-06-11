@@ -1,13 +1,10 @@
 {% load global_helpers %}
 {% load comment_helpers %}
 {% load tz %}
-<div class="row">
-    <div class="callout panel radius grid-x">
+<div class="callout panel grid-x">
 	<div class="cell small-3 medium-2 large-1" align="center">
 	  {% include 'forumapp/user_listing.html' %}</br>
-    {% localtime on %}
-	    {{ listing.pub_date|format_date }}
-    {% endlocaltime %}
+	  {{ listing.pub_date|format_date }}
   </div>
 	{% if request.user.is_staff or view.kwargs|is_moderator:request.user %}
 	<div class="cell small-7 medium-8 large-10"><p>{{ listing.text }}</p></div>
@@ -22,4 +19,3 @@
 	<div class="cell small-11"><p>{{ listing.text }}</p></div>
 	{% endif %}
     </div>
-</div>

@@ -12,29 +12,26 @@ def is_recent(comment):
 
 @register.filter
 def format_date(date):
-    ## TODO: this date is in UTC for some reason. It needs to be converted
+    date = timezone.localtime(date)
     time_diff = timezone.now() - date
 
     if time_diff > datetime.timedelta(days=365.25):
-        return template.defaultfilters.date(date, "n/j/Y Z")
+        return template.defaultfilters.date(date, "n/j/Y")
 
     elif time_diff > datetime.timedelta(days=30):
         return template.defaultfilters.date(date, "n/j")
 
     elif time_diff > datetime.timedelta(days=7):
-        return template.defaultfilters.date(date, "n/j g:i")
+        return template.defaultfilters.date(date, "n/j g:i A")
 
     elif time_diff > datetime.timedelta(days=1):
-        return template.defaultfilters.date(date, "D n/j g:i")
+        return template.defaultfilters.date(date, "D n/j g:i A")
 
     elif time_diff < datetime.timedelta(days=1) and time_diff > datetime.timedelta(seconds=0):
-        return template.defaultfilters.date(date, "g:i")
+        return template.defaultfilters.date(date, "g:i A")
 
     elif time_diff < datetime.timedelta(seconds=0):
-        return template.defaultfilters.date(date, "g:i n/j/Y")
-
-    else:
-        return "error"
+        return template.defaultfilters.date(date, "n/j/Y g:i A")
 
 #Create filter for comments to see if they are owned by the user passed in
 @register.filter
