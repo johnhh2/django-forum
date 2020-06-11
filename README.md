@@ -23,11 +23,11 @@ source venv/bin/activate
 #### Back-end dependencies
 Once in the virtual environment, download the poetry package manager
 ```
+sudo pip install --upgrade setuptools pip
 pip install poetry
 ```
-If this fails, run
+If this fails, try installing these dependencies:
 ```
-sudo pip install --upgrade setuptools pip
 sudo apt-get install python2.7-dev libffi-dev libssl-dev
 pip install poetry
 ```
