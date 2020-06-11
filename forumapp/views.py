@@ -205,14 +205,14 @@ class ChannelView(ViewMixin, generic.ListView):
                     channel.save()
 
         elif 'create' in request.POST:
-            try:
-                owner = request.user
-                channel = Channel(owner=owner)
-                form = self.form_class(request.POST, instance=channel)
-
-            except ValueError:
+            if not request.user.is_authenticated:
                 messages.error(request, "Please log in to create channels.")
+                
                 return HttpResponseRedirect(self.request.path_info)
+
+            owner = request.user
+            channel = Channel(owner=owner)
+            form = self.form_class(request.POST, instance=channel)
 
             if form.is_valid():
                 channel_name = form.cleaned_data.get('channel_name')
@@ -333,15 +333,16 @@ class ThreadView(ViewMixin, generic.DetailView):
                 raise Http404("Insufficient permissions.")
 
         elif 'create' in request.POST:
-            try:
-                owner = request.user
-                thread = Thread(channel=channel, owner=owner)
-                thread.save()
-                form = self.form_class(request.POST, instance=thread)
 
-            except ValueError:
+            if not request.user.is_authenticated:
                 messages.error(request, "Please log in to create threads.")
+                
                 return HttpResponseRedirect(self.request.path_info)
+
+            owner = request.user
+            thread = Thread(channel=channel, owner=owner)
+            thread.save()
+            form = self.form_class(request.POST, instance=thread)
 
             if form.is_valid():
                 thread_name = form.cleaned_data.get('thread_name')
@@ -435,15 +436,16 @@ class CommentView(ViewMixin, generic.DetailView):
                 raise Http404("Insufficient permissions.")
 
         elif 'create' in request.POST:
-            try:
-                owner = request.user
-                comment = Comment(thread=thread, owner=owner)
-                comment.save()
-                form = self.form_class(request.POST, instance=comment)
 
-            except ValueError:
+            if not request.user.is_authenticated:
                 messages.error(request, "Please log in to create comments.")
+                
                 return HttpResponseRedirect(self.request.path_info)
+            
+            owner = request.user
+            comment = Comment(thread=thread, owner=owner)
+            comment.save()
+            form = self.form_class(request.POST, instance=comment)
 
             if form.is_valid():
                 text = form.cleaned_data.get('text')
