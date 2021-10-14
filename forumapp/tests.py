@@ -68,6 +68,23 @@ class ChannelTests(ValidationErrorTestMixin, TestCase):
 
         self.testNoChannel()
 
+    def testChannelIsRecent(self):
+        owner = User.objects.create(username=self.username)
+
+        c = create_channel(self.channel_name, owner)
+
+        self.assertTrue(c.is_recent())
+
+        c.pub_date = timezone.now() - datetime.timedelta(days=2)
+        c.save()
+
+        self.assertFalse(c.is_recent())
+
+        c.pub_date = timezone.now() + datetime.timedelta(days=2)
+        c.save()
+
+        self.assertFalse(c.is_recent())
+
     def testChannelsAreDisplayed(self):
         owner = User.objects.create(username=self.username)
 
@@ -96,7 +113,7 @@ class ChannelTests(ValidationErrorTestMixin, TestCase):
         #delete channel and see if the owner was changed to to the otheruser
         owner.delete()
 
-        self.assertEqual(True, Channel.objects.filter(channel_name=self.channel_name).exists())
+        self.assertTrue(Channel.objects.filter(channel_name=self.channel_name).exists())
         self.assertEqual(self.username[::-1], Channel.objects.get(channel_name=self.channel_name).owner.username)
 
     def testUniqueChannel(self):
@@ -164,6 +181,7 @@ class ThreadTests(ValidationErrorTestMixin, TestCase):
 
         self.assertIn(t.thread_name, self.thread_name)
         self.assertEqual(len(t.thread_name), len(self.thread_name))
+        self.assertEqual(t.__str__(), self.thread_name)
 
         response = self.client.get(reverse('forumapp:thread', kwargs={'channel': self.channel_name}))
 
@@ -178,14 +196,31 @@ class ThreadTests(ValidationErrorTestMixin, TestCase):
         self.assertContains(response, "No threads are available.")
         self.assertQuerysetEqual(response.context['thread_list'], [])
 
+    def testThreadIsRecent(self):
+        owner = User.objects.create(username=self.username)
+        c = create_channel(self.channel_name, owner)
+        t = create_thread(c, owner, self.thread_name, self.thread_desc)
+
+        self.assertTrue(t.is_recent())
+
+        t.pub_date = timezone.now() - datetime.timedelta(days=2)
+        t.save()
+
+        self.assertFalse(t.is_recent())
+
+        t.pub_date = timezone.now() + datetime.timedelta(days=2)
+        t.save()
+
+        self.assertFalse(t.is_recent())
+
     def testThreadsAreDisplayed(self):
         owner = User.objects.create(username=self.username+'2')
         c = create_channel(self.channel_name, owner, -1)
         t1 = create_thread(c, owner, self.thread_name, self.thread_desc)
         t2 = create_thread(c, owner, self.thread_name[::-1], self.thread_desc)
 
-        self.assertEquals(0, t1.thread_id)
-        self.assertEquals(1, t2.thread_id)
+        self.assertEqual(0, t1.thread_id)
+        self.assertEqual(1, t2.thread_id)
 
         response = self.client.get(reverse('forumapp:thread', kwargs={'channel': self.channel_name}))
 
@@ -207,12 +242,12 @@ class ThreadTests(ValidationErrorTestMixin, TestCase):
 
         thread.delete()
 
-        self.assertEquals(True, User.objects.filter(username=self.username).exists())
-        self.assertEquals(True, Channel.objects.filter(channel_name=self.channel_name).exists())
-        self.assertEquals(False, Thread.objects.filter(channel__channel_name=self.channel_name, thread_id=thread_id).exists())
-        self.assertEquals(False, Thread.objects.filter(channel=None).exists())
-        self.assertEquals(False, Comment.objects.filter(thread__thread_id=thread_id, comment_id=comment_id).exists())
-        self.assertEquals(False, Comment.objects.filter(thread=None).exists())
+        self.assertTrue(User.objects.filter(username=self.username).exists())
+        self.assertTrue(Channel.objects.filter(channel_name=self.channel_name).exists())
+        self.assertFalse(Thread.objects.filter(channel__channel_name=self.channel_name, thread_id=thread_id).exists())
+        self.assertFalse(Thread.objects.filter(channel=None).exists())
+        self.assertFalse(Comment.objects.filter(thread__thread_id=thread_id, comment_id=comment_id).exists())
+        self.assertFalse(Comment.objects.filter(thread=None).exists())
 
     # Confirm that threadss are unique on (channel, thread_id)
     def testUniqueThread(self):
@@ -225,8 +260,8 @@ class ThreadTests(ValidationErrorTestMixin, TestCase):
         t3 = create_thread(c2, user2)
         t4 = create_thread(c2, user1)
 
-        self.assertEquals(t1.thread_id, t3.thread_id)
-        self.assertEquals(t2.thread_id, t4.thread_id)
+        self.assertEqual(t1.thread_id, t3.thread_id)
+        self.assertEqual(t2.thread_id, t4.thread_id)
 
         t5 = Thread(thread_id=0, channel=c1, owner=user2, thread_name="aa", description="bb", pub_date=timezone.now())
 
@@ -288,6 +323,8 @@ class CommentTests(ValidationErrorTestMixin, TestCase):
 
         c = create_comment(thread, owner3, self.text)
 
+        self.assertEqual(c.__str__(), self.text)
+
         response = self.client.get(reverse('forumapp:comment', kwargs={'channel': self.channel_name, 'thread': thread.thread_id}))
 
         self.assertEqual(response.status_code, 200)
@@ -313,8 +350,8 @@ class CommentTests(ValidationErrorTestMixin, TestCase):
         c1 = create_comment(thread, owner3, self.text)
         c2 = create_comment(thread, owner2, self.text[::-1])
 
-        self.assertEquals(0, c1.comment_id)
-        self.assertEquals(1, c2.comment_id)
+        self.assertEqual(0, c1.comment_id)
+        self.assertEqual(1, c2.comment_id)
 
         response = self.client.get(reverse('forumapp:comment', kwargs={'channel': self.channel_name, 'thread': thread.thread_id}))
 
@@ -336,11 +373,11 @@ class CommentTests(ValidationErrorTestMixin, TestCase):
 
         comment.delete()
 
-        self.assertEquals(True, User.objects.filter(username=self.username).exists())
-        self.assertEquals(True, Channel.objects.filter(channel_name=self.channel_name).exists())
-        self.assertEquals(True, Thread.objects.filter(channel__channel_name=self.channel_name, thread_id=thread_id).exists())
-        self.assertEquals(False, Comment.objects.filter(thread__thread_id=thread_id, comment_id=comment_id).exists())
-        self.assertEquals(False, Comment.objects.filter(thread=None).exists())
+        self.assertTrue(User.objects.filter(username=self.username).exists())
+        self.assertTrue(Channel.objects.filter(channel_name=self.channel_name).exists())
+        self.assertTrue(Thread.objects.filter(channel__channel_name=self.channel_name, thread_id=thread_id).exists())
+        self.assertFalse(Comment.objects.filter(thread__thread_id=thread_id, comment_id=comment_id).exists())
+        self.assertFalse(Comment.objects.filter(thread=None).exists())
 
     def testCommentIsRecent(self):
         owner = User.objects.create(username=self.username)
@@ -375,8 +412,8 @@ class CommentTests(ValidationErrorTestMixin, TestCase):
         co3 = create_comment(t2, user2)
         co4 = create_comment(t2, user2)
 
-        self.assertEquals(co1.comment_id, co3.comment_id)
-        self.assertEquals(co2.comment_id, co4.comment_id)
+        self.assertEqual(co1.comment_id, co3.comment_id)
+        self.assertEqual(co2.comment_id, co4.comment_id)
 
         co5 = Comment(comment_id=0, thread=t1, owner=user2, text="", pub_date=timezone.now())
         co6 = Comment(comment_id=1, thread=t1, owner=user2, text="", pub_date=timezone.now())
@@ -452,14 +489,14 @@ class UserTests(ValidationErrorTestMixin, TestCase):
 
         # Channel and its children should be gone (this tests cascade deletion
         #   for channels->threads->comments)
-        self.assertEqual(False, Channel.objects.filter(owner=None).exists())
-        self.assertEqual(False, Thread.objects.filter(channel=None).exists())
-        self.assertEqual(False, Comment.objects.filter(thread=None).exists())
+        self.assertFalse(Channel.objects.filter(owner=None).exists())
+        self.assertFalse(Thread.objects.filter(channel=None).exists())
+        self.assertFalse(Comment.objects.filter(thread=None).exists())
 
         # Verify that the thread and comment under the other user's channel should still exist
-        self.assertEqual(True, Channel.objects.filter(channel_name=self.channel_name2).exists())
-        self.assertEqual(True, Thread.objects.filter(channel__channel_name=self.channel_name2, thread_id=thread_id2).exists())
-        self.assertEqual(True, Comment.objects.filter(thread__channel__channel_name=self.channel_name2, thread__thread_id=otherthread_id, comment_id=comment_id2).exists())
+        self.assertTrue(Channel.objects.filter(channel_name=self.channel_name2).exists())
+        self.assertTrue(Thread.objects.filter(channel__channel_name=self.channel_name2, thread_id=thread_id2).exists())
+        self.assertTrue(Comment.objects.filter(thread__channel__channel_name=self.channel_name2, thread__thread_id=otherthread_id, comment_id=comment_id2).exists())
 
     def testUniqueUser(self):
         user1 = User.objects.create(username=self.username)
@@ -467,6 +504,10 @@ class UserTests(ValidationErrorTestMixin, TestCase):
 
         with self.assertValidationErrors(['username']):
             User(username=self.username).validate_unique()
+
+    def testUserSettings(self):
+        user = User.objects.create(username=self.username)
+        self.assertEqual(self.user.usersettings.__str__(), self.username)
 
     def testAdminBanUser(self):
         pass
