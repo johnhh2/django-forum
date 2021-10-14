@@ -1,5 +1,6 @@
 [run]
 command_line = manage.py test -k --failfast
+source = django-forum
 # branch = True
 
 [report]
@@ -34,6 +35,6 @@ exclude_lines =
 
 ignore_errors = True
 show_missing = True
-skip_empty = False
-skip_covered = False
+skip_empty = True
+skip_covered = True
 sort = cover
