@@ -17,7 +17,8 @@ jobs:
         python-version: 3.7
     - name: Generate Report
       run: |
-        pip install coverage
+        pip install poetry==0.14.17
+        poetry install
         coverage run
     - name: Upload Coverage to Codecov
       uses: codecov/codecov-action@v1
