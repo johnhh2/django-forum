@@ -7,6 +7,7 @@ authors = ["John-Hugh Hedrick <johnhugh1998@gmail.com>", "Matthew Purnell <mattp
 [tool.poetry.dependencies]
 python = "3.6.*"
 django = "1.11.25"
+coverage = "^6.0.2"
 
 [tool.poetry.dev-dependencies]
 

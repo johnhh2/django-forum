@@ -1,0 +1,39 @@
+[run]
+command_line = manage.py test -k --failfast
+# branch = True
+
+[report]
+precision = 2
+
+omit =
+    venv*
+    manage.py
+    node_modules
+    *admin*
+    *migrations*
+    *tests*
+    *views*
+    *urls.py
+    *errors.py
+    *__init__.py
+    *pycache*
+    *templatetags*
+
+exclude_lines =
+    # Defensive assertions
+    raise NotSupportedError
+    raise ConsolidationError
+    except Account.DoesNotExist
+
+    # Not currently implemented
+    pragma: no cover
+    if False
+    if .*portfolio.org
+    return CombinedInvestment
+    pass
+
+ignore_errors = True
+show_missing = True
+skip_empty = True
+skip_covered = True
+sort = cover
