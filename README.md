@@ -1,3 +1,5 @@
+[![codecov](https://codecov.io/gh/johnhh2/django-forum/branch/master/graph/badge.svg?token=14FUQY8A8E)](https://codecov.io/gh/johnhh2/django-forum)
+
 # Django-Forum
 Basic forum web application made with Django
 
