@@ -1,6 +1,5 @@
 [run]
 command_line = manage.py test -k --failfast
-source = django-forum
 # branch = True
 
 [report]
