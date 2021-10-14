@@ -8,7 +8,7 @@ from django.urls import reverse
 
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
-from .models import Channel, Thread, Comment
+from .models import Channel, Thread, Comment, UserSettings
 
 #Allow easy testing for validation errors
 class ValidationErrorTestMixin(object):
@@ -507,7 +507,8 @@ class UserTests(ValidationErrorTestMixin, TestCase):
 
     def testUserSettings(self):
         user = User.objects.create(username=self.username)
-        self.assertEqual(self.user.usersettings.__str__(), self.username)
+        usersettings = UserSettings.objects.create(user=user)
+        self.assertEqual(usersettings.__str__(), self.username)
 
     def testAdminBanUser(self):
         pass
