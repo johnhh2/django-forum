@@ -1,0 +1,28 @@
+name: CodeCov
+on: [push, pull_request]
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    env:
+      OS: ubuntu-latest
+      PYTHON: '3.9'
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: ‘2’
+
+    - name: Setup Python
+      uses: actions/setup-python@master
+      with:
+        python-version: 3.6
+    - name: Generate Report
+      run: |
+        pip install poetry==0.12.17
+        poetry install
+        poetry run python -m coverage run
+        poetry run python -m coverage xml
+    - name: Upload Coverage to Codecov
+      uses: codecov/codecov-action@v2
+      with:
+        fail_ci_if_error: true
+        token: ${{ secrets.CODECOV_TOKEN }}
