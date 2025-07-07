@@ -2,7 +2,6 @@
 name = "django-forum"
 version = "0.1.0"
 description = ""
-authors = ["John-Hugh Hedrick <johnhugh1998@gmail.com>", "Matthew Purnell <mattpurnell98@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = "3.6.*"
